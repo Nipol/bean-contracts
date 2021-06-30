@@ -1,0 +1,19 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "indent": ["error", 4],
+    "func-order": "off",
+    "bracket-align": "off",
+    "compiler-fixed": "off",
+    "no-simple-event-func-name": "off",
+    "no-inline-assembly": "warn",
+    "separate-by-one-line-in-contract": "off",
+    "two-lines-top-level-separator": "off",
+    "mark-callable-contracts": "off",
+    "payable-fallback": "off",
+    "compiler-version": ["off"],
+    "const-name-snakecase": "off",
+    "not-rely-on-time": "off",
+    "var-name-mixedcase": "off"
+  }
+}

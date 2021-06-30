@@ -1,0 +1,11 @@
+node_modules
+coverage
+cache
+artifacts
+build
+coverage.json
+package-lock.json
+**/.*.swp
+allFiredEvents
+crytic-export
+.DS_Store
