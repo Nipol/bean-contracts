@@ -5,7 +5,7 @@
 pragma solidity ^0.8.0;
 
 import "./Ownership.sol";
-import "./Interface/IAllowlist.sol";
+import "../Interface/IAllowlist.sol";
 
 contract Allowlist is IAllowlist, Ownership {
     mapping(address => bool) public override allowance;

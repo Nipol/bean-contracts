@@ -53,6 +53,7 @@ library EIP712 {
         pure
         returns (bytes32 result)
     {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let memPtr := mload(64)
 
