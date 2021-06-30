@@ -1,7 +1,7 @@
 {
-  "name": "shallwecoffee",
+  "name": "@bean/library",
   "version": "1.0.0",
-  "description": "coffee",
+  "description": "Smart Contract Library",
   "main": "index.js",
   "scripts": {
     "build": "npx hardhat compile",
