@@ -1,24 +1,14 @@
 {
-  "name": "shallwecoffee",
-  "version": "1.0.0",
-  "description": "coffee",
-  "main": "index.js",
-  "scripts": {
-    "build": "npx hardhat compile",
-    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
-    "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
-    "coverage:server": "npm run coverage && http-server ./coverage -s",
-    "docs": "scripts/docs.sh",
-    "lint": "npm run lint:js && npm run lint:sol",
-    "lint:js": "eslint '*/**/*.{js,ts}' --quiet --fix",
-    "lint:sol": "solhint --config .solhint.json --max-warnings 0 'contracts/**/*.sol'",
-    "prettier": "prettier --config .prettierrc --write '**/*.{js,sol,ts}'",
-    "vertigo": "scripts/vertigo.sh",
-    "analyze": "slither ./contracts",
-    "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js"
+  "name": "@beandao/library",
+  "version": "0.1.1",
+  "description": "Smart Contract Library",
+  "license": "LGPL-3.0",
+  "author": {
+    "name": "yoonsung.eth"
   },
-  "author": "yoonsung",
-  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nipol/library/issues"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-solhint": "^2.0.0",
@@ -46,5 +36,37 @@
     "solidity-coverage": "^0.7.16",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.9"
+  },
+  "files": [
+    "/contracts"
+  ],
+  "homepage": "https://github.com/Nipol/library#readme",
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "hardhat",
+    "smart-contracts",
+    "solidity"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nipol/library"
+  },
+  "scripts": {
+    "build": "npx hardhat compile",
+    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
+    "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
+    "coverage:server": "npm run coverage && http-server ./coverage -s",
+    "docs": "scripts/docs.sh",
+    "lint": "npm run lint:js && npm run lint:sol",
+    "lint:js": "eslint '*/**/*.{js,ts}' --quiet --fix",
+    "lint:sol": "solhint --config .solhint.json --max-warnings 0 'contracts/**/*.sol'",
+    "prettier": "prettier --config .prettierrc --write '**/*.{js,sol,ts}'",
+    "vertigo": "scripts/vertigo.sh",
+    "analyze": "slither ./contracts",
+    "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js"
   }
 }

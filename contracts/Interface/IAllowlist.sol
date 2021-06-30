@@ -4,8 +4,6 @@
 
 pragma solidity ^0.8.0;
 
-import "../Library/Ownership.sol";
-
 interface IAllowlist {
     event Allowed(address addr);
     event Revoked(address addr);

@@ -1,0 +1,16 @@
+**/.*
+.DS_Store
+.devcontainer/
+.vscode/
+node_modules/
+scripts/
+test/
+.editorconfig
+.eslintrc
+.mocharc.json
+.prettierignore
+.prettierrc
+.solcover.json
+.solhint.json
+hardhat.config.test
+tsconfig.json

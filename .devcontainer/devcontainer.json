@@ -1,16 +1,16 @@
 // For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.106.0/containers/typescript-node-12
 {
-  "name": "Contract Template",
+  "name": "@beandao/library",
   "build": {
     "dockerfile": "Dockerfile",
     // Update 'VARIANT' to pick a Node version: 10, 12, 14
-    "args": { "VARIANT": "14", "SOLC_VERSION": "0.8.4" }
+    "args": { "VARIANT": "14", "SOLC_VERSION": "0.8.5" }
   },
 
   // Set *default* container specific settings.json values on container create.
   "settings": {
-    "terminal.integrated.defaultProfile.linux": "/usr/bin/zsh",
+    "terminal.integrated.defaultProfile.linux": "zsh",
     "solidity.packageDefaultDependenciesContractsDirectory": "",
     "solidity.packageDefaultDependenciesDirectory": "contracts/Library",
     "solidity.linter": "solhint",
@@ -51,6 +51,6 @@
   "remoteUser": "node",
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "sudo mkdir -p /home/node/.ssh && sudo cp -r /home/node/.ssh-localhost/* /home/node/.ssh && sudo chmod 707 /home/node/.ssh && sudo chmod 606 /home/node/.ssh/* && npm install && sudo curl https://dapp.tools/install | zsh && source /home/node/.zshrc",
+  "postCreateCommand": "sudo mkdir -p /home/node/.ssh && sudo cp -r /home/node/.ssh-localhost/* /home/node/.ssh && sudo chmod 707 /home/node/.ssh && sudo chmod 606 /home/node/.ssh/* && npm install",
   "runArgs": ["-v", "${env:HOME}${env:USERPROFILE}/.ssh:/home/node/.ssh-localhost:ro"]
 }
