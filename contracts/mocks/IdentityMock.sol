@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../Interface/IERC1271.sol";
+import "../interfaces/IERC1271.sol";
 
 contract IdentityMock is IERC1271 {
     mapping(address => bool) public owners;

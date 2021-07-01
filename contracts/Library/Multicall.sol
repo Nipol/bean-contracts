@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../Interface/IMulticall.sol";
+import "../interfaces/IMulticall.sol";
 
 abstract contract Multicall is IMulticall {
     function multicall(bytes[] calldata callData)

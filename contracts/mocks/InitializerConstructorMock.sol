@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../Library/Initializer.sol";
+import "../library/Initializer.sol";
 
 contract InitializerConstructorMock is Initializer {
     constructor() initializer {}

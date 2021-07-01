@@ -4,8 +4,8 @@
 
 pragma solidity ^0.8.0;
 
-import "../Library/Ownership.sol";
-import "../Interface/IERC173.sol";
+import "../library/Ownership.sol";
+import "../interfaces/IERC173.sol";
 
 contract OwnershipMock is IERC173, Ownership {
     constructor() {

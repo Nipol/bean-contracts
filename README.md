@@ -1,4 +1,4 @@
-# Contract Template
+# beanDAO Contracts 
 
 ```
 sudo curl -L https://nixos.org/nix/install | sh

@@ -1,7 +1,7 @@
 {
-  "name": "@beandao/library",
-  "version": "0.1.1",
-  "description": "Smart Contract Library",
+  "name": "bean-contracts",
+  "version": "0.0.2",
+  "description": "Smart Contract Library for beandao production",
   "license": "LGPL-3.0",
   "author": {
     "name": "yoonsung.eth"
@@ -38,7 +38,9 @@
     "typescript": "^3.9.9"
   },
   "files": [
-    "/contracts"
+    "contracts/**/*.sol",
+    "/build/contracts/*.json",
+    "!/contracts/mocks/**/*"
   ],
   "homepage": "https://github.com/Nipol/library#readme",
   "keywords": [
@@ -65,8 +67,14 @@
     "lint:js": "eslint '*/**/*.{js,ts}' --quiet --fix",
     "lint:sol": "solhint --config .solhint.json --max-warnings 0 'contracts/**/*.sol'",
     "prettier": "prettier --config .prettierrc --write '**/*.{js,sol,ts}'",
+    "prepublish": "rimraf build contracts/build artifacts cache",
+    "prepack": "scripts/prepack.sh",
+    "prepare": "env COMPILE_MODE=production npm run build",
     "vertigo": "scripts/vertigo.sh",
     "analyze": "slither ./contracts",
     "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js"
+  },
+  "dependencies": {
+    "rimraf": "^3.0.2"
   }
 }

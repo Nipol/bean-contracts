@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../Library/ERC2612.sol";
+import "../library/ERC2612.sol";
 
 contract ERC20Mock is ERC2612 {
     mapping(address => mapping(address => uint256)) public allowance;

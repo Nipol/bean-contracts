@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../Library/Address.sol";
+import "../library/Address.sol";
 
 contract AddressMock {
     using Address for address;

@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../Interface/IERC173.sol";
+import "../interfaces/IERC173.sol";
 
 contract Ownership is IERC173 {
     address private _owner;

@@ -12,7 +12,7 @@
   "settings": {
     "terminal.integrated.defaultProfile.linux": "zsh",
     "solidity.packageDefaultDependenciesContractsDirectory": "",
-    "solidity.packageDefaultDependenciesDirectory": "contracts/Library",
+    "solidity.packageDefaultDependenciesDirectory": "node_modules",
     "solidity.linter": "solhint",
     "solidity.compileUsingRemoteVersion": "latest",
     "solidity.enableLocalNodeCompiler": false,
