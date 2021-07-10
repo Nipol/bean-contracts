@@ -9,3 +9,5 @@ package-lock.json
 allFiredEvents
 crytic-export
 .DS_Store
+contracts/README.md
+contracts/build
