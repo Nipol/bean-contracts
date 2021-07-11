@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Nipol/library/.git"
+    "url": "https://github.com/Nipol/bean-contracts/.git"
   },
   "keywords": [
     "solidity",
@@ -25,6 +25,6 @@
   "author": "yoonsung.eth",
   "license": "LGPL-3.0",
   "bugs": {
-    "url": "https://github.com/Nipol/library//issues"
+    "url": "https://github.com/Nipol/bean-contracts/issues"
   }
 }
