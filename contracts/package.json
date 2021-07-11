@@ -1,30 +1,30 @@
 {
-    "name": "@beandao/contracts",
-    "description": "Smart Contract Library for beandao production",
-    "version": "0.1.3",
-    "files": [
-      "**/*.sol",
-      "/build/contracts/*.json",
-      "!/mocks/**/*"
-    ],
-    "scripts": {
-      "prepare": "bash ../scripts/prepare-contracts-package.sh"
-    },
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/Nipol/library/.git"
-    },
-    "keywords": [
-      "solidity",
-      "ethereum",
-      "smart",
-      "contracts",
-      "security",
-      "zeppelin"
-    ],
-    "author": "yoonsung.eth",
-    "license": "LGPL-3.0",
-    "bugs": {
-      "url": "https://github.com/Nipol/library//issues"
-    }
+  "name": "@beandao/contracts",
+  "description": "Smart Contract Library for beandao production",
+  "version": "0.1.4",
+  "files": [
+    "**/*.sol",
+    "/build/contracts/*.json",
+    "!/mocks/**/*"
+  ],
+  "scripts": {
+    "prepare": "bash ../scripts/prepare-contracts-package.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nipol/bean-contracts/.git"
+  },
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "smart",
+    "contracts",
+    "security",
+    "zeppelin"
+  ],
+  "author": "yoonsung.eth",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Nipol/bean-contracts/issues"
+  }
 }
