@@ -35,7 +35,8 @@
     "solc": "^0.8.4",
     "solidity-coverage": "^0.7.16",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.9"
+    "typescript": "^3.9.9",
+    "rimraf": "^3.0.2"
   },
   "files": [
     "contracts/**/*.sol",
@@ -67,14 +68,12 @@
     "lint:js": "eslint '*/**/*.{js,ts}' --quiet --fix",
     "lint:sol": "solhint --config .solhint.json --max-warnings 0 'contracts/**/*.sol'",
     "prettier": "prettier --config .prettierrc --write '**/*.{js,sol,ts}'",
-    "prepublish": "rimraf build contracts/build artifacts cache",
-    "prepack": "scripts/prepack.sh",
+    "prepublish": "rimraf build contracts/build artifacts cache contracts/*.md",
     "prepare": "env COMPILE_MODE=production npm run build",
+    "prepack": "scripts/prepack.sh",
+    "release": "scripts/release.sh",
     "vertigo": "scripts/vertigo.sh",
     "analyze": "slither ./contracts",
     "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js"
-  },
-  "dependencies": {
-    "rimraf": "^3.0.2"
   }
 }
