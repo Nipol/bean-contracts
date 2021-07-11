@@ -7,5 +7,5 @@ pragma solidity ^0.8.0;
 interface IMint {
     function mint(uint256 value) external returns (bool);
 
-    function mintTo(uint256 value, address to) external returns (bool);
+    function mintTo(address to, uint256 value) external returns (bool);
 }
