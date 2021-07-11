@@ -17,13 +17,13 @@ contract MulticallMock is Multicall {
         stage--;
     }
 
-    function increaseWithLongMessage() external returns(bytes memory message) {
+    function increaseWithRevert() external {
         stage++;
-        message = new bytes(65500);
+        revert("increase");
     }
 
-    function decreaseWithLongMessage() external returns(bytes memory message) {
+    function decreaseWithRevert() external {
         stage++;
-        message = new bytes(65500);
+        revert("decrease");
     }
 }
