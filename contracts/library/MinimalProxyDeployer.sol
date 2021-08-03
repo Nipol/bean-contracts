@@ -4,16 +4,21 @@
 
 pragma solidity ^0.8.0;
 
-import "./Create2Maker.sol";
+import "./Create2MinimalMaker.sol";
 
-library Deployer {
+/**
+ * @title MinimalProxyDeployer
+ * @author yoonsung.eth
+ * @notice Minimal Proxy를 배포하는 기능을 가진 라이브러리
+ */
+library MinimalProxyDeployer {
     function deploy(address template, bytes memory initializationCalldata)
         internal
         returns (address result)
     {
         bytes memory createCode =
             abi.encodePacked(
-                type(Create2Maker).creationCode,
+                type(Create2MinimalMaker).creationCode,
                 abi.encode(address(template), initializationCalldata)
             );
 
@@ -45,7 +50,7 @@ library Deployer {
     ) internal returns (address result) {
         bytes memory createCode =
             abi.encodePacked(
-                type(Create2Maker).creationCode,
+                type(Create2MinimalMaker).creationCode,
                 abi.encode(address(template), initializationCalldata)
             );
 
@@ -77,7 +82,7 @@ library Deployer {
     ) internal view returns (address addr) {
         bytes memory createCode =
             abi.encodePacked(
-                type(Create2Maker).creationCode,
+                type(Create2MinimalMaker).creationCode,
                 abi.encode(address(template), initializationCalldata)
             );
 
