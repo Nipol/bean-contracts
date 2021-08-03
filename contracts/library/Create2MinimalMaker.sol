@@ -4,7 +4,13 @@
 
 pragma solidity ^0.8.0;
 
-contract Create2Maker {
+/**
+ * @title Create2MinimalMaker
+ * @author yoonsung.eth
+ * @notice Minimal Proxy를 배포하는 기능을 가진 Maker Dummy
+ * @dev template에는 단 한번만 호출 가능한 initialize 함수가 필요하며, 이는 필수적으로 호출되어 과정이 생략되어야 함.
+ */
+contract Create2MinimalMaker {
     constructor(address template, bytes memory initializationCalldata)
         payable
     {
