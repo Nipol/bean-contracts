@@ -13,10 +13,7 @@ abstract contract Initializer {
     bool private _initializing;
 
     modifier initializer() {
-        require(
-            _initializing || !_initialized || !address(this).isContract(),
-            "Initializer/Already Initialized"
-        );
+        require(_initializing || !_initialized || !address(this).isContract(), "Initializer/Already Initialized");
 
         bool isSurfaceCall = !_initializing;
         if (isSurfaceCall) {

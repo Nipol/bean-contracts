@@ -2,19 +2,17 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
 
-describe('Beacon Proxy', () => {
+describe('Minimal Proxy', () => {
   let DummyTemplate: Contract;
-  let Beacon: Contract;
-  let BeaconDeployerMock: Contract;
+  let MinimalDeployerMock: Contract;
 
   let wallet: Signer;
-  let Dummy: Signer;
 
-  const seedPhrase = 'Beacon Test🚏';
+  const seedPhrase = 'Minimal Test🚏';
 
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
-    [wallet, Dummy] = accounts;
+    [wallet] = accounts;
 
     const DummyTemplateDeployer = await ethers.getContractFactory(
       'contracts/mocks/DummyTemplate.sol:DummyTemplate',
@@ -22,22 +20,19 @@ describe('Beacon Proxy', () => {
     );
     DummyTemplate = await DummyTemplateDeployer.deploy();
 
-    const BeaconDeployer = await ethers.getContractFactory('contracts/library/Beacon.sol:Beacon', wallet);
-    Beacon = await BeaconDeployer.deploy(DummyTemplate.address);
-
-    const BeaconDeployerMockDeployer = await ethers.getContractFactory(
-      'contracts/mocks/BeaconDeployerMock.sol:BeaconDeployerMock',
+    const MinimalDeployerMockDeployer = await ethers.getContractFactory(
+      'contracts/mocks/MinimalDeployerMock.sol:MinimalDeployerMock',
       wallet,
     );
-    BeaconDeployerMock = await BeaconDeployerMockDeployer.deploy(Beacon.address, seedPhrase);
+    MinimalDeployerMock = await MinimalDeployerMockDeployer.deploy(DummyTemplate.address, seedPhrase);
 
-    await BeaconDeployerMock.deployed();
+    await MinimalDeployerMock.deployed();
   });
 
   describe('#deploy()', () => {
     it('should be success', async () => {
-      const deployaddr = await BeaconDeployerMock.deployCalculate('sample');
-      await BeaconDeployerMock.deploy('sample');
+      const deployaddr = await MinimalDeployerMock.deployCalculate('sample');
+      await MinimalDeployerMock.deploy('sample');
       const deployed = (
         await ethers.getContractFactory('contracts/mocks/DummyTemplate.sol:DummyTemplate', wallet)
       ).attach(deployaddr);
@@ -47,8 +42,8 @@ describe('Beacon Proxy', () => {
 
   describe('#deployFromSeed()', () => {
     it('should be success', async () => {
-      const deployaddr = await BeaconDeployerMock.deployCalculateFromSeed('sample');
-      await BeaconDeployerMock.deployFromSeed('sample');
+      const deployaddr = await MinimalDeployerMock.deployCalculateFromSeed('sample');
+      await MinimalDeployerMock.deployFromSeed('sample');
       const deployed = (
         await ethers.getContractFactory('contracts/mocks/DummyTemplate.sol:DummyTemplate', wallet)
       ).attach(deployaddr);

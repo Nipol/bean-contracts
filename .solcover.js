@@ -30,7 +30,7 @@ const accounts = [
 
 module.exports = {
   providerOptions: {
-    accounts
+    accounts,
   },
   skipFiles: ['Migrations.sol', 'Token.sol', 'oz', 'gnosis-safe'],
 };

@@ -22,7 +22,6 @@ RUN apt-get update \
     # install solc
     && pip3 install solc-select \
     && solc-select install ${SOLC_VERSION} \
-    && sudo npm i -g solhint \
     && sudo npm i -g lerna \
     # Clean up
     && apt-get autoremove -y \

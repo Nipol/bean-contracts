@@ -15,9 +15,7 @@ contract Create2BeaconMaker {
      * @param beacon call 했을 경우, 주소가 반환되어야 함
      * @param initializationCalldata template로 배포할 때 초기화 할 함수
      */
-    constructor(address beacon, bytes memory initializationCalldata)
-        payable
-    {
+    constructor(address beacon, bytes memory initializationCalldata) payable {
         (, bytes memory returnData) = beacon.staticcall("");
         address template = abi.decode(returnData, (address));
         // solhint-disable-next-line avoid-low-level-calls
@@ -31,19 +29,18 @@ contract Create2BeaconMaker {
             }
         }
 
-        // place eip-1167 runtime code in memory.
-        bytes memory runtimeCode =
-            abi.encodePacked(
-                bytes6(0x3d3d3d3d3d73),
-                beacon,
-                bytes32(0x5afa3d82803e368260203750808036602082515af43d82803e903d91603a57fd),
-                bytes2(0x5bf3)
-            );
-
-        // return Beacon Minimal Proxy code to write it to spawned contract runtime.
+        // Beacon Address
+        bytes20 targetBytes = bytes20(beacon);
+        // place Beacon Proxy code in memory.
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            return(add(0x20, runtimeCode), 60) // Beacon Minimal Proxy runtime code, length
+            let clone := mload(0x40)
+            mstore(clone, 0x3d3d3d3d3d730000000000000000000000000000000000000000000000000000)
+            mstore(add(clone, 0x6), targetBytes)
+            mstore(add(clone, 0x1a), 0x5afa3d82803e368260203750808036602082515af43d82803e903d91603a57fd)
+            mstore(add(clone, 0x3a), 0x5bf3000000000000000000000000000000000000000000000000000000000000)
+            // return Beacon Minimal Proxy code to write it to spawned contract runtime.
+            return(add(0x00, clone), 60) // Beacon Minimal Proxy runtime code, length
         }
     }
 }

@@ -23,11 +23,7 @@ contract Ownership is IERC173 {
         return _owner;
     }
 
-    function transferOwnership(address newOwner)
-        external
-        override
-        onlyOwner
-    {
+    function transferOwnership(address newOwner) external override onlyOwner {
         _owner = newOwner;
         emit OwnershipTransferred(msg.sender, newOwner);
     }

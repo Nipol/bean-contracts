@@ -10,7 +10,7 @@ import {
   arrayify,
   joinSignature,
   SigningKey,
-  recoverAddress
+  recoverAddress,
 } from 'ethers/lib/utils';
 
 const EIP712DOMAIN_TYPEHASH = keccak256(
@@ -206,9 +206,9 @@ describe('StandardToken/ERC2612', () => {
 
       ERC20Mock = ERC20Mock.connect(walletTo);
 
-      await expect(
-        ERC20Mock.permit(walletAddress, walletToAddress, value, deadline, v, fakeR, s),
-      ).to.be.revertedWith('ERC2612/Invalid-Signature');
+      await expect(ERC20Mock.permit(walletAddress, walletToAddress, value, deadline, v, fakeR, s)).to.be.revertedWith(
+        'ERC2612/Invalid-Signature',
+      );
     });
   });
 });

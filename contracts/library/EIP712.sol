@@ -6,9 +6,7 @@ pragma solidity ^0.8.0;
 
 library EIP712 {
     bytes32 internal constant EIP712DOMAIN_TYPEHASH =
-        keccak256(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-        );
+        keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
 
     /**
      * @dev Calculates a EIP712 domain separator.
@@ -48,19 +46,12 @@ library EIP712 {
      * @param hashStruct The EIP712 hash struct.
      * @return result EIP712 hash applied to the given EIP712 Domain.
      */
-    function hashMessage(bytes32 domainHash, bytes32 hashStruct)
-        internal
-        pure
-        returns (bytes32 result)
-    {
+    function hashMessage(bytes32 domainHash, bytes32 hashStruct) internal pure returns (bytes32 result) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let memPtr := mload(64)
 
-            mstore(
-                memPtr,
-                0x1901000000000000000000000000000000000000000000000000000000000000
-            ) // EIP191 header
+            mstore(memPtr, 0x1901000000000000000000000000000000000000000000000000000000000000) // EIP191 header
             mstore(add(memPtr, 2), domainHash) // EIP712 domain hash
             mstore(add(memPtr, 34), hashStruct) // Hash of struct
 

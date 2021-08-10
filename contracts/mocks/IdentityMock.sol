@@ -9,20 +9,14 @@ import "../interfaces/IERC1271.sol";
 contract IdentityMock is IERC1271 {
     mapping(address => bool) public owners;
 
-    bytes4 internal constant MAGICVALUE =
-        bytes4(keccak256("isValidSignature(bytes,bytes)"));
+    bytes4 internal constant MAGICVALUE = bytes4(keccak256("isValidSignature(bytes,bytes)"));
     bytes4 internal constant NOT_MAGICVALUE = 0xffffffff;
 
     constructor() {
         owners[msg.sender] = true;
     }
 
-    function isValidSignature(bytes memory digest, bytes memory signature)
-        external
-        view
-        override
-        returns (bytes4)
-    {
+    function isValidSignature(bytes memory digest, bytes memory signature) external view override returns (bytes4) {
         bytes32 r;
         bytes32 s;
         uint8 v;

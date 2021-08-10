@@ -12,15 +12,11 @@ import "./Create2MinimalMaker.sol";
  * @notice Minimal Proxy를 배포하는 기능을 가진 라이브러리
  */
 library MinimalProxyDeployer {
-    function deploy(address template, bytes memory initializationCalldata)
-        internal
-        returns (address result)
-    {
-        bytes memory createCode =
-            abi.encodePacked(
-                type(Create2MinimalMaker).creationCode,
-                abi.encode(address(template), initializationCalldata)
-            );
+    function deploy(address addr, bytes memory initializationCalldata) internal returns (address result) {
+        bytes memory createCode = abi.encodePacked(
+            type(Create2MinimalMaker).creationCode,
+            abi.encode(address(addr), initializationCalldata)
+        );
 
         (bytes32 salt, ) = getSaltAndTarget(createCode);
 
@@ -44,17 +40,17 @@ library MinimalProxyDeployer {
         }
     }
 
-    function deployWithValue(
-        address template,
-        bytes memory initializationCalldata
+    function deployFromSeed(
+        address addr,
+        bytes memory initializationCalldata,
+        string memory seed
     ) internal returns (address result) {
-        bytes memory createCode =
-            abi.encodePacked(
-                type(Create2MinimalMaker).creationCode,
-                abi.encode(address(template), initializationCalldata)
-            );
+        bytes memory createCode = abi.encodePacked(
+            type(Create2MinimalMaker).creationCode,
+            abi.encode(address(addr), initializationCalldata)
+        );
 
-        (bytes32 salt, ) = getSaltAndTarget(createCode);
+        bytes32 salt = keccak256(abi.encodePacked(msg.sender, seed));
 
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -62,7 +58,7 @@ library MinimalProxyDeployer {
             let encoded_size := mload(createCode) // load the init code's length.
             result := create2(
                 // call `CREATE2` w/ 4 arguments.
-                callvalue(), // forward any supplied endowment.
+                0, // forward any supplied endowment.
                 encoded_data, // pass in initialization code.
                 encoded_size, // pass in init code's length.
                 salt // pass in the salt value.
@@ -76,24 +72,33 @@ library MinimalProxyDeployer {
         }
     }
 
-    function calculateAddress(
-        address template,
-        bytes memory initializationCalldata
-    ) internal view returns (address addr) {
-        bytes memory createCode =
-            abi.encodePacked(
-                type(Create2MinimalMaker).creationCode,
-                abi.encode(address(template), initializationCalldata)
-            );
+    function calculateAddress(address template, bytes memory initializationCalldata)
+        internal
+        view
+        returns (address addr)
+    {
+        bytes memory createCode = abi.encodePacked(
+            type(Create2MinimalMaker).creationCode,
+            abi.encode(address(template), initializationCalldata)
+        );
 
         (, addr) = getSaltAndTarget(createCode);
     }
 
-    function getSaltAndTarget(bytes memory initCode)
-        internal
-        view
-        returns (bytes32 salt, address target)
-    {
+    function calculateAddressFromSeed(
+        address template,
+        bytes memory initializationCalldata,
+        string memory seed
+    ) internal view returns (address addr) {
+        bytes memory createCode = abi.encodePacked(
+            type(Create2MinimalMaker).creationCode,
+            abi.encode(address(template), initializationCalldata)
+        );
+
+        addr = getTargetFromSeed(createCode, seed);
+    }
+
+    function getSaltAndTarget(bytes memory initCode) internal view returns (bytes32 salt, address target) {
         // get the keccak256 hash of the init code for address derivation.
         bytes32 initCodeHash = keccak256(initCode);
 
@@ -136,5 +141,27 @@ library MinimalProxyDeployer {
             // otherwise, increment the nonce and derive a new salt.
             nonce++;
         }
+    }
+
+    function getTargetFromSeed(bytes memory initCode, string memory seed) internal view returns (address target) {
+        // get the keccak256 hash of the init code for address derivation.
+        bytes32 initCodeHash = keccak256(initCode);
+
+        bytes32 salt = keccak256(abi.encodePacked(msg.sender, seed));
+
+        target = address( // derive the target deployment address.
+            uint160( // downcast to match the address type.
+                uint256( // cast to uint to truncate upper digits.
+                    keccak256( // compute CREATE2 hash using 4 inputs.
+                        abi.encodePacked( // pack all inputs to the hash together.
+                            bytes1(0xff), // pass in the control character.
+                            address(this), // pass in the address of this contract.
+                            salt, // pass in the salt from above.
+                            initCodeHash // pass in hash of contract creation code.
+                        )
+                    )
+                )
+            )
+        );
     }
 }

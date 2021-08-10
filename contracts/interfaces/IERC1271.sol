@@ -18,8 +18,5 @@ interface IERC1271 {
      * MUST allow external calls
      */
 
-    function isValidSignature(bytes calldata _data, bytes calldata _signature)
-        external
-        view
-        returns (bytes4);
+    function isValidSignature(bytes calldata _data, bytes calldata _signature) external view returns (bytes4);
 }

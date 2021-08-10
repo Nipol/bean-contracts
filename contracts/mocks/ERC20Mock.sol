@@ -11,11 +11,7 @@ contract ERC20Mock is ERC2612 {
 
     string public name = "Mock";
 
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 
     constructor() {
         _initDomainSeparator(name, "1");
@@ -34,10 +30,17 @@ contract ERC20Mock is ERC2612 {
         emit Approval(owner, spender, value);
     }
 
-    function _approve(address owner, address spender, uint256 amount) internal override {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal override {
         allowance[owner][spender] = amount;
     }
 
-    function _transfer(address from, address to, uint256 value) internal override {
-    }
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal override {}
 }

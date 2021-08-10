@@ -11,9 +11,7 @@ pragma solidity ^0.8.0;
  * @dev template에는 단 한번만 호출 가능한 initialize 함수가 필요하며, 이는 필수적으로 호출되어 과정이 생략되어야 함.
  */
 contract Create2MinimalMaker {
-    constructor(address template, bytes memory initializationCalldata)
-        payable
-    {
+    constructor(address template, bytes memory initializationCalldata) payable {
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = template.delegatecall(initializationCalldata);
         if (!success) {
@@ -25,18 +23,17 @@ contract Create2MinimalMaker {
             }
         }
 
-        // place eip-1167 runtime code in memory.
-        bytes memory runtimeCode =
-            abi.encodePacked(
-                bytes10(0x363d3d373d3d3d363d73),
-                template,
-                bytes15(0x5af43d82803e903d91602b57fd5bf3)
-            );
-
-        // return eip-1167 code to write it to spawned contract runtime.
+        // Template Address
+        bytes20 targetBytes = bytes20(template);
+        // place Minimal Proxy eip-1167 code in memory.
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            return(add(0x20, runtimeCode), 45) // eip-1167 runtime code, length
+            let clone := mload(0x40)
+            mstore(clone, 0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000)
+            mstore(add(clone, 0xa), targetBytes)
+            mstore(add(clone, 0x1e), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+            // return eip-1167 code to write it to spawned contract runtime.
+            return(add(0x00, clone), 45) // eip-1167 runtime code, length
         }
     }
 }

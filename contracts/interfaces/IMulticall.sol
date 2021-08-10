@@ -5,7 +5,5 @@
 pragma solidity ^0.8.0;
 
 interface IMulticall {
-    function multicall(bytes[] calldata callData)
-        external
-        returns (bytes[] memory returnData);
+    function multicall(bytes[] calldata callData) external returns (bytes[] memory returnData);
 }
