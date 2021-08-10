@@ -8,6 +8,8 @@ describe('Minimal Proxy', () => {
 
   let wallet: Signer;
 
+  const seedPhrase = 'Minimal Test🚏';
+
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
     [wallet] = accounts;
@@ -22,7 +24,7 @@ describe('Minimal Proxy', () => {
       'contracts/mocks/MinimalDeployerMock.sol:MinimalDeployerMock',
       wallet,
     );
-    MinimalDeployerMock = await MinimalDeployerMockDeployer.deploy(DummyTemplate.address);
+    MinimalDeployerMock = await MinimalDeployerMockDeployer.deploy(DummyTemplate.address, seedPhrase);
 
     await MinimalDeployerMock.deployed();
   });
@@ -31,6 +33,17 @@ describe('Minimal Proxy', () => {
     it('should be success', async () => {
       const deployaddr = await MinimalDeployerMock.deployCalculate('sample');
       await MinimalDeployerMock.deploy('sample');
+      const deployed = (
+        await ethers.getContractFactory('contracts/mocks/DummyTemplate.sol:DummyTemplate', wallet)
+      ).attach(deployaddr);
+      expect(await deployed.name()).to.equal('sample');
+    });
+  });
+
+  describe('#deployFromSeed()', () => {
+    it('should be success', async () => {
+      const deployaddr = await MinimalDeployerMock.deployCalculateFromSeed('sample');
+      await MinimalDeployerMock.deployFromSeed('sample');
       const deployed = (
         await ethers.getContractFactory('contracts/mocks/DummyTemplate.sol:DummyTemplate', wallet)
       ).attach(deployaddr);
