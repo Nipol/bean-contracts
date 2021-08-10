@@ -25,10 +25,10 @@ describe('Initializer', () => {
     });
 
     it('should be true from Contract', async () => {
-        const DummyDeployer = await ethers.getContractFactory('contracts/mocks/ERC20Mock.sol:ERC20Mock', wallet);
-        const DummyMock: Contract = await DummyDeployer.deploy();
-        const addr = DummyMock.address;
-        expect(await AddressMock.isContract(addr)).to.equal(true);
-      });
+      const DummyDeployer = await ethers.getContractFactory('contracts/mocks/ERC20Mock.sol:ERC20Mock', wallet);
+      const DummyMock: Contract = await DummyDeployer.deploy();
+      const addr = DummyMock.address;
+      expect(await AddressMock.isContract(addr)).to.equal(true);
+    });
   });
 });

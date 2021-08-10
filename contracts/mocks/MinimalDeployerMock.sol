@@ -4,38 +4,38 @@
 
 pragma solidity ^0.8.0;
 
-import "../library/BeaconProxyDeployer.sol";
+import "../library/MinimalProxyDeployer.sol";
 
-contract BeaconDeployerMock {
+contract MinimalDeployerMock {
     string private seed;
-    address private beacon;
+    address private template;
 
-    constructor(address beaconAddr, string memory seedStr) {
-        beacon = beaconAddr;
+    constructor(address templateAddr, string memory seedStr) {
+        template = templateAddr;
         seed = seedStr;
     }
 
     function deploy(string calldata _name) external returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
-        addr = BeaconProxyDeployer.deploy(beacon, initCode);
+        addr = MinimalProxyDeployer.deploy(template, initCode);
     }
 
     function deployCalculate(string calldata _name) external view returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
-        addr = BeaconProxyDeployer.calculateAddress(beacon, initCode);
+        addr = MinimalProxyDeployer.calculateAddress(template, initCode);
     }
 
     function deployFromSeed(string calldata _name) external returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
-        addr = BeaconProxyDeployer.deployFromSeed(beacon, initCode, seed);
+        addr = MinimalProxyDeployer.deployFromSeed(template, initCode, seed);
     }
 
     function deployCalculateFromSeed(string calldata _name) external view returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
-        addr = BeaconProxyDeployer.calculateAddressFromSeed(beacon, initCode, seed);
+        addr = MinimalProxyDeployer.calculateAddressFromSeed(template, initCode, seed);
     }
 }

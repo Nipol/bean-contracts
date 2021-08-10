@@ -55,11 +55,7 @@ library SafeMath {
         z = add(mul(x, RAY), y / 2) / y;
     }
 
-    function toWAD(uint256 wad, uint256 decimal)
-        internal
-        pure
-        returns (uint256 z)
-    {
+    function toWAD(uint256 wad, uint256 decimal) internal pure returns (uint256 z) {
         require(decimal < 18, "Math/Too-high-decimal");
         z = mul(wad, 10**(18 - decimal));
     }

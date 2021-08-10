@@ -49,9 +49,7 @@ library Bytes {
                 // second 32 bytes.
                 vs := mload(add(sig, 64))
             }
-            s =
-                vs &
-                0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+            s = vs & 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
             v = 27 + uint8(uint256(vs) >> 255);
         }
 

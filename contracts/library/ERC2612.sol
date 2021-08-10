@@ -20,9 +20,7 @@ import {ERC20} from "./ERC20.sol";
  */
 abstract contract ERC2612 is ERC20 {
     bytes32 public immutable PERMIT_TYPEHASH =
-        keccak256(
-            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-        );
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     bytes32 public DOMAIN_SEPARATOR;
 
@@ -35,15 +33,9 @@ abstract contract ERC2612 is ERC20 {
      * @param _name        name of contract
      * @param _version     version of contract
      */
-    function _initDomainSeparator(string memory _name, string memory _version)
-        internal
-    {
+    function _initDomainSeparator(string memory _name, string memory _version) internal {
         version = _version;
-        DOMAIN_SEPARATOR = EIP712.hashDomainSeperator(
-            _name,
-            _version,
-            address(this)
-        );
+        DOMAIN_SEPARATOR = EIP712.hashDomainSeperator(_name, _version, address(this));
     }
 
     /**
@@ -68,26 +60,13 @@ abstract contract ERC2612 is ERC20 {
         require(owner != address(0), "ERC2612/Invalid-address-0");
         require(deadline >= block.timestamp, "ERC2612/Expired-time");
 
-        bytes32 digest =
-            EIP712.hashMessage(
-                DOMAIN_SEPARATOR,
-                keccak256(
-                    abi.encode(
-                        PERMIT_TYPEHASH,
-                        owner,
-                        spender,
-                        value,
-                        nonces[owner]++,
-                        deadline
-                    )
-                )
-            );
+        bytes32 digest = EIP712.hashMessage(
+            DOMAIN_SEPARATOR,
+            keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+        );
 
         address recovered = ecrecover(digest, v, r, s);
-        require(
-            recovered != address(0) && recovered == owner,
-            "ERC2612/Invalid-Signature"
-        );
+        require(recovered != address(0) && recovered == owner, "ERC2612/Invalid-Signature");
 
         _approve(owner, spender, value);
     }

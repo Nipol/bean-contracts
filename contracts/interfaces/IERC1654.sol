@@ -18,8 +18,5 @@ interface IERC1654 {
      * MUST allow external calls
      */
 
-    function isValidSignature(bytes32 _data, bytes calldata _signature)
-        external
-        view
-        returns (bytes4);
+    function isValidSignature(bytes32 _data, bytes calldata _signature) external view returns (bytes4);
 }
