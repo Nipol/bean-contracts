@@ -98,6 +98,21 @@ library MinimalProxyDeployer {
         addr = getTargetFromSeed(createCode, seed);
     }
 
+    function isMinimal(address templateAddr, address target) internal view returns (bool result) {
+        bytes20 templateAddrBytes = bytes20(templateAddr);
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let clone := mload(0x40)
+            mstore(clone, 0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000)
+            mstore(add(clone, 0xa), templateAddrBytes)
+            mstore(add(clone, 0x1e), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+
+            let other := add(clone, 0x40)
+            extcodecopy(target, other, 0, 0x2d)
+            result := eq(mload(clone), mload(other))
+        }
+    }
+
     function getSaltAndTarget(bytes memory initCode) internal view returns (bytes32 salt, address target) {
         // get the keccak256 hash of the init code for address derivation.
         bytes32 initCodeHash = keccak256(initCode);

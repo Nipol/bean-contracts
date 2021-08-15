@@ -98,6 +98,22 @@ library BeaconProxyDeployer {
         addr = getTargetFromSeed(createCode, seed);
     }
 
+    function isBeacon(address beaconAddr, address target) internal view returns (bool result) {
+        bytes20 beaconAddrBytes = bytes20(beaconAddr);
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let clone := mload(0x40)
+            mstore(clone, 0x3d3d3d3d3d730000000000000000000000000000000000000000000000000000)
+            mstore(add(clone, 0x6), beaconAddrBytes)
+            mstore(add(clone, 0x1a), 0x5afa3d82803e368260203750808036602082515af43d82803e903d91603a57fd)
+            mstore(add(clone, 0x3a), 0x5bf3000000000000000000000000000000000000000000000000000000000000)
+
+            let other := add(clone, 0x40)
+            extcodecopy(target, other, 0, 0x3c)
+            result := eq(mload(clone), mload(other))
+        }
+    }
+
     function getSaltAndTarget(bytes memory initCode) internal view returns (bytes32 salt, address target) {
         // get the keccak256 hash of the init code for address derivation.
         bytes32 initCodeHash = keccak256(initCode);

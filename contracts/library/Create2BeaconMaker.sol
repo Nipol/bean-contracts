@@ -40,7 +40,7 @@ contract Create2BeaconMaker {
             mstore(add(clone, 0x1a), 0x5afa3d82803e368260203750808036602082515af43d82803e903d91603a57fd)
             mstore(add(clone, 0x3a), 0x5bf3000000000000000000000000000000000000000000000000000000000000)
             // return Beacon Minimal Proxy code to write it to spawned contract runtime.
-            return(add(0x00, clone), 60) // Beacon Minimal Proxy runtime code, length
+            return(add(0x00, clone), 0x3c) // Beacon Minimal Proxy runtime code, length
         }
     }
 }
