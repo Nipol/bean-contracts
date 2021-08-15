@@ -38,4 +38,8 @@ contract BeaconDeployerMock {
 
         addr = BeaconProxyDeployer.calculateAddressFromSeed(beacon, initCode, seed);
     }
+
+    function isBeacon(address target) external view returns (bool result) {
+        result = BeaconProxyDeployer.isBeacon(beacon, target);
+    }
 }

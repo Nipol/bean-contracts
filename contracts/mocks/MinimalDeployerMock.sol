@@ -38,4 +38,8 @@ contract MinimalDeployerMock {
 
         addr = MinimalProxyDeployer.calculateAddressFromSeed(template, initCode, seed);
     }
+
+    function isMinimal(address target) external view returns (bool result) {
+        result = MinimalProxyDeployer.isMinimal(template, target);
+    }
 }

@@ -50,4 +50,16 @@ describe('Minimal Proxy', () => {
       expect(await deployed.name()).to.equal('sample');
     });
   });
+
+  describe('#isMinimal()', () => {
+    it('should be success with detect beacon contract', async () => {
+      const deployaddr = await MinimalDeployerMock.deployCalculateFromSeed('sample');
+      await MinimalDeployerMock.deployFromSeed('sample');
+      expect(await MinimalDeployerMock.isMinimal(deployaddr)).to.equal(true);
+    });
+
+    it('should be success with detect dummy contract', async () => {
+      expect(await MinimalDeployerMock.isMinimal(DummyTemplate.address)).to.equal(false);
+    });
+  });
 });

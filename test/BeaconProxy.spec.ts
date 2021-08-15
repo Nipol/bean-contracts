@@ -55,4 +55,16 @@ describe('Beacon Proxy', () => {
       expect(await deployed.name()).to.equal('sample');
     });
   });
+
+  describe('#isBeacon()', () => {
+    it('should be success with detect beacon contract', async () => {
+      const deployaddr = await BeaconDeployerMock.deployCalculateFromSeed('sample');
+      await BeaconDeployerMock.deployFromSeed('sample');
+      expect(await BeaconDeployerMock.isBeacon(deployaddr)).to.equal(true);
+    });
+
+    it('should be success with detect dummy contract', async () => {
+      expect(await BeaconDeployerMock.isBeacon(DummyTemplate.address)).to.equal(false);
+    });
+  });
 });

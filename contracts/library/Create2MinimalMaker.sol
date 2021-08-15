@@ -33,7 +33,7 @@ contract Create2MinimalMaker {
             mstore(add(clone, 0xa), targetBytes)
             mstore(add(clone, 0x1e), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
             // return eip-1167 code to write it to spawned contract runtime.
-            return(add(0x00, clone), 45) // eip-1167 runtime code, length
+            return(add(0x00, clone), 0x2d) // eip-1167 runtime code, length
         }
     }
 }
