@@ -30,13 +30,13 @@ contract BeaconDeployerMock {
     function deployFromSeed(string calldata _name) external returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
-        addr = BeaconProxyDeployer.deployFromSeed(beacon, initCode, seed);
+        addr = BeaconProxyDeployer.deploy(seed, beacon, initCode);
     }
 
     function deployCalculateFromSeed(string calldata _name) external view returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
-        addr = BeaconProxyDeployer.calculateAddressFromSeed(beacon, initCode, seed);
+        addr = BeaconProxyDeployer.calculateAddress(seed, beacon, initCode);
     }
 
     function isBeacon(address target) external view returns (bool result) {

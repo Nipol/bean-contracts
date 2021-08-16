@@ -40,7 +40,7 @@ describe('Minimal Proxy', () => {
     });
   });
 
-  describe('#deployFromSeed()', () => {
+  describe('#deploy(seed)', () => {
     it('should be success', async () => {
       const deployaddr = await MinimalDeployerMock.deployCalculateFromSeed('sample');
       await MinimalDeployerMock.deployFromSeed('sample');
