@@ -40,10 +40,10 @@ library MinimalProxyDeployer {
         }
     }
 
-    function deployFromSeed(
+    function deploy(
+        string memory seed,
         address addr,
-        bytes memory initializationCalldata,
-        string memory seed
+        bytes memory initializationCalldata
     ) internal returns (address result) {
         bytes memory createCode = abi.encodePacked(
             type(Create2MinimalMaker).creationCode,
@@ -85,10 +85,10 @@ library MinimalProxyDeployer {
         (, addr) = getSaltAndTarget(createCode);
     }
 
-    function calculateAddressFromSeed(
+    function calculateAddress(
+        string memory seed,
         address template,
-        bytes memory initializationCalldata,
-        string memory seed
+        bytes memory initializationCalldata
     ) internal view returns (address addr) {
         bytes memory createCode = abi.encodePacked(
             type(Create2MinimalMaker).creationCode,

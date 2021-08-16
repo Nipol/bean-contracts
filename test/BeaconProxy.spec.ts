@@ -45,7 +45,7 @@ describe('Beacon Proxy', () => {
     });
   });
 
-  describe('#deployFromSeed()', () => {
+  describe('#deploy(seed)', () => {
     it('should be success', async () => {
       const deployaddr = await BeaconDeployerMock.deployCalculateFromSeed('sample');
       await BeaconDeployerMock.deployFromSeed('sample');
