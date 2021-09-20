@@ -15,27 +15,39 @@ contract MinimalDeployerMock {
         seed = seedStr;
     }
 
+    function deploy() external returns (address addr) {
+        addr = MinimalProxyDeployer.deploy(template);
+    }
+
     function deploy(string calldata _name) external returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
-
         addr = MinimalProxyDeployer.deploy(template, initCode);
+    }
+
+    function deployCalculate() external view returns (address addr) {
+        addr = MinimalProxyDeployer.calculateAddress(template);
     }
 
     function deployCalculate(string calldata _name) external view returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
-
         addr = MinimalProxyDeployer.calculateAddress(template, initCode);
+    }
+
+    function deployFromSeed() external returns (address addr) {
+        addr = MinimalProxyDeployer.deploy(seed, template);
     }
 
     function deployFromSeed(string calldata _name) external returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
-
         addr = MinimalProxyDeployer.deploy(seed, template, initCode);
+    }
+
+    function deployCalculateFromSeed() external view returns (address addr) {
+        addr = MinimalProxyDeployer.calculateAddress(seed, template);
     }
 
     function deployCalculateFromSeed(string calldata _name) external view returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
-
         addr = MinimalProxyDeployer.calculateAddress(seed, template, initCode);
     }
 

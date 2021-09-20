@@ -10,16 +10,16 @@ import "../interfaces/IAllowlist.sol";
 contract Allowlist is IAllowlist, Ownership {
     mapping(address => bool) public override allowance;
 
-    constructor() {
-        Ownership.initialize(msg.sender);
-    }
+    constructor() Ownership() {}
 
     function authorise(address allowAddr) external override onlyOwner {
+        require(allowance[allowAddr] == false, "Allowlist/Already-Authorized");
         allowance[allowAddr] = true;
         emit Allowed(allowAddr);
     }
 
     function revoke(address revokeAddr) external override onlyOwner {
+        require(allowance[revokeAddr] == true, "Allowlist/Not-Authorized");
         delete allowance[revokeAddr];
         emit Revoked(revokeAddr);
     }

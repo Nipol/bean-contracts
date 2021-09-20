@@ -7,12 +7,14 @@ import "../interfaces/IERC165.sol";
 import "../interfaces/IERC173.sol";
 
 contract InterfaceMock is IERC165, IERC173 {
+    event Dummy();
+
     function owner() external view override returns (address) {
         return address(0);
     }
 
     function transferOwnership(address newOwner) external override {
-        uint256 asdf = 100 + 1;
+        emit Dummy();
     }
 
     function supportsInterface(bytes4 interfaceID) external view override returns (bool) {

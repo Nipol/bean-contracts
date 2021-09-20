@@ -4,18 +4,18 @@
 
 pragma solidity ^0.8.0;
 
-import "../interfaces/IMulticall.sol";
+import "../interfaces/IAggregatecall.sol";
 
 /**
- * @title Multicall
+ * @title Aggregatecall
  * @author yoonsung.eth
  * @notice 컨트랙트가 가지고 있는 트랜잭션을 순서대로 실행시킬 수 있음.
  */
-abstract contract Multicall is IMulticall {
-    function multicall(bytes[] calldata callData) external override returns (bytes[] memory returnData) {
-        returnData = new bytes[](callData.length);
-        for (uint256 i = 0; i < callData.length; i++) {
-            (bool success, bytes memory result) = address(this).delegatecall(callData[i]);
+abstract contract Aggregatecall is IAggregatecall {
+    function aggregate(Call[] memory calls) external override returns (bytes[] memory returnData) {
+        returnData = new bytes[](calls.length);
+        for (uint256 i = 0; i < calls.length; i++) {
+            (bool success, bytes memory result) = calls[i].target.call(calls[i].data);
             // Next 5 lines from https://ethereum.stackexchange.com/a/83577
             if (!success) {
                 // revert called without a message
