@@ -15,10 +15,18 @@ contract BeaconDeployerMock {
         seed = seedStr;
     }
 
+    function deploy() external returns (address addr) {
+        addr = BeaconProxyDeployer.deploy(beacon);
+    }
+
     function deploy(string calldata _name) external returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
         addr = BeaconProxyDeployer.deploy(beacon, initCode);
+    }
+
+    function deployCalculate() external view returns (address addr) {
+        addr = BeaconProxyDeployer.calculateAddress(beacon);
     }
 
     function deployCalculate(string calldata _name) external view returns (address addr) {
@@ -27,10 +35,18 @@ contract BeaconDeployerMock {
         addr = BeaconProxyDeployer.calculateAddress(beacon, initCode);
     }
 
+    function deployFromSeed() external returns (address addr) {
+        addr = BeaconProxyDeployer.deploy(seed, beacon);
+    }
+
     function deployFromSeed(string calldata _name) external returns (address addr) {
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), _name);
 
         addr = BeaconProxyDeployer.deploy(seed, beacon, initCode);
+    }
+
+    function deployCalculateFromSeed() external view returns (address addr) {
+        addr = BeaconProxyDeployer.calculateAddress(seed, beacon);
     }
 
     function deployCalculateFromSeed(string calldata _name) external view returns (address addr) {

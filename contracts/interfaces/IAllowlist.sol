@@ -5,8 +5,8 @@
 pragma solidity ^0.8.0;
 
 interface IAllowlist {
-    event Allowed(address addr);
-    event Revoked(address addr);
+    event Allowed(address indexed addr);
+    event Revoked(address indexed addr);
 
     function allowance(address) external returns (bool);
 

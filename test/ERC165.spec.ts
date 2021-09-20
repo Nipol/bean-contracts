@@ -3,13 +3,11 @@ import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
 import { Interface, FormatTypes } from 'ethers/lib/utils';
 
-describe.only('ERC165', () => {
+describe('ERC165', () => {
   let InterfaceMock: Contract;
 
   let wallet: Signer;
   let Dummy: Signer;
-
-  const seedPhrase = 'Beacon Test🚏';
 
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
@@ -31,10 +29,10 @@ describe.only('ERC165', () => {
         'function supportsInterface(bytes4 interfaceID) external view returns (bool)',
       ]);
 
-      console.log(iface.getSighash('supportsInterface(bytes4)'));
+      const ERC173Selector = BigNumber.from(iface.getSighash('owner')).xor(iface.getSighash('transferOwnership'));
 
-      expect(await InterfaceMock.supportsInterface(iface.getSighash('supportsInterface(bytes4)'))).to.equal(true);
-      expect(await InterfaceMock.supportsInterface(iface.getSighash('transferOwnership(address)'))).to.equal(true);
+      expect(await InterfaceMock.supportsInterface(ERC173Selector)).to.equal(true);
+      // expect(await InterfaceMock.supportsInterface(iface.getSighash('transferOwnership(address)'))).to.equal(true);
     });
   });
 });

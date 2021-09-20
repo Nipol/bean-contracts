@@ -41,10 +41,10 @@ async function getApprovalDigest(
   nonce: BigNumber,
   deadline: BigNumber,
 ): Promise<string> {
-  // const name = await token.name();
-  // const version = await token.version();
-  const DOMAIN_SEPARATOR = await token.DOMAIN_SEPARATOR();
-  // const DOMAIN_SEPARATOR = getDomainSeparator(name, version, chainId, token.address);
+  const name = await token.name();
+  const version = await token.version();
+  // const DOMAIN_SEPARATOR = await token.DOMAIN_SEPARATOR();
+  const DOMAIN_SEPARATOR = getDomainSeparator(name, version, chainId, token.address);
   return keccak256(
     solidityPack(
       ['bytes1', 'bytes1', 'bytes32', 'bytes32'],

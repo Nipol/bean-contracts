@@ -68,7 +68,7 @@ export default {
     // }
   },
   solidity: {
-    version: '0.8.6',
+    version: '0.8.7',
     settings: {
       optimizer: {
         enabled: true,
@@ -88,5 +88,8 @@ export default {
   gasReporter: {
     currency: 'USD',
     gasPrice: 40,
+  },
+  mocha: {
+    timeout: 0,
   },
 };
