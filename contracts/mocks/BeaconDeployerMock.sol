@@ -16,7 +16,7 @@ contract BeaconDeployerMock {
     }
 
     function deploy() external returns (address addr) {
-        addr = BeaconProxyDeployer.deploy(beacon);
+        addr = BeaconProxyDeployer.deploy(beacon, new bytes(0));
     }
 
     function deploy(string calldata _name) external returns (address addr) {
@@ -26,7 +26,7 @@ contract BeaconDeployerMock {
     }
 
     function deployCalculate() external view returns (address addr) {
-        addr = BeaconProxyDeployer.calculateAddress(beacon);
+        addr = BeaconProxyDeployer.calculateAddress(beacon, new bytes(0));
     }
 
     function deployCalculate(string calldata _name) external view returns (address addr) {
@@ -36,7 +36,7 @@ contract BeaconDeployerMock {
     }
 
     function deployFromSeed() external returns (address addr) {
-        addr = BeaconProxyDeployer.deploy(seed, beacon);
+        addr = BeaconProxyDeployer.deploy(seed, beacon, new bytes(0));
     }
 
     function deployFromSeed(string calldata _name) external returns (address addr) {
@@ -46,7 +46,7 @@ contract BeaconDeployerMock {
     }
 
     function deployCalculateFromSeed() external view returns (address addr) {
-        addr = BeaconProxyDeployer.calculateAddress(seed, beacon);
+        addr = BeaconProxyDeployer.calculateAddress(seed, beacon, new bytes(0));
     }
 
     function deployCalculateFromSeed(string calldata _name) external view returns (address addr) {
