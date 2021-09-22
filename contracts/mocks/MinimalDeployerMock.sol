@@ -16,7 +16,7 @@ contract MinimalDeployerMock {
     }
 
     function deploy() external returns (address addr) {
-        addr = MinimalProxyDeployer.deploy(template);
+        addr = MinimalProxyDeployer.deploy(template, new bytes(0));
     }
 
     function deploy(string calldata _name) external returns (address addr) {
@@ -25,7 +25,7 @@ contract MinimalDeployerMock {
     }
 
     function deployCalculate() external view returns (address addr) {
-        addr = MinimalProxyDeployer.calculateAddress(template);
+        addr = MinimalProxyDeployer.calculateAddress(template, new bytes(0));
     }
 
     function deployCalculate(string calldata _name) external view returns (address addr) {
@@ -34,7 +34,7 @@ contract MinimalDeployerMock {
     }
 
     function deployFromSeed() external returns (address addr) {
-        addr = MinimalProxyDeployer.deploy(seed, template);
+        addr = MinimalProxyDeployer.deploy(seed, template, new bytes(0));
     }
 
     function deployFromSeed(string calldata _name) external returns (address addr) {
@@ -43,7 +43,7 @@ contract MinimalDeployerMock {
     }
 
     function deployCalculateFromSeed() external view returns (address addr) {
-        addr = MinimalProxyDeployer.calculateAddress(seed, template);
+        addr = MinimalProxyDeployer.calculateAddress(seed, template, new bytes(0));
     }
 
     function deployCalculateFromSeed(string calldata _name) external view returns (address addr) {

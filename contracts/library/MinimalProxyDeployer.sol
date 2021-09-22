@@ -13,61 +13,8 @@ import "./MinimalMakerWithCall.sol";
  * @notice Minimal Proxy를 배포하는 기능을 가진 라이브러리
  */
 library MinimalProxyDeployer {
-    function deploy(address addr) internal returns (address result) {
-        bytes memory createCode = abi.encodePacked(type(MinimalMaker).creationCode, abi.encode(address(addr)));
-
-        (bytes32 salt, ) = getSaltAndTarget(createCode);
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let encoded_data := add(0x20, createCode) // load initialization code.
-            let encoded_size := mload(createCode) // load the init code's length.
-            result := create2(
-                // call `CREATE2` w/ 4 arguments.
-                0, // forward any supplied endowment.
-                encoded_data, // pass in initialization code.
-                encoded_size, // pass in init code's length.
-                salt // pass in the salt value.
-            )
-
-            // pass along failure message from failed contract deployment and revert.
-            if iszero(result) {
-                returndatacopy(0, 0, returndatasize())
-                revert(0, returndatasize())
-            }
-        }
-    }
-
-    function deploy(string memory seed, address addr) internal returns (address result) {
-        bytes memory createCode = abi.encodePacked(type(MinimalMaker).creationCode, abi.encode(address(addr)));
-
-        bytes32 salt = keccak256(abi.encodePacked(msg.sender, seed));
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let encoded_data := add(0x20, createCode) // load initialization code.
-            let encoded_size := mload(createCode) // load the init code's length.
-            result := create2(
-                // call `CREATE2` w/ 4 arguments.
-                0, // forward any supplied endowment.
-                encoded_data, // pass in initialization code.
-                encoded_size, // pass in init code's length.
-                salt // pass in the salt value.
-            )
-
-            // pass along failure message from failed contract deployment and revert.
-            if iszero(result) {
-                returndatacopy(0, 0, returndatasize())
-                revert(0, returndatasize())
-            }
-        }
-    }
-
-    function deploy(address addr, bytes memory initializationCalldata) internal returns (address result) {
-        bytes memory createCode = abi.encodePacked(
-            type(MinimalMakerWithCall).creationCode,
-            abi.encode(address(addr), initializationCalldata)
-        );
+    function deploy(address template, bytes memory initializationCalldata) internal returns (address result) {
+        bytes memory createCode = creation(template, initializationCalldata);
 
         (bytes32 salt, ) = getSaltAndTarget(createCode);
 
@@ -93,13 +40,10 @@ library MinimalProxyDeployer {
 
     function deploy(
         string memory seed,
-        address addr,
+        address template,
         bytes memory initializationCalldata
     ) internal returns (address result) {
-        bytes memory createCode = abi.encodePacked(
-            type(MinimalMakerWithCall).creationCode,
-            abi.encode(address(addr), initializationCalldata)
-        );
+        bytes memory createCode = creation(template, initializationCalldata);
 
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, seed));
 
@@ -123,27 +67,14 @@ library MinimalProxyDeployer {
         }
     }
 
-    function calculateAddress(address template) internal view returns (address addr) {
-        bytes memory createCode = abi.encodePacked(type(MinimalMaker).creationCode, abi.encode(address(template)));
-        (, addr) = getSaltAndTarget(createCode);
-    }
-
     function calculateAddress(address template, bytes memory initializationCalldata)
         internal
         view
         returns (address addr)
     {
-        bytes memory createCode = abi.encodePacked(
-            type(MinimalMakerWithCall).creationCode,
-            abi.encode(address(template), initializationCalldata)
-        );
+        bytes memory createCode = creation(template, initializationCalldata);
 
         (, addr) = getSaltAndTarget(createCode);
-    }
-
-    function calculateAddress(string memory seed, address template) internal view returns (address addr) {
-        bytes memory createCode = abi.encodePacked(type(MinimalMaker).creationCode, abi.encode(address(template)));
-        addr = getTargetFromSeed(createCode, seed);
     }
 
     function calculateAddress(
@@ -151,10 +82,7 @@ library MinimalProxyDeployer {
         address template,
         bytes memory initializationCalldata
     ) internal view returns (address addr) {
-        bytes memory createCode = abi.encodePacked(
-            type(MinimalMakerWithCall).creationCode,
-            abi.encode(address(template), initializationCalldata)
-        );
+        bytes memory createCode = creation(template, initializationCalldata);
 
         addr = getTargetFromSeed(createCode, seed);
     }
@@ -239,5 +167,18 @@ library MinimalProxyDeployer {
                 )
             )
         );
+    }
+
+    function creation(address addr, bytes memory initializationCalldata)
+        private
+        pure
+        returns (bytes memory createCode)
+    {
+        createCode = initializationCalldata.length > 0
+            ? abi.encodePacked(
+                type(MinimalMakerWithCall).creationCode,
+                abi.encode(address(addr), initializationCalldata)
+            )
+            : abi.encodePacked(type(MinimalMaker).creationCode, abi.encode(address(addr)));
     }
 }
