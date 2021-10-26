@@ -31,7 +31,7 @@ library MinimalProxyDeployer {
             )
 
             // pass along failure message from failed contract deployment and revert.
-            if iszero(result) {
+            if iszero(extcodesize(result)) {
                 returndatacopy(0, 0, returndatasize())
                 revert(0, returndatasize())
             }
@@ -60,7 +60,7 @@ library MinimalProxyDeployer {
             )
 
             // pass along failure message from failed contract deployment and revert.
-            if iszero(result) {
+            if iszero(extcodesize(result)) {
                 returndatacopy(0, 0, returndatasize())
                 revert(0, returndatasize())
             }
