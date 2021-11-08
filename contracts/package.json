@@ -1,7 +1,7 @@
 {
   "name": "@beandao/contracts",
   "description": "Smart Contract Library for beandao production",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "files": [
     "**/*.sol",
     "/build/contracts/*.json",
