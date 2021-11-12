@@ -27,10 +27,15 @@ abstract contract Scheduler is IScheduler {
     }
 
     function queue(bytes32 uid) internal {
+        queue(uid, uint32(block.timestamp));
+    }
+
+    function queue(bytes32 uid, uint32 from) internal {
         require(stateOf[uid] == STATE.UNKNOWN, "Scheduler/Already-Scheduled");
-        endOf[uid] = uint32(block.timestamp) + delay;
+        assert(from >= uint32(block.timestamp));
+        endOf[uid] = from + delay;
         stateOf[uid] = STATE.APPROVED;
-        emit Approved(uid, uint32(block.timestamp) + delay);
+        emit Approved(uid, from + delay);
     }
 
     function resolve(bytes32 uid) internal {
