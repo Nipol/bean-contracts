@@ -22,6 +22,10 @@ contract SchedulerMock is Scheduler {
         queue(uid);
     }
 
+    function _queue(bytes32 uid, uint32 time) external {
+        queue(uid, time);
+    }
+
     function _resolve(bytes32 uid) external {
         resolve(uid);
     }
