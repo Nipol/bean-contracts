@@ -10,9 +10,16 @@ import "../interfaces/IERC721Metadata.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
 import "./Address.sol";
 
+/**
+ * @author yoonsung.eth
+ * @notice ERC721의 모든 명세를 만족하는 구현체로써, NFT를 구성하는 외적 정보는 해당 라이브러리를 사용하는 유저가 구현하여 사용할 수 있도록 합니다.
+ * @dev NFT는 추가발행될 필요가 있으므로 internal mint 함수를 포함하고 있으며, 이를 이용하는 라이브러리가 Ownership을 적절하게
+ */
 abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     using Address for address;
 
+    string public name;
+    string public symbol;
     address[] private _owners;
     address[] private _approves;
     mapping(address => mapping(address => bool)) private _operatorApprovals;
@@ -20,24 +27,24 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     //------------------------------------------------------------------------------------------------------//
     // ERC721 Metadata Specification.
     //------------------------------------------------------------------------------------------------------//
-    function name() external view virtual returns (string memory _name) {}
+    // function name() external view virtual returns (string memory name) {}
 
-    function symbol() external view virtual returns (string memory _symbol) {}
+    // function symbol() external view virtual returns (string memory symbol) {}
 
     function tokenURI(uint256 tokenId) external view virtual returns (string memory) {}
 
     //------------------------------------------------------------------------------------------------------//
     // ERC721 Specification.
     //------------------------------------------------------------------------------------------------------//
-    function balanceOf(address owner) public view virtual returns (uint256 count) {
-        require(owner != address(0), "ERC721: balance query for the zero address");
+    function balanceOf(address target) public view virtual returns (uint256 count) {
+        require(target != address(0), "ERC721: balance query for the zero address");
         for (uint256 i = 0; i < _owners.length; i++) {
-            if (owner == _owners[i]) count++;
+            if (target == _owners[i]) count++;
         }
     }
 
-    function ownerOf(uint256 tokenId) public view virtual returns (address owner) {
-        owner = _owners[tokenId];
+    function ownerOf(uint256 tokenId) public view virtual returns (address target) {
+        target = _owners[tokenId];
     }
 
     function safeTransferFrom(
@@ -68,11 +75,11 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     }
 
     function approve(address to, uint256 tokenId) public payable virtual {
-        address owner = ownerOf(tokenId);
-        require(to != owner, "ERC721: approval to current owner");
-        require(msg.sender == owner || isApprovedForAll(owner, msg.sender), "ERC721: Not Owner");
+        address _owner = ownerOf(tokenId);
+        require(to != _owner, "ERC721: approval to current owner");
+        require(msg.sender == _owner || isApprovedForAll(_owner, msg.sender), "ERC721: Not Owner");
         _approves[tokenId] = to;
-        emit Approval(owner, to, tokenId);
+        emit Approval(_owner, to, tokenId);
     }
 
     function setApprovalForAll(address operator, bool approved) public virtual {
@@ -86,8 +93,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         allowance = _approves[tokenId];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view virtual returns (bool success) {
-        success = _operatorApprovals[_owner][_operator];
+    function isApprovedForAll(address target, address operator) public view virtual returns (bool success) {
+        success = _operatorApprovals[target][operator];
     }
 
     //------------------------------------------------------------------------------------------------------//
@@ -102,11 +109,11 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         return index;
     }
 
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view virtual returns (uint256 tokenId) {
-        require(index < balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
+    function tokenOfOwnerByIndex(address target, uint256 index) public view virtual returns (uint256 tokenId) {
+        require(index < balanceOf(target), "ERC721Enumerable: owner index out of bounds");
         uint256 count;
         for (uint256 i; i < _owners.length; i++) {
-            if (owner == _owners[i]) {
+            if (target == _owners[i]) {
                 if (count == index) return i;
                 else count++;
             }
@@ -163,8 +170,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
         require(_exists(tokenId), "ERC721: operator query for nonexistent token");
-        address owner = ownerOf(tokenId);
-        success = (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
+        address _owner = ownerOf(tokenId);
+        success = (spender == _owner || getApproved(tokenId) == spender || isApprovedForAll(_owner, spender));
     }
 
     function _exists(uint256 index) private view returns (bool exist) {
@@ -192,15 +199,11 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         );
     }
 
-    function _safeMint(address to, uint256 tokenId) internal virtual {
-        _safeMint(to, tokenId, "");
-    }
-
     function _burn(uint256 tokenId) internal virtual {
-        address owner = ownerOf(tokenId);
+        address _owner = ownerOf(tokenId);
         approve(address(0), tokenId);
         _owners[tokenId] = address(0);
 
-        emit Transfer(owner, address(0), tokenId);
+        emit Transfer(_owner, address(0), tokenId);
     }
 }
