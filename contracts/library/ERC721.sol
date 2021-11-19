@@ -21,7 +21,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     string public name;
     string public symbol;
     address[] private _owners;
-    address[] private _approves;
+    mapping(uint256 => address) private _approves;
     mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     //------------------------------------------------------------------------------------------------------//
@@ -75,7 +75,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     }
 
     function approve(address to, uint256 tokenId) public payable virtual {
-        address _owner = ownerOf(tokenId);
+        address _owner = _owners[tokenId];
         require(to != _owner, "ERC721: approval to current owner");
         require(msg.sender == _owner || isApprovedForAll(_owner, msg.sender), "ERC721: Not Owner");
         _approves[tokenId] = to;
@@ -164,8 +164,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
         require(_exists(tokenId), "ERC721: operator query for nonexistent token");
-        address _owner = ownerOf(tokenId);
-        success = (spender == _owner || getApproved(tokenId) == spender || isApprovedForAll(_owner, spender));
+        address _owner = _owners[tokenId];
+        success = (spender == _owner) || (getApproved(tokenId) == spender) || isApprovedForAll(_owner, spender);
     }
 
     function _exists(uint256 tokenId) private view returns (bool exist) {
@@ -194,7 +194,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     }
 
     function _burn(uint256 tokenId) internal virtual {
-        address _owner = ownerOf(tokenId);
+        address _owner = _owners[tokenId];
         approve(address(0), tokenId);
         _owners[tokenId] = address(0);
 
