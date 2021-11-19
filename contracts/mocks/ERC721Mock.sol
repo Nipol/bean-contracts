@@ -13,7 +13,11 @@ contract ERC721Mock is ERC721, Ownership {
         symbol = nftSymbol;
     }
 
-    function mint(address to, uint256 tokenId) external onlyOwner {
+    function mint(uint256 tokenId) external onlyOwner {
+        _mint(msg.sender, tokenId);
+    }
+
+    function mintTo(address to, uint256 tokenId) external onlyOwner {
         _mint(to, tokenId);
     }
 

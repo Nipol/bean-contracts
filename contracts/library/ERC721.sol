@@ -155,14 +155,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         if (to.isContract()) {
             try IERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
                 success = retval == IERC721TokenReceiver.onERC721Received.selector;
-            } catch (bytes memory reason) {
-                // revert called without a message
-                if (reason.length < 68) revert();
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    reason := add(reason, 0x04)
-                }
-                revert(abi.decode(reason, (string)));
+            } catch {
+                return false;
             }
         }
         return true;
@@ -174,8 +168,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         success = (spender == _owner || getApproved(tokenId) == spender || isApprovedForAll(_owner, spender));
     }
 
-    function _exists(uint256 index) private view returns (bool exist) {
-        exist = _owners[index] != address(0);
+    function _exists(uint256 tokenId) private view returns (bool exist) {
+        exist = (tokenId < _owners.length) && (_owners[tokenId] != address(0));
     }
 
     function _mint(address to, uint256 tokenId) internal virtual {
