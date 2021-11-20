@@ -105,7 +105,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     }
 
     function tokenByIndex(uint256 index) public view virtual returns (uint256) {
-        require(_exists(index), "ERC721: approved query for nonexistent token");
+        require(index > _owners.length, "ERC721: approved query for nonexistent token");
         return index;
     }
 
@@ -131,7 +131,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     ) internal virtual {
         require(_owners[tokenId] == from, "ERC721: transfer of token that is not own");
         require(to != address(0), "ERC721: transfer to the zero address");
-        approve(address(0), tokenId);
+        _approves[tokenId] = address(0);
         _owners[tokenId] = to;
         emit Transfer(from, to, tokenId);
     }
@@ -165,7 +165,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
         require(_exists(tokenId), "ERC721: operator query for nonexistent token");
         address _owner = _owners[tokenId];
-        success = (spender == _owner) || (getApproved(tokenId) == spender) || isApprovedForAll(_owner, spender);
+        success = (spender == _owner) || (_approves[tokenId] == spender) || isApprovedForAll(_owner, spender);
     }
 
     function _exists(uint256 tokenId) private view returns (bool exist) {
@@ -195,8 +195,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
 
     function _burn(uint256 tokenId) internal virtual {
         address _owner = _owners[tokenId];
-        approve(address(0), tokenId);
-        _owners[tokenId] = address(0);
+        _approves[tokenId] = address(0);
+        delete _owners[tokenId];
 
         emit Transfer(_owner, address(0), tokenId);
     }
