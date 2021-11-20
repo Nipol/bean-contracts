@@ -105,7 +105,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     }
 
     function tokenByIndex(uint256 index) public view virtual returns (uint256) {
-        require(index > _owners.length, "ERC721: approved query for nonexistent token");
+        require(index < _owners.length, "ERC721: approved query for nonexistent token");
         return index;
     }
 

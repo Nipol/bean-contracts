@@ -180,6 +180,75 @@ describe.only('ERC721', () => {
     });
   });
 
+  describe('#getApproved()', () => {
+    it('should be success with approved address', async () => {
+      const walletaddr = await wallet.getAddress();
+      const addr = await Dummy.getAddress();
+      await ERC721Mock.mintTo(walletaddr, '0');
+      expect(await ERC721Mock.getApproved('0')).to.equal(constants.AddressZero);
+      expect(await ERC721Mock.approve(addr, '0'))
+        .to.emit(ERC721Mock, 'Approval')
+        .withArgs(walletaddr, addr, '0');
+      expect(await ERC721Mock.getApproved('0')).to.equal(addr);
+    });
+  });
+
+  describe('#tokenByIndex()', () => {
+    it('should be success with total length', async () => {
+      const walletaddr = await wallet.getAddress();
+      const addr = await Dummy.getAddress();
+      await ERC721Mock.mintTo(walletaddr, '0');
+      await ERC721Mock.mintTo(walletaddr, '1');
+      await ERC721Mock.mintTo(walletaddr, '2');
+      expect(await ERC721Mock.tokenByIndex('2')).to.equal('2');
+    });
+
+    it('should be revert with over length', async () => {
+      const walletaddr = await wallet.getAddress();
+      const addr = await Dummy.getAddress();
+      await ERC721Mock.mintTo(walletaddr, '0');
+      await ERC721Mock.mintTo(walletaddr, '1');
+      await ERC721Mock.mintTo(walletaddr, '2');
+      await expect(ERC721Mock.tokenByIndex('3')).revertedWith('ERC721: approved query for nonexistent token');
+    });
+  });
+
+  describe('#tokenOfOwnerByIndex()', () => {
+    it('should be success', async () => {
+      const walletaddr = await wallet.getAddress();
+      const addr = await Dummy.getAddress();
+      await ERC721Mock.mintTo(walletaddr, '0');
+      await ERC721Mock.mintTo(walletaddr, '1');
+      await ERC721Mock.mintTo(walletaddr, '2');
+      await ERC721Mock.mintTo(addr, '3');
+      await ERC721Mock.mintTo(addr, '4');
+      await ERC721Mock.mintTo(addr, '5');
+      expect(await ERC721Mock.tokenOfOwnerByIndex(walletaddr, '2')).to.equal('2');
+      expect(await ERC721Mock.tokenOfOwnerByIndex(addr, '2')).to.equal('5');
+    });
+
+    it('should be revert with over index', async () => {
+      const walletaddr = await wallet.getAddress();
+      const addr = await Dummy.getAddress();
+      await ERC721Mock.mintTo(walletaddr, '0');
+      await ERC721Mock.mintTo(walletaddr, '1');
+      await ERC721Mock.mintTo(walletaddr, '2');
+      await ERC721Mock.mintTo(addr, '3');
+      await ERC721Mock.mintTo(addr, '4');
+      await ERC721Mock.mintTo(addr, '5');
+      await expect(ERC721Mock.tokenOfOwnerByIndex(walletaddr, '4')).revertedWith(
+        'ERC721Enumerable: owner index out of bounds',
+      );
+    });
+
+    it('should be revert with end of reach', async () => {
+      const walletaddr = await wallet.getAddress();
+      await expect(ERC721Mock.tokenOfOwnerByIndex(walletaddr, '0')).revertedWith(
+        'ERC721Enumerable: owner index out of bounds',
+      );
+    });
+  });
+
   describe('#setApprovalForAll()', () => {
     beforeEach(async () => {
       const walletaddr = await wallet.getAddress();
