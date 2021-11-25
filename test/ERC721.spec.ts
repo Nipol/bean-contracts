@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
 
-describe.only('ERC721', () => {
+describe('ERC721', () => {
   let ERC721Mock: Contract;
 
   let wallet: Signer;
