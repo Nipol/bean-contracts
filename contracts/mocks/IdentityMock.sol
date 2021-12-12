@@ -16,7 +16,7 @@ contract IdentityMock is IERC1271 {
         owners[msg.sender] = true;
     }
 
-    function isValidSignature(bytes memory digest, bytes memory signature) external view override returns (bytes4) {
+    function isValidSignature(bytes32 digest, bytes memory signature) external view returns (bytes4) {
         bytes32 r;
         bytes32 s;
         uint8 v;
@@ -28,13 +28,7 @@ contract IdentityMock is IERC1271 {
         }
         if (v < 27) v += 27;
 
-        // digest bytes to bytes32
-        bytes32 _digest;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            _digest := mload(add(digest, 32))
-        }
-        address recovered = ecrecover(_digest, v, r, s);
+        address recovered = ecrecover(digest, v, r, s);
 
         if (recovered == address(0) || owners[recovered] == false) {
             return NOT_MAGICVALUE;
