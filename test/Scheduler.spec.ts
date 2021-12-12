@@ -48,7 +48,7 @@ describe('Scheduler', () => {
       await ethers.provider.send('evm_setNextBlockTimestamp', [nextLevel]);
       const next = day.add(nextLevel.toString());
       id = keccak256('0x1234');
-      expect(await SchedulerMock._queue(id))
+      expect(await SchedulerMock['_queue(bytes32)'](id))
         .to.emit(SchedulerMock, 'Approved')
         .withArgs(id, next);
       await expect((await SchedulerMock.endOf(id)).toString()).to.equal(next.toString());
@@ -59,10 +59,18 @@ describe('Scheduler', () => {
       const nextLevel = now + 1;
       await ethers.provider.send('evm_setNextBlockTimestamp', [nextLevel]);
       id = keccak256('0x1234');
-      expect(await SchedulerMock._queue(id))
+      expect(await SchedulerMock['_queue(bytes32)'](id))
         .to.emit(SchedulerMock, 'Approved')
         .withArgs(id, day.add(nextLevel));
-      await expect(SchedulerMock._queue(id)).revertedWith('Scheduler/Already-Scheduled');
+      await expect(SchedulerMock['_queue(bytes32)'](id)).revertedWith('Scheduler/Already-Scheduled');
+    });
+
+    it('should be revert with prev time', async () => {
+      let now = await latestTimestamp();
+      const nextLevel = now + 1;
+      await ethers.provider.send('evm_setNextBlockTimestamp', [nextLevel]);
+      id = keccak256('0x1234');
+      await expect(SchedulerMock['_queue(bytes32,uint32)'](id, now - 1)).reverted;
     });
   });
 
@@ -71,7 +79,7 @@ describe('Scheduler', () => {
     beforeEach(async () => {
       id = keccak256('0x12');
       await SchedulerMock.set(day);
-      await SchedulerMock._queue(id);
+      await SchedulerMock['_queue(bytes32)'](id);
       let now = await latestTimestamp();
       const nextLevel = now + 1;
       await ethers.provider.send('evm_setNextBlockTimestamp', [nextLevel]);
