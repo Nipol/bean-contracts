@@ -7,7 +7,9 @@ pragma solidity ^0.8.0;
 import "../library/Wizadry.sol";
 
 contract WizadryMock is Wizadry {
-    function cast(bytes32[] memory spells, bytes[] memory elements) external {
-        _cast(spells, elements);
+    receive() external payable {}
+
+    function _cast(bytes32[] memory spells, bytes[] memory elements) external returns (bytes[] memory) {
+        return cast(spells, elements);
     }
 }

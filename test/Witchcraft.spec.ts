@@ -7,7 +7,7 @@ function buf2hex(buffer: Buffer) {
   return '0x' + [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
-describe('Witchcraft', () => {
+describe.only('Witchcraft', () => {
   let WitchcraftMock: Contract;
 
   let wallet: Signer;

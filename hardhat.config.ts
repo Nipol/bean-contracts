@@ -72,7 +72,7 @@ export default {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 9999999,
+        runs: 42069,
         details: {
           yul: true,
         },

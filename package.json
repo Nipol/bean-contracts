@@ -13,7 +13,7 @@
     "@nomiclabs/hardhat-ethers": "^2.0.3",
     "@nomiclabs/hardhat-solhint": "^2.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
-    "@types/chai": "^4.2.22",
+    "@types/chai": "^4.3.0",
     "@types/mocha": "^7.0.2",
     "@types/node": "^14.18.0",
     "babel-eslint": "^10.1.0",
@@ -26,7 +26,7 @@
     "eth-gas-reporter": "^0.2.23",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.5.2",
-    "hardhat": "^2.7.0",
+    "hardhat": "^2.7.1",
     "hardhat-gas-reporter": "^1.0.6",
     "http-server": "^0.12.3",
     "mocha": "^8.4.0",
@@ -37,7 +37,9 @@
     "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.17",
     "ts-node": "^10.4.0",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.3",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.2.27"
   },
   "files": [
     "contracts/**/*.sol",
@@ -76,9 +78,5 @@
     "vertigo": "scripts/vertigo.sh",
     "analyze": "slither ./contracts",
     "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js"
-  },
-  "dependencies": {
-    "keccak256": "^1.0.3",
-    "merkletreejs": "^0.2.26"
   }
 }

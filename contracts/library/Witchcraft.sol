@@ -6,27 +6,18 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
+uint256 constant ELEMENT_POS_MASK = 0x7f;
 uint256 constant IO_END_OF_ARGS = 0xff;
 uint256 constant IO_USE_DYNAMIC = 0x80;
 uint256 constant IO_USE_ELEMENTS = 0xfe;
-uint256 constant ELEMENT_POS_MASK = 0x7f;
 
 /**
- * Input / Output Mapping 1 byte, 8 bit, 0x00000000)
+ * @title Witchcraft
+ * @author yoonsung.eth
+ * @notice
  * - 이 전체 값은 기본적으로 elements의 배열에 접근하기 위한 정보로 사용된다.
  *   대체로 0~127 사이의 값이며, 0xff라면 해당 인덱스에 접근하지 않는다.
  *   다만 첫 bit 값이 0이라면, Pos의 값에 따라 elements에 접근하고
- *
- *    0     1     2     3     4     5     6     7
- * ┌─────┬───────────────────────────────────────┐
- * │ VAR │            Pos                        │
- * └──▲──┴──▲────────────────────────────────────┘
- *    │     │
- *    │     └기본적으로 1~127 사이이며, 이 값은 elements의 index를 나타낸다
- *    │      이 값이 0(0xff)이라면 해석을 멈추고, 255(0xfe)이라면 배열로 들어온 모든 elements를 인자로 사용한다.
- *    │
- *    └0 bit for value, 해당 Index를 value로 사용 한다. 해당 필드의 나머지 옵션을 비활성화 하고, 32bytes로 해석함.
- *     1 bit for parameter , 해당 Index를 매개 변수를 위한 필드로 사용 한다.
  */
 
 library Witchcraft {
@@ -124,6 +115,7 @@ library Witchcraft {
         }
     }
 
+    // TODO: 아무 것도 반환하지 않는 함수인데 있는데, 포지션을 지정하면 길이가 맞지 않아서 방법이 필요함
     function writeOutputs(
         bytes[] memory elements,
         bytes1 index,
@@ -155,7 +147,6 @@ library Witchcraft {
         } else {
             // Single word
             assert(output.length == 32);
-            // console.log("mark:", idx & ELEMENT_POS_MASK);
             elements[idx & ELEMENT_POS_MASK] = output;
         }
 
