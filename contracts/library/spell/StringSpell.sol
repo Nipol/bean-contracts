@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-contract StringSpellMock {
+contract StringSpell {
     function strlen(string calldata x) external pure returns (uint256) {
         return bytes(x).length;
     }

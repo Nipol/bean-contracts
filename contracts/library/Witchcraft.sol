@@ -4,12 +4,13 @@
 
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
-uint256 constant ELEMENT_POS_MASK = 0x7f;
+uint256 constant ELEMENT_POS_MASK = 0x3f;
 uint256 constant IO_END_OF_ARGS = 0xff;
-uint256 constant IO_USE_DYNAMIC = 0x80;
 uint256 constant IO_USE_ELEMENTS = 0xfe;
+uint256 constant IO_USE_DYNAMIC = 0x80;
+uint256 constant IO_USE_PACK = 0x40;
+uint256 constant IO_USE_STATIC = 0x00;
+uint256 constant IO_USE_MASK = 0xC0;
 
 /**
  * @title Witchcraft
@@ -40,33 +41,35 @@ library Witchcraft {
         bytes32 indices
     ) internal view returns (bytes memory ret) {
         (uint256 count, uint256 free) = (0, 0); // 인코딩 된 바이트 수
-        // uint256 free = 0; // 인코딩된 바이트의
         bytes memory paramData; // option, 호출이 필요로 하는 경우 현재 상태 인코딩에 사용
-
         uint8 idx;
 
         for (uint256 i = 0; i < 32; i++) {
             idx = uint8(indices[i]);
             if (idx == IO_END_OF_ARGS) break;
 
-            if (idx & IO_USE_DYNAMIC != 0) {
-                if (idx == IO_USE_ELEMENTS) {
-                    // 모든 elements를 하나의 인자로 사용한다.
-                    // 총 길이가 32bytes가 되지 않더라도, free pointer가 이후에 작성되기 때문에 32byte로 떨어짐
-                    if (paramData.length == 0) {
-                        paramData = abi.encode(elements);
-                    }
-                    count += paramData.length;
-                    free += 32;
-                } else {
-                    // 특정 element를 하나의 인자로 사용한다.
-                    // 총 길이가 32bytes가 되지 않더라도, free pointer가 이후에 작성되기 때문에 32byte로 떨어짐
-                    uint256 arglen = elements[idx & ELEMENT_POS_MASK].length;
-                    assert(arglen % 32 == 0);
-                    count += arglen + 32; // 데이터 포지션 기록때문에 32 padding
-                    free += 32;
+            if (idx == IO_USE_ELEMENTS) {
+                // 모든 elements를 연속된 인자로 사용한다.
+                // 총 길이가 32bytes가 되지 않더라도, free pointer가 이후에 작성되기 때문에 32byte로 떨어짐
+                if (paramData.length == 0) {
+                    paramData = abi.encode(elements);
                 }
-            } else {
+                count += paramData.length;
+                free += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_DYNAMIC) {
+                // 특정 element를 하나의 인자로 사용한다.
+                // 총 길이가 32bytes가 되지 않더라도, free pointer가 이후에 작성되기 때문에 32byte로 떨어짐
+                uint256 arglen = elements[idx & ELEMENT_POS_MASK].length;
+                assert(arglen % 32 == 0);
+                count += arglen + 32; // 데이터 포지션 기록때문에 32 padding
+                free += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_PACK) {
+                //현재 인덱스의 인자에 대해 32bytes mod zero-padding, 길이 삽입, 데이터 위치 지정 을 수행한다.
+                // 마스킹 되어서 배열로 들어온 포지션
+                paramData = abi.encode(elements[idx & ELEMENT_POS_MASK]);
+                count += paramData.length;
+                free += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_STATIC) {
                 assert(elements[idx & ELEMENT_POS_MASK].length == 32);
                 count += 32;
                 free += 32;
@@ -84,27 +87,32 @@ library Witchcraft {
             idx = uint8(indices[i]);
             if (idx == IO_END_OF_ARGS) break;
 
-            if (idx & IO_USE_DYNAMIC != 0) {
-                if (idx == IO_USE_ELEMENTS) {
-                    // solhint-disable-next-line no-inline-assembly
-                    assembly {
-                        mstore(add(add(ret, 36), count), free)
-                    }
-                    memcpy(paramData, 32, ret, free + 4, paramData.length - 32);
-                    free += paramData.length - 32;
-                    count += 32;
-                } else {
-                    uint256 arglen = elements[idx & ELEMENT_POS_MASK].length;
-
-                    // solhint-disable-next-line no-inline-assembly
-                    assembly {
-                        mstore(add(add(ret, 36), count), free)
-                    }
-                    memcpy(elements[idx & ELEMENT_POS_MASK], 0, ret, free + 4, arglen);
-                    free += arglen;
-                    count += 32;
+            if (idx == IO_USE_ELEMENTS) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    mstore(add(add(ret, 36), count), free)
                 }
-            } else {
+                memcpy(paramData, 32, ret, free + 4, paramData.length - 32);
+                free += paramData.length - 32;
+                count += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_DYNAMIC) {
+                uint256 arglen = elements[idx & ELEMENT_POS_MASK].length;
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    mstore(add(add(ret, 36), count), free)
+                }
+                memcpy(elements[idx & ELEMENT_POS_MASK], 0, ret, free + 4, arglen);
+                free += arglen;
+                count += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_PACK) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    mstore(add(add(ret, 36), count), free)
+                }
+                memcpy(paramData, 32, ret, free + 4, paramData.length);
+                free += paramData.length - 32;
+                count += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_STATIC) {
                 bytes memory element = elements[idx & ELEMENT_POS_MASK];
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
@@ -115,7 +123,7 @@ library Witchcraft {
         }
     }
 
-    // TODO: 아무 것도 반환하지 않는 함수인데 있는데, 포지션을 지정하면 길이가 맞지 않아서 방법이 필요함
+    // TODO: 아무 것도 반환하지 않는 함수인데, 포지션을 지정하면 길이가 맞지 않아서 방법이 필요함
     function writeOutputs(
         bytes[] memory elements,
         bytes1 index,

@@ -4,7 +4,6 @@
 
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
 import "./Witchcraft.sol";
 
 // Call Type
@@ -60,14 +59,14 @@ abstract contract Wizadry {
      *  │            │         └│ I/O for parameter over 7 │
      *  │            │          └──────────────────────────┘
      *  │            │
-     *  │            └┌Call types────────────────┐
-     *  │             │ 0x00 │  DELEGATECALL     │
+     *  │            └┌Call types───────────────┐
+     *  │             │ 0b00 │  DELEGATECALL     │
      *  │             ├──────┼───────────────────┤
-     *  │             │ 0x01 │  CALL             │
+     *  │             │ 0b01 │  CALL             │
      *  │             ├──────┼───────────────────┤
-     *  │             │ 0x10 │  CALL with Value  │
+     *  │             │ 0b10 │  CALL with Value  │
      *  │             ├──────┼───────────────────┤
-     *  │             │ 0x11 │  STATICCALL       │
+     *  │             │ 0b11 │  STATICCALL       │
      *  │             └──────┴───────────────────┘
      *  │
      *  └ Function Signature for Spell Book. (4 bytes)
@@ -75,15 +74,22 @@ abstract contract Wizadry {
      * Input / Output index Mapping
      *  slot map
      *    0     1     2     3     4     5     6     7
-     * ┌─────┬─────────────────────────────────────────┐
-     * │ VAR │  Pos                                    │
-     * └──▲──┴──▲──────────────────────────────────────┘
-     *    │     │
-     *    │     └Basically range of 1~127, this value for elements index.
-     *    │      if mapping value is 0xFF stop translate element. or value is 0xfe, using parameter for entire elements.
-     *    │
-     *    └0 bit for dynamic parameter data
-     *     1 bit for static parameter data
+     * ┌──────────┬───────────────────────────────────┐
+     * │ El types │  Pos                              │
+     * └────▲─────┴─▲─────────────────────────────────┘
+     *      │       │
+     *      │       └Basically range of 0~63, this value for elements index.
+     *      │        if mapping value is 0xFF stop translate element.
+     *      │
+     *      └┌Call types────────────────┐
+     *       │ 0b00 │  STATIC INDEX     │
+     *       ├──────┼───────────────────┤
+     *       │ 0b01 │  PACK INDEX       │
+     *       ├──────┼───────────────────┤
+     *       │ 0b10 │  DYNAMIC INDEX    │
+     *       ├──────┼───────────────────┤
+     *       │ 0b11 │  Entire ELEMENTS  │
+     *       └──────┴───────────────────┘
      */
     function cast(bytes32[] memory spells, bytes[] memory elements) internal returns (bytes[] memory) {
         bytes32 command;
@@ -127,7 +133,14 @@ abstract contract Wizadry {
                 revert("Invalid calltype");
             }
 
-            assert(success);
+            if (!success) {
+                // pass along failure message from calls and revert.
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    returndatacopy(0, 0, returndatasize())
+                    revert(0, returndatasize())
+                }
+            }
 
             if (flags & FLAG_TUPLE != 0) {
                 elements.writeTuple(outputPos, outdata);

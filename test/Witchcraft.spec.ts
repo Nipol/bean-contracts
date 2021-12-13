@@ -7,7 +7,7 @@ function buf2hex(buffer: Buffer) {
   return '0x' + [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
-describe.only('Witchcraft', () => {
+describe('Witchcraft', () => {
   let WitchcraftMock: Contract;
 
   let wallet: Signer;
@@ -108,7 +108,7 @@ describe.only('Witchcraft', () => {
       const spell = utils.concat([
         selector, // function selector
         '0x00', // flag
-        '0xfe', // value position from elements array [0]
+        '0xFE', // value position from elements array [0]
         '0xFF', // value position from elements array [1]
         '0xFF', // value position from elements array [2]
         '0xFF', // value position from elements array [3]
@@ -139,8 +139,8 @@ describe.only('Witchcraft', () => {
       const spell = utils.concat([
         selector, // function selector
         '0x00', // flag
-        '0xfe', // value position from elements array [0]
-        '0xFe', // value position from elements array [1]
+        '0xFE', // value position from elements array [0]
+        '0xFE', // value position from elements array [1]
         '0xFF', // value position from elements array [2]
         '0xFF', // value position from elements array [3]
         '0xFF', // value position from elements array [4]
@@ -175,7 +175,7 @@ describe.only('Witchcraft', () => {
       const spell = utils.concat([
         selector, // function selector
         '0x00', // flag
-        '0xfe', // value position from elements array [0]
+        '0xFE', // value position from elements array [0]
         '0xFF', // value position from elements array [1]
         '0xFF', // value position from elements array [2]
         '0xFF', // value position from elements array [3]
