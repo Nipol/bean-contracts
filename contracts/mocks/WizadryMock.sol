@@ -9,7 +9,7 @@ import "../library/Wizadry.sol";
 contract WizadryMock is Wizadry {
     receive() external payable {}
 
-    function _cast(bytes32[] memory spells, bytes[] memory elements) external returns (bytes[] memory) {
+    function _cast(bytes32[] calldata spells, bytes[] memory elements) external returns (bytes[] memory) {
         return cast(spells, elements);
     }
 }

@@ -31,6 +31,11 @@ abstract contract Wizadry {
 
     address immutable self;
 
+    modifier ensureOnCall() {
+        require(address(this) == self);
+        _;
+    }
+
     constructor() {
         self = address(this);
     }
@@ -97,8 +102,7 @@ abstract contract Wizadry {
      *       │ 0b11 │  Entire ELEMENTS  │
      *       └──────┴───────────────────┘
      */
-    function cast(bytes32[] calldata spells, bytes[] memory elements) internal returns (bytes[] memory) {
-        assert(address(this) == self);
+    function cast(bytes32[] calldata spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
         bytes32 command;
         uint8 flags;
         bytes32 indices;
