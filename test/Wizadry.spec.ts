@@ -8,7 +8,7 @@ function buf2hex(buffer: Buffer) {
   return '0x' + [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
-describe('Wizadry', () => {
+describe.only('Wizadry', () => {
   let WizadryMock: Contract;
   let TokenMock: Contract;
   let VaultMock: Contract;
@@ -17,6 +17,7 @@ describe('Wizadry', () => {
   let EventLib: Contract;
   let DeployLib: Contract;
   let MathLib: Contract;
+  let EtherLib: Contract;
 
   let wallet: Signer;
   let Dummy: Signer;
@@ -56,6 +57,12 @@ describe('Wizadry', () => {
       wallet,
     );
     TokenLib = await TokenLibDeployer.deploy();
+
+    const EtherSpellDeployer = await ethers.getContractFactory(
+      'contracts/library/spell/EtherSpell.sol:EtherSpell',
+      wallet,
+    );
+    EtherLib = await EtherSpellDeployer.deploy();
 
     const DeployLibDeployer = await ethers.getContractFactory(
       'contracts/library/spell/DeploySpell.sol:DeploySpell',
@@ -530,6 +537,122 @@ describe('Wizadry', () => {
       ];
 
       await expect(WizadryMock._cast(spells, elements)).to.reverted;
+    });
+
+    it('should be revert when transfer ether failed', async () => {
+      const ABI = [
+        'function cast(uint256 value, bytes memory byteCode, bytes32 salt) external returns (address deployed)',
+        'function transfer(address payable to, uint256 amount) external',
+        'function emitAddress(address addr)',
+        'function add(uint256 a, uint256 b)',
+      ];
+      const interfaces = new Interface(ABI);
+      const castSig = interfaces.getSighash('cast');
+      const transferSig = interfaces.getSighash('transfer');
+
+      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+
+      const elements = [
+        constants.HashZero, // value
+        contractDeployer.bytecode, // deploy
+        '0x0000000000000000000000000000000000000000000000000000000000000000', // nonce
+        '0x0000000000000000000000000000100000000000000000000000000000000000',
+      ];
+
+      const spells = [
+        utils.concat([
+          castSig, // function selector from Library address
+          '0x00', // flag delegatecall with extension
+          '0x00', // value position from elements array. this value is over 32bytes
+          '0x41', // value position from elements array. this value is over 32bytes
+          '0x02',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // returned data position on elements array. this value is over 32bytes
+          DeployLib.address, // address
+        ]),
+        utils.concat([
+          transferSig, // function selector from Library address
+          '0x00', // flag delegatecall with extension
+          '0x00', // value position from elements array. this value is over 32bytes
+          '0x03', // value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // returned data position on elements array. this value is over 32bytes
+          EtherLib.address, // address
+        ]),
+      ];
+      const deployableAddr = utils.getCreate2Address(WizadryMock.address, elements[2], keccak256(elements[1]));
+      await expect(WizadryMock._cast(spells, elements)).to.reverted;
+      expect(await ethers.provider.getCode(deployableAddr)).to.equal('0x');
+    });
+
+    it('should be success when send ether failed', async () => {
+      const ABI = [
+        'function cast(uint256 value, bytes memory byteCode, bytes32 salt) external returns (address deployed)',
+        'function send(address payable to, uint256 amount) external returns (bool suc) ',
+        'function emitBytes32(bytes32 data) external',
+        'function add(uint256 a, uint256 b)',
+      ];
+      const interfaces = new Interface(ABI);
+      const castSig = interfaces.getSighash('cast');
+      const sendSig = interfaces.getSighash('send');
+      const emitBytes32Sig = interfaces.getSighash('emitBytes32');
+
+      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+
+      const elements = [
+        constants.HashZero, // value
+        contractDeployer.bytecode, // deploy
+        '0x0000000000000000000000000000000000000000000000000000000000000000', // nonce
+        '0x0000000000000000000000000000100000000000000000000000000000000000',
+      ];
+
+      const spells = [
+        utils.concat([
+          castSig, // function selector from Library address
+          '0x00', // flag delegatecall with extension
+          '0x00', // value position from elements array. this value is over 32bytes
+          '0x41', // value position from elements array. this value is over 32bytes
+          '0x02',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // returned data position on elements array. this value is over 32bytes
+          DeployLib.address, // address
+        ]),
+        utils.concat([
+          sendSig, // function selector from Library address
+          '0x00', // flag delegatecall with extension
+          '0x00', // value position from elements array. this value is over 32bytes
+          '0x03', // value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // returned data position on elements array. this value is over 32bytes
+          EtherLib.address, // address
+        ]),
+        utils.concat([
+          emitBytes32Sig, // function selector from Library address
+          '0x00', // flag delegatecall with extension
+          '0x00', // value position from elements array. this value is over 32bytes
+          '0xFF', // value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF', // returned data position on elements array. this value is over 32bytes
+          EventLib.address, // address
+        ]),
+      ];
+
+      expect(await WizadryMock._cast(spells, elements))
+        .to.emit(EventLib.attach(WizadryMock.address), 'EmittedBytes32')
+        .withArgs(elements[0]);
     });
   });
 });
