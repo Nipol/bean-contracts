@@ -102,7 +102,7 @@ abstract contract Wizadry {
      *       │ 0b11 │  Entire ELEMENTS  │
      *       └──────┴───────────────────┘
      */
-    function cast(bytes32[] calldata spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
+    function cast(bytes32[] memory spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
         bytes32 command;
         uint8 flags;
         bytes32 indices;
