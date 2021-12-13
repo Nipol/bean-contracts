@@ -316,11 +316,11 @@ describe('Wizadry', () => {
 
     it('should be successfully deploy contract with delegatecall', async () => {
       const ABI = [
-        'function perform(uint256 value, bytes memory byteCode) external returns (address deployed)',
+        'function cast(uint256 value, bytes memory byteCode) external returns (address deployed)',
         'function emitAddress(address addr)',
       ];
       const interfaces = new Interface(ABI);
-      const performSig = interfaces.getSighash('perform');
+      const castSig = interfaces.getSighash('cast');
       const emitSig = interfaces.getSighash('emitAddress');
 
       const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
@@ -329,7 +329,7 @@ describe('Wizadry', () => {
 
       const spells = [
         utils.concat([
-          performSig, // function selector from Library address
+          castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
           '0x41', // value position from elements array. this value is over 32bytes
@@ -364,11 +364,11 @@ describe('Wizadry', () => {
 
     it('should be revert with deploy contract on same nonce', async () => {
       const ABI = [
-        'function perform(uint256 value, bytes memory byteCode) external returns (address deployed)',
+        'function cast(uint256 value, bytes memory byteCode) external returns (address deployed)',
         'function emitAddress(address addr)',
       ];
       const interfaces = new Interface(ABI);
-      const performSig = interfaces.getSighash('perform');
+      const castSig = interfaces.getSighash('cast');
       const emitSig = interfaces.getSighash('emitAddress');
 
       const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
@@ -377,7 +377,7 @@ describe('Wizadry', () => {
 
       const spells = [
         utils.concat([
-          performSig, // function selector from Library address
+          castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
           '0x41', // value position from elements array. this value is over 32bytes
@@ -389,7 +389,7 @@ describe('Wizadry', () => {
           DeployLib.address, // address
         ]),
         utils.concat([
-          performSig, // function selector from Library address
+          castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
           '0x41', // value position from elements array. this value is over 32bytes
@@ -407,12 +407,12 @@ describe('Wizadry', () => {
 
     it('should be successfully deploy contract using create2 with delegatecall', async () => {
       const ABI = [
-        'function perform(uint256 value, bytes memory byteCode, bytes32 salt) external returns (address deployed)',
+        'function cast(uint256 value, bytes memory byteCode, bytes32 salt) external returns (address deployed)',
         'function emitAddress(address addr)',
         'function add(uint256 a, uint256 b)',
       ];
       const interfaces = new Interface(ABI);
-      const performSig = interfaces.getSighash('perform');
+      const castSig = interfaces.getSighash('cast');
       const emitSig = interfaces.getSighash('emitAddress');
       const addSig = interfaces.getSighash('add');
 
@@ -427,7 +427,7 @@ describe('Wizadry', () => {
 
       const spells = [
         utils.concat([
-          performSig, // function selector from Library address
+          castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
           '0x41', // value position from elements array. this value is over 32bytes
@@ -451,7 +451,7 @@ describe('Wizadry', () => {
           MathLib.address, // address
         ]),
         utils.concat([
-          performSig, // function selector from Library address
+          castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
           '0x41', // value position from elements array. this value is over 32bytes
@@ -485,12 +485,12 @@ describe('Wizadry', () => {
 
     it('should be revert deploy contract using create2 with delegatecall', async () => {
       const ABI = [
-        'function perform(uint256 value, bytes memory byteCode, bytes32 salt) external returns (address deployed)',
+        'function cast(uint256 value, bytes memory byteCode, bytes32 salt) external returns (address deployed)',
         'function emitAddress(address addr)',
         'function add(uint256 a, uint256 b)',
       ];
       const interfaces = new Interface(ABI);
-      const performSig = interfaces.getSighash('perform');
+      const castSig = interfaces.getSighash('cast');
       const emitSig = interfaces.getSighash('emitAddress');
       const addSig = interfaces.getSighash('add');
 
@@ -504,7 +504,7 @@ describe('Wizadry', () => {
 
       const spells = [
         utils.concat([
-          performSig, // function selector from Library address
+          castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
           '0x41', // value position from elements array. this value is over 32bytes
@@ -516,7 +516,7 @@ describe('Wizadry', () => {
           DeployLib.address, // address
         ]),
         utils.concat([
-          performSig, // function selector from Library address
+          castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
           '0x41', // value position from elements array. this value is over 32bytes

@@ -5,7 +5,7 @@
 pragma solidity ^0.8.0;
 
 contract DeploySpell {
-    function perform(uint256 value, bytes memory byteCode) external returns (address deployed) {
+    function cast(uint256 value, bytes memory byteCode) external returns (address deployed) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             deployed := create(value, add(byteCode, 0x20), mload(byteCode))
@@ -16,7 +16,7 @@ contract DeploySpell {
         }
     }
 
-    function perform(
+    function cast(
         uint256 value,
         bytes memory byteCode,
         bytes32 salt
