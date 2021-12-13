@@ -29,6 +29,12 @@ uint256 constant SHORT_SPELL_FILL = 0x00000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
 abstract contract Wizadry {
     using Witchcraft for bytes[];
 
+    address immutable self;
+
+    constructor() {
+        self = address(this);
+    }
+
     /**
      * @notice
      * @dev Specification
@@ -91,7 +97,8 @@ abstract contract Wizadry {
      *       │ 0b11 │  Entire ELEMENTS  │
      *       └──────┴───────────────────┘
      */
-    function cast(bytes32[] memory spells, bytes[] memory elements) internal returns (bytes[] memory) {
+    function cast(bytes32[] calldata spells, bytes[] memory elements) internal returns (bytes[] memory) {
+        assert(address(this) == self);
         bytes32 command;
         uint8 flags;
         bytes32 indices;
