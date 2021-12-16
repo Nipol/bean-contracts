@@ -74,8 +74,8 @@ describe('StandardToken/ERC2612', () => {
     const accounts = await ethers.getSigners();
     [wallet, walletTo, Dummy] = accounts;
 
-    const ERC20Deployer = await ethers.getContractFactory('contracts/mocks/ERC20Mock.sol:ERC20Mock', wallet);
-    ERC20Mock = await ERC20Deployer.deploy();
+    const ERC20Deployer = await ethers.getContractFactory('contracts/mocks/TokenMock.sol:TokenMock', wallet);
+    ERC20Mock = await ERC20Deployer.deploy('Sample', 'SMP', 18, '1');
 
     await ERC20Mock.deployed();
   });

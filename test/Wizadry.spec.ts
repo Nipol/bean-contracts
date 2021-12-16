@@ -32,7 +32,7 @@ describe('Wizadry', () => {
     WizadryMock = await WizadryMockDeployer.deploy();
 
     const TokenMockDeployer = await ethers.getContractFactory('contracts/mocks/TokenMock.sol:TokenMock', wallet);
-    TokenMock = await TokenMockDeployer.deploy('SAMPLE', 'SMPL', '18');
+    TokenMock = await TokenMockDeployer.deploy('SAMPLE', 'SMPL', 18, '1');
 
     const VaultMockDeployer = await ethers.getContractFactory('contracts/mocks/VaultMock.sol:VaultMock', wallet);
     VaultMock = await VaultMockDeployer.deploy();
