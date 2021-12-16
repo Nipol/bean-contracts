@@ -5,6 +5,7 @@
 pragma solidity ^0.8.0;
 
 import "./EIP712.sol";
+import "../interfaces/IERC2612.sol";
 import {ERC20} from "./ERC20.sol";
 
 /**
@@ -18,7 +19,7 @@ import {ERC20} from "./ERC20.sol";
  * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple
  *   withdrawal attacks
  */
-abstract contract ERC2612 is ERC20 {
+abstract contract ERC2612 is ERC20, IERC2612 {
     bytes32 public immutable PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
@@ -48,7 +49,7 @@ abstract contract ERC2612 is ERC20 {
      * @param r         r of the signature
      * @param s         s of the signature
      */
-    function _permit(
+    function permit(
         address owner,
         address spender,
         uint256 value,
@@ -56,7 +57,7 @@ abstract contract ERC2612 is ERC20 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) internal virtual {
+    ) external virtual {
         require(owner != address(0), "ERC2612/Invalid-address-0");
         require(deadline >= block.timestamp, "ERC2612/Expired-time");
 
