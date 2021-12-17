@@ -7,7 +7,8 @@ pragma solidity ^0.8.0;
 uint256 constant ELEMENT_POS_MASK = 0x3f;
 uint256 constant IO_END_OF_ARGS = 0xff;
 uint256 constant IO_USE_ELEMENTS = 0xfe;
-uint256 constant IO_USE_DYNAMIC = 0x80;
+uint256 constant IO_USE_DYNAMIC = 0xC0;
+uint256 constant IO_USE_ENCODE = 0x80;
 uint256 constant IO_USE_PACK = 0x40;
 uint256 constant IO_USE_STATIC = 0x00;
 uint256 constant IO_USE_MASK = 0xC0;
@@ -49,7 +50,7 @@ library Witchcraft {
             if (idx == IO_END_OF_ARGS) break;
 
             if (idx == IO_USE_ELEMENTS) {
-                // 모든 elements를 연속된 인자로 사용한다.
+                // 0xfe, 모든 elements를 연속된 인자로 사용한다.
                 // 총 길이가 32bytes가 되지 않더라도, free pointer가 이후에 작성되기 때문에 32byte로 떨어짐
                 if (paramData.length == 0) {
                     paramData = abi.encode(elements);
@@ -57,19 +58,25 @@ library Witchcraft {
                 count += paramData.length;
                 free += 32;
             } else if (idx & IO_USE_MASK == IO_USE_DYNAMIC) {
-                // 특정 element를 하나의 인자로 사용한다.
+                // 0xC0, 특정 element를 하나의 인자로 사용한다.
                 // 총 길이가 32bytes가 되지 않더라도, free pointer가 이후에 작성되기 때문에 32byte로 떨어짐
                 uint256 arglen = elements[idx & ELEMENT_POS_MASK].length;
                 assert(arglen % 32 == 0);
                 count += arglen + 32; // 데이터 포지션 기록때문에 32 padding
                 free += 32;
-            } else if (idx & IO_USE_MASK == IO_USE_PACK) {
-                //현재 인덱스의 인자에 대해 32bytes mod zero-padding, 길이 삽입, 데이터 위치 지정 을 수행한다.
+            } else if (idx & IO_USE_MASK == IO_USE_ENCODE) {
+                // 0x80, 현재 인덱스의 인자에 대해 32bytes mod zero-padding, 길이 삽입, 데이터 위치 지정 을 수행한다.
                 // 마스킹 되어서 배열로 들어온 포지션
                 paramData = abi.encode(elements[idx & ELEMENT_POS_MASK]);
                 count += paramData.length;
                 free += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_PACK) {
+                // 0x40, 현재의 인자를 패킹만 함.
+                paramData = abi.encodePacked(elements[idx & ELEMENT_POS_MASK]);
+                count += paramData.length - 32;
+                free += 32;
             } else if (idx & IO_USE_MASK == IO_USE_STATIC) {
+                // 0x00,
                 assert(elements[idx & ELEMENT_POS_MASK].length == 32);
                 count += 32;
                 free += 32;
@@ -104,7 +111,7 @@ library Witchcraft {
                 memcpy(elements[idx & ELEMENT_POS_MASK], 0, ret, free + 4, arglen);
                 free += arglen;
                 count += 32;
-            } else if (idx & IO_USE_MASK == IO_USE_PACK) {
+            } else if (idx & IO_USE_MASK == IO_USE_ENCODE) {
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
                     mstore(add(add(ret, 36), count), free)
@@ -112,6 +119,14 @@ library Witchcraft {
                 memcpy(paramData, 32, ret, free + 4, paramData.length);
                 free += paramData.length - 32;
                 count += 32;
+            } else if (idx & IO_USE_MASK == IO_USE_PACK) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    mstore(add(add(ret, 36), count), count)
+                }
+                memcpy(paramData, 32, ret, count + 4, paramData.length);
+                count += paramData.length - 32;
+                free += 32;
             } else if (idx & IO_USE_MASK == IO_USE_STATIC) {
                 bytes memory element = elements[idx & ELEMENT_POS_MASK];
                 // solhint-disable-next-line no-inline-assembly
@@ -128,29 +143,35 @@ library Witchcraft {
         bytes[] memory elements,
         bytes1 index,
         bytes memory output
-    ) internal pure returns (bytes[] memory newEle) {
+    ) internal view returns (bytes[] memory newEle) {
         uint256 idx = uint8(index);
         if (idx == IO_END_OF_ARGS) return elements;
 
-        if (idx & IO_USE_DYNAMIC != 0) {
-            if (idx == IO_USE_ELEMENTS) {
-                elements = abi.decode(output, (bytes[]));
-            } else {
-                // Check the first field is 0x20 (because we have only a single return value)
-                uint256 argptr;
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    argptr := mload(add(output, 32))
-                }
-                assert(argptr == 32);
+        if (idx == IO_USE_ELEMENTS) {
+            elements = abi.decode(output, (bytes[]));
+        } else if (idx & IO_USE_MASK == IO_USE_DYNAMIC) {
+            // Check the first field is 0x20 (because we have only a single return value)
+            uint256 argptr;
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                argptr := mload(add(output, 32))
+            }
+            assert(argptr == 32);
 
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    // Overwrite the first word of the return data with the length - 32
-                    mstore(add(output, 32), sub(mload(output), 32))
-                    // Insert a pointer to the return data, starting at the second word, into state
-                    mstore(add(add(elements, 32), mul(and(idx, ELEMENT_POS_MASK), 32)), add(output, 32))
-                }
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                // Overwrite the first word of the return data with the length - 32
+                mstore(add(output, 32), sub(mload(output), 32))
+                // Insert a pointer to the return data, starting at the second word, into state
+                mstore(add(add(elements, 32), mul(and(idx, ELEMENT_POS_MASK), 32)), add(output, 32))
+            }
+        } else if (idx & IO_USE_MASK == IO_USE_ENCODE) {
+            elements[idx & ELEMENT_POS_MASK] = abi.decode(output, (bytes));
+        } else if (idx & IO_USE_MASK == IO_USE_PACK) {
+            // 앞의 데이터 포인터, 및 데이터 길이를 지운다음 데이터만 남긴다.
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                mstore(add(add(elements, 32), mul(and(idx, ELEMENT_POS_MASK), 32)), add(output, 64))
             }
         } else {
             // Single word

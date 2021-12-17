@@ -59,7 +59,7 @@ abstract contract Wizadry {
      *  │       │ - how to translate this spell using stored pre-information.
      *  │       │   0    1     2     3     4     5     6     7
      *  │       │┌──────────┬─────┬─────┬─────┬─────┬─────┬─────┐
-     *  │       └│  C Type  │ EXT │ TUP │    Future Reserved    │
+     *  │       └│  C Type  │ EXT │ TUP │     │ Future Reserved │
      *  │        └───▲──────┴──▲──┴──▲──┴─────┴─────┴─────┴─────┘
      *  │            │         │     │
      *  │            │         │     │┌TUPLE─────────────────────┐
@@ -97,10 +97,11 @@ abstract contract Wizadry {
      *       ├──────┼───────────────────┤
      *       │ 0b01 │  PACK INDEX       │
      *       ├──────┼───────────────────┤
-     *       │ 0b10 │  DYNAMIC INDEX    │
+     *       │ 0b10 │  ENCODE INDEX     │
      *       ├──────┼───────────────────┤
-     *       │ 0b11 │  Entire ELEMENTS  │
+     *       │ 0b11 │  DYNAMIC INDEX    │
      *       └──────┴───────────────────┘
+     *       if 0xfe, use Entire ELEMENTS.
      */
     function cast(bytes32[] memory spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
         bytes32 command;

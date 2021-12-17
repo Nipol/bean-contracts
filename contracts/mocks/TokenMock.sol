@@ -4,10 +4,15 @@
 
 pragma solidity ^0.8.0;
 
-import "../library/Ownership.sol";
-import "../library/ERC2612.sol";
+import "../interfaces/IMint.sol";
+import "../interfaces/IBurn.sol";
+import "../interfaces/IERC165.sol";
+import {ERC20, IERC20} from "../library/ERC20.sol";
+import {ERC2612, IERC2612} from "../library/ERC2612.sol";
+import {Ownership, IERC173} from "../library/Ownership.sol";
+import {Multicall, IMulticall} from "../library/Multicall.sol";
 
-contract TokenMock is ERC20, ERC2612, Ownership {
+contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IBurn, IMint, IERC165 {
     constructor(
         string memory tokenName,
         string memory tokenSymbol,
@@ -48,5 +53,19 @@ contract TokenMock is ERC20, ERC2612, Ownership {
         totalSupply = totalSupply - value;
         emit Transfer(from, address(0), value);
         return true;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return
+            // ERC20
+            interfaceId == type(IERC20).interfaceId ||
+            interfaceId == type(IMint).interfaceId ||
+            interfaceId == type(IBurn).interfaceId ||
+            // ERC2612
+            interfaceId == type(IERC2612).interfaceId ||
+            // ITemplateV1(ERC165, ERC173, IMulticall)
+            interfaceId == type(IERC165).interfaceId ||
+            interfaceId == type(IERC173).interfaceId ||
+            interfaceId == type(IMulticall).interfaceId;
     }
 }

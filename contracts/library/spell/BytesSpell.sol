@@ -4,25 +4,24 @@
 
 pragma solidity ^0.8.0;
 
-library Bytes {
+contract BytesSpell {
     function mergeSignature(
-        uint8 r,
-        bytes32 s,
-        bytes32 v
-    ) internal pure returns (bytes memory signature) {
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external pure returns (bytes memory signature) {
         signature = new bytes(65);
         // solhint-disable-next-line no-inline-assembly
         assembly {
             mstore(add(signature, 32), r)
             mstore(add(signature, 64), s)
-            mstore(add(signature, 65), v)
+            mstore8(add(signature, 96), v)
         }
-
         return signature;
     }
 
     function splitSignature(bytes memory sig)
-        internal
+        external
         pure
         returns (
             uint8 v,
