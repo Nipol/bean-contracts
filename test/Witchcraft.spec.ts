@@ -203,7 +203,7 @@ describe('Witchcraft', () => {
       const spell = utils.concat([
         selector, // function selector
         '0x00', // flag
-        '0x80', // value position from elements array [0]
+        '0xC0', // value position from elements array [0]
         '0xFF', // value position from elements array [1]
         '0xFF', // value position from elements array [2]
         '0xFF', // value position from elements array [3]

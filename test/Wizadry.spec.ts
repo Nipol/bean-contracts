@@ -1,7 +1,16 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer, utils } from 'ethers';
-import { defaultAbiCoder, Interface, formatBytes32String, hexDataSlice, keccak256 } from 'ethers/lib/utils';
+import {
+  defaultAbiCoder,
+  Interface,
+  formatBytes32String,
+  hexDataSlice,
+  keccak256,
+  arrayify,
+  SigningKey,
+  joinSignature,
+} from 'ethers/lib/utils';
 
 function buf2hex(buffer: Buffer) {
   // buffer is an ArrayBuffer
@@ -18,6 +27,8 @@ describe('Wizadry', () => {
   let DeployLib: Contract;
   let MathLib: Contract;
   let EtherLib: Contract;
+  let BytesLib: Contract;
+  let CryptographyLib: Contract;
 
   let wallet: Signer;
   let Dummy: Signer;
@@ -28,48 +39,47 @@ describe('Wizadry', () => {
     const accounts = await ethers.getSigners();
     [wallet, Dummy] = accounts;
 
-    const WizadryMockDeployer = await ethers.getContractFactory('contracts/mocks/WizadryMock.sol:WizadryMock', wallet);
-    WizadryMock = await WizadryMockDeployer.deploy();
+    WizadryMock = await (
+      await ethers.getContractFactory('contracts/mocks/WizadryMock.sol:WizadryMock', wallet)
+    ).deploy();
 
-    const TokenMockDeployer = await ethers.getContractFactory('contracts/mocks/TokenMock.sol:TokenMock', wallet);
-    TokenMock = await TokenMockDeployer.deploy('SAMPLE', 'SMPL', 18, '1');
+    TokenMock = await (
+      await ethers.getContractFactory('contracts/mocks/TokenMock.sol:TokenMock', wallet)
+    ).deploy('SAMPLE', 'SMPL', 18, '1');
 
-    const VaultMockDeployer = await ethers.getContractFactory('contracts/mocks/VaultMock.sol:VaultMock', wallet);
-    VaultMock = await VaultMockDeployer.deploy();
+    VaultMock = await (await ethers.getContractFactory('contracts/mocks/VaultMock.sol:VaultMock', wallet)).deploy();
 
-    const EventMockDeployer = await ethers.getContractFactory(
-      'contracts/library/spell/EventSpell.sol:EventSpell',
-      wallet,
-    );
-    EventLib = await EventMockDeployer.deploy();
+    EventLib = await (
+      await ethers.getContractFactory('contracts/library/spell/EventSpell.sol:EventSpell', wallet)
+    ).deploy();
 
-    const MathMockDeployer = await ethers.getContractFactory('contracts/library/spell/MathSpell.sol:MathSpell', wallet);
-    MathLib = await MathMockDeployer.deploy();
+    MathLib = await (
+      await ethers.getContractFactory('contracts/library/spell/MathSpell.sol:MathSpell', wallet)
+    ).deploy();
 
-    const StringSpellMockDeployer = await ethers.getContractFactory(
-      'contracts/library/spell/StringSpell.sol:StringSpell',
-      wallet,
-    );
-    StringLib = await StringSpellMockDeployer.deploy();
+    StringLib = await (
+      await ethers.getContractFactory('contracts/library/spell/StringSpell.sol:StringSpell', wallet)
+    ).deploy();
 
-    const TokenLibDeployer = await ethers.getContractFactory(
-      'contracts/library/spell/ERC20Spell.sol:ERC20Spell',
-      wallet,
-    );
-    TokenLib = await TokenLibDeployer.deploy();
+    TokenLib = await (
+      await ethers.getContractFactory('contracts/library/spell/ERC20Spell.sol:ERC20Spell', wallet)
+    ).deploy();
 
-    const EtherSpellDeployer = await ethers.getContractFactory(
-      'contracts/library/spell/EtherSpell.sol:EtherSpell',
-      wallet,
-    );
-    EtherLib = await EtherSpellDeployer.deploy();
+    EtherLib = await (
+      await ethers.getContractFactory('contracts/library/spell/EtherSpell.sol:EtherSpell', wallet)
+    ).deploy();
 
-    const DeployLibDeployer = await ethers.getContractFactory(
-      'contracts/library/spell/DeploySpell.sol:DeploySpell',
-      wallet,
-    );
+    DeployLib = await (
+      await ethers.getContractFactory('contracts/library/spell/DeploySpell.sol:DeploySpell', wallet)
+    ).deploy();
 
-    DeployLib = await DeployLibDeployer.deploy();
+    BytesLib = await (
+      await ethers.getContractFactory('contracts/library/spell/BytesSpell.sol:BytesSpell', wallet)
+    ).deploy();
+
+    CryptographyLib = await (
+      await ethers.getContractFactory('contracts/library/spell/CryptographySpell.sol:CryptographySpell', wallet)
+    ).deploy();
 
     await TokenMock.mintTo(WizadryMock.address, initialToken);
   });
@@ -194,6 +204,82 @@ describe('Wizadry', () => {
         .withArgs(WizadryMock.address, elements[0]);
     });
 
+    it('should be successfully bytes manipulate with tuple', async () => {
+      const hash = arrayify('0x00000000000000000000000000000000000000000000000000000000000001FA');
+
+      // for 0x22310Bf73bC88ae2D2c9a29Bd87bC38FBAc9e6b0
+      const sig = joinSignature(
+        new SigningKey('0x7c299dda7c704f9d474b6ca5d7fee0b490c8decca493b5764541fe5ec6b65114').signDigest(hash),
+      );
+
+      const ABI = [
+        'function splitSignature(bytes memory sig) external pure returns (uint8 v, bytes32 r, bytes32 s)',
+        'function mergeSignature(uint8 v, bytes32 r, bytes32 s) external pure returns (bytes memory signature)',
+        'function ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) external pure returns (address addr)',
+      ];
+      const interfaces = new Interface(ABI);
+      const splitSig = interfaces.getSighash('splitSignature');
+      const mergeSig = interfaces.getSighash('mergeSignature');
+      const ecrecoverSig = interfaces.getSighash('ecrecover');
+      const elements = [sig, hash];
+
+      const spells = [
+        utils.concat([
+          splitSig, // function selector from Library address
+          '0x10', // flag delegatecall with tuple
+          '0x80', // value position from elements array. this value is over 32bytes
+          '0xFF', // value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // returned data position on elements array. this value is over 32bytes
+          BytesLib.address, // address
+        ]),
+        utils.concat([
+          mergeSig, // function selector from Library address
+          '0x00', // flag delegatecall
+          '0x40', // value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x40', // returned data position
+          BytesLib.address, // address
+        ]),
+        utils.concat([
+          splitSig, // function selector from Library address
+          '0x10', // flag delegatecall with tuple
+          '0x80', // value position from elements array. this value is over 32bytes
+          '0xFF', // value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // returned data position on elements array. this value is over 32bytes
+          BytesLib.address, // address
+        ]),
+        utils.concat([
+          ecrecoverSig, // function selector from Library address
+          '0x00', // flag delegatecall with tuple
+          '0x01', // value position from elements array. this value is over 32bytes
+          '0x40', // value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // returned data position on elements array. this value is over 32bytes
+          CryptographyLib.address,
+        ]),
+      ];
+
+      expect(await WizadryMock.callStatic._cast(spells, elements)).to.deep.equal([
+        '0x00000000000000000000000022310Bf73bC88ae2D2c9a29Bd87bC38FBAc9e6b0'.toLocaleLowerCase(),
+        '0x00000000000000000000000000000000000000000000000000000000000001FA'.toLocaleLowerCase(),
+      ]);
+    });
+
     it('should be successfully string concatening using lib with delegatecall', async () => {
       const ABI = ['function strcat(string calldata a, string calldata b)', 'function emitString(string memory str)'];
       const interfaces = new Interface(ABI);
@@ -208,19 +294,19 @@ describe('Wizadry', () => {
         utils.concat([
           strcatSig, // function selector from Library address
           '0x00', // flag delegatecall
-          '0x80', // value position from elements array. this value is over 32bytes
-          '0x81', // value position from elements array. this value is over 32bytes
+          '0xC0', // value position from elements array. this value is over 32bytes
+          '0xC1', // value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0x80', // returned data position on elements array. this value is over 32bytes
+          '0xC0', // returned data position on elements array. this value is over 32bytes
           StringLib.address, // address
         ]),
         utils.concat([
           emitStrSig, // function selector from Library address
           '0x00', // flag delegatecall
-          '0x80', // value position from elements array. this value is over 32bytes
+          '0xC0', // value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
@@ -249,20 +335,20 @@ describe('Wizadry', () => {
       const spells = [
         utils.concat([
           strcatSig, // function selector from Library address
-          '0xc0', // flag staticcall
-          '0x80', // value position from elements array. this value is over 32bytes
-          '0x81', // value position from elements array. this value is over 32bytes
+          '0xC0', // flag staticcall
+          '0xC0', // value position from elements array. this value is over 32bytes
+          '0xC1', // value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0x80', // returned data position on elements array. this value is over 32bytes
+          '0xC0', // returned data position on elements array. this value is over 32bytes
           StringLib.address, // address
         ]),
         utils.concat([
           emitStrSig, // function selector from Library address
           '0x00', // flag delegatecall
-          '0x80', // value position from elements array. this value is over 32bytes
+          '0xC0', // value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
@@ -292,20 +378,20 @@ describe('Wizadry', () => {
         utils.concat([
           strcatSig, // function selector from Library address
           '0x20', // flag delegatecall with extension
-          '0x81', // value position from elements array. this value is over 32bytes
-          '0x82', // value position from elements array. this value is over 32bytes
+          '0xC1', // value position from elements array. this value is over 32bytes
+          '0xC2', // value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0x80', // returned data position on elements array. this value is over 32bytes
+          '0xC0', // returned data position on elements array. this value is over 32bytes
           StringLib.address, // address
         ]),
-        utils.concat(['0x8081FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF80']),
+        utils.concat(['0xC0C1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC0']),
         utils.concat([
           emitStrSig, // function selector from Library address
           '0x00', // flag delegatecall
-          '0x80', // value position from elements array. this value is over 32bytes
+          '0xC0', // value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
@@ -339,7 +425,7 @@ describe('Wizadry', () => {
           castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
-          '0x41', // value position from elements array. this value is over 32bytes
+          '0x81', // value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
@@ -437,7 +523,7 @@ describe('Wizadry', () => {
           castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
-          '0x41', // value position from elements array. this value is over 32bytes
+          '0x81', // value position from elements array. this value is over 32bytes
           '0x02',
           '0xFF',
           '0xFF',
@@ -461,7 +547,7 @@ describe('Wizadry', () => {
           castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
-          '0x41', // value position from elements array. this value is over 32bytes
+          '0x81', // value position from elements array. this value is over 32bytes
           '0x02',
           '0xFF',
           '0xFF',
@@ -514,7 +600,7 @@ describe('Wizadry', () => {
           castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
-          '0x41', // value position from elements array. this value is over 32bytes
+          '0x81', // value position from elements array. this value is over 32bytes
           '0x02',
           '0xFF',
           '0xFF',
@@ -526,7 +612,7 @@ describe('Wizadry', () => {
           castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
-          '0x41', // value position from elements array. this value is over 32bytes
+          '0x81', // value position from elements array. this value is over 32bytes
           '0x02',
           '0xFF',
           '0xFF',
@@ -590,7 +676,7 @@ describe('Wizadry', () => {
       expect(await ethers.provider.getCode(deployableAddr)).to.equal('0x');
     });
 
-    it('should be success when send ether failed', async () => {
+    it('should be success when send ether failed reason not enough balance', async () => {
       const ABI = [
         'function cast(uint256 value, bytes memory byteCode, bytes32 salt) external returns (address deployed)',
         'function send(address payable to, uint256 amount) external returns (bool suc) ',
@@ -616,7 +702,7 @@ describe('Wizadry', () => {
           castSig, // function selector from Library address
           '0x00', // flag delegatecall with extension
           '0x00', // value position from elements array. this value is over 32bytes
-          '0x41', // value position from elements array. this value is over 32bytes
+          '0x81', // value position from elements array. this value is over 32bytes
           '0x02',
           '0xFF',
           '0xFF',
