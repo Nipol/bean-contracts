@@ -34,6 +34,10 @@ describe('Scheduler', () => {
     it('should be revert with minimum delay', async () => {
       await expect(SchedulerMock.set(day.sub('1'))).revertedWith('Scheduler/Delay-is-not-within-Range');
     });
+
+    it('should be revert minimumDelay value upper than maximumDelay', async () => {
+      await expect(SchedulerMock.set2(day.sub('1'))).revertedWith('Scheduler/Delay-is-not-within-Range');
+    })
   });
 
   describe('#queue()', () => {

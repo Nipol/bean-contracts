@@ -12,16 +12,19 @@ import "../interfaces/IScheduler.sol";
  * @notice 컨트랙트에 내부적으로 사용될 시간 지연 모듈
  */
 abstract contract Scheduler is IScheduler {
-    uint32 internal constant GRACE_PERIOD = 7 days;
-    uint32 internal constant MINIMUM_DELAY = 1 days;
-    uint32 internal constant MAXIMUM_DELAY = 30 days;
-
     uint32 public delay;
     mapping(bytes32 => uint32) public endOf;
     mapping(bytes32 => STATE) public stateOf;
 
-    function setDelay(uint32 value) internal {
-        require(value >= MINIMUM_DELAY && value <= MAXIMUM_DELAY, "Scheduler/Delay-is-not-within-Range");
+    function setDelay(
+        uint32 value,
+        uint32 minimumDelay,
+        uint32 maximumDelay
+    ) internal {
+        require(
+            value >= minimumDelay && value <= maximumDelay && minimumDelay < maximumDelay,
+            "Scheduler/Delay-is-not-within-Range"
+        );
         delay = value;
         emit Delayed(value);
     }
@@ -38,11 +41,11 @@ abstract contract Scheduler is IScheduler {
         emit Approved(uid, from + delay);
     }
 
-    function resolve(bytes32 uid) internal {
+    function resolve(bytes32 uid, uint32 gracePeriod) internal {
         require(stateOf[uid] == STATE.APPROVED, "Scheduler/Not-Queued");
         require(uint32(block.timestamp) >= endOf[uid], "Scheduler/Not-Reached-Lock");
 
-        if (uint32(block.timestamp) >= endOf[uid] + GRACE_PERIOD) {
+        if (uint32(block.timestamp) >= endOf[uid] + gracePeriod) {
             delete endOf[uid];
             stateOf[uid] = STATE.STALED;
             emit Staled(uid);
