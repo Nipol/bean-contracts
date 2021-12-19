@@ -12,10 +12,18 @@ import "../library/Scheduler.sol";
  * @notice Contract가 할 수 있는 모든 호출을 담당함.
  */
 contract SchedulerMock is Scheduler {
+    uint32 internal constant GRACE_PERIOD = 7 days;
+    uint32 internal constant MINIMUM_DELAY = 1 days;
+    uint32 internal constant MAXIMUM_DELAY = 30 days;
+
     string public name = "Scheduler";
 
     function set(uint32 delayTime) external {
-        setDelay(delayTime);
+        setDelay(delayTime, MINIMUM_DELAY, MAXIMUM_DELAY);
+    }
+
+    function set2(uint32 delayTime) external {
+        setDelay(delayTime, MAXIMUM_DELAY, MINIMUM_DELAY);
     }
 
     function _queue(bytes32 uid) external {
@@ -27,6 +35,6 @@ contract SchedulerMock is Scheduler {
     }
 
     function _resolve(bytes32 uid) external {
-        resolve(uid);
+        resolve(uid, GRACE_PERIOD);
     }
 }
