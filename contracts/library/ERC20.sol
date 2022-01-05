@@ -41,7 +41,9 @@ abstract contract ERC20 is IERC20 {
         uint256 value
     ) internal virtual {
         balanceOf[from] -= value;
-        balanceOf[to] += value;
+        unchecked {
+            balanceOf[to] += value;
+        }
         emit Transfer(from, to, value);
     }
 
