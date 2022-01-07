@@ -9,8 +9,11 @@ contract EtherSpell {
         bal = to.balance;
     }
 
-    function transfer(address payable to, uint256 amount) external {
-        to.transfer(amount);
+    function transfer(address payable to, uint256 amount) external returns (bool success) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            success := call(gas(), to, amount, 0, 0, 0, 0)
+        }
     }
 
     function send(address payable to, uint256 amount) external returns (bool suc) {

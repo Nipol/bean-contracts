@@ -27,8 +27,10 @@ contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IBurn, IMint, IERC16
     }
 
     function mint(uint256 value) external onlyOwner returns (bool) {
-        balanceOf[msg.sender] += value;
         totalSupply += value;
+        unchecked {
+            balanceOf[msg.sender] += value;
+        }
         emit Transfer(address(0), msg.sender, value);
         return true;
     }
@@ -42,7 +44,9 @@ contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IBurn, IMint, IERC16
 
     function burn(uint256 value) external onlyOwner returns (bool) {
         balanceOf[msg.sender] -= value;
-        totalSupply -= value;
+        unchecked {
+            totalSupply -= value;
+        }
         emit Transfer(msg.sender, address(0), value);
         return true;
     }
@@ -50,7 +54,9 @@ contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IBurn, IMint, IERC16
     function burnFrom(address from, uint256 value) external onlyOwner returns (bool) {
         allowance[from][msg.sender] -= value;
         balanceOf[from] -= value;
-        totalSupply = totalSupply - value;
+        unchecked {
+            totalSupply -= value;
+        }
         emit Transfer(from, address(0), value);
         return true;
     }

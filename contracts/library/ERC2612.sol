@@ -61,13 +61,15 @@ abstract contract ERC2612 is ERC20, IERC2612 {
         require(owner != address(0), "ERC2612/Invalid-address-0");
         require(deadline >= block.timestamp, "ERC2612/Expired-time");
 
-        bytes32 digest = EIP712.hashMessage(
-            DOMAIN_SEPARATOR,
-            keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-        );
+        unchecked {
+            bytes32 digest = EIP712.hashMessage(
+                DOMAIN_SEPARATOR,
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+            );
 
-        address recovered = ecrecover(digest, v, r, s);
-        require(recovered != address(0) && recovered == owner, "ERC2612/Invalid-Signature");
+            address recovered = ecrecover(digest, v, r, s);
+            require(recovered != address(0) && recovered == owner, "ERC2612/Invalid-Signature");
+        }
 
         _approve(owner, spender, value);
     }
