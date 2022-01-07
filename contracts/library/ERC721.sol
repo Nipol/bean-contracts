@@ -38,8 +38,10 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     //------------------------------------------------------------------------------------------------------//
     function balanceOf(address target) public view virtual returns (uint256 count) {
         require(target != address(0), "ERC721: balance query for the zero address");
-        for (uint256 i = 0; i < _owners.length; i++) {
-            if (target == _owners[i]) count++;
+        unchecked {
+            for (uint256 i = 0; i < _owners.length; i++) {
+                if (target == _owners[i]) count++;
+            }
         }
     }
 
@@ -112,10 +114,12 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     function tokenOfOwnerByIndex(address target, uint256 index) public view virtual returns (uint256 tokenId) {
         require(index < balanceOf(target), "ERC721Enumerable: owner index out of bounds");
         uint256 count;
-        for (uint256 i; i < _owners.length; i++) {
-            if (target == _owners[i]) {
-                if (count == index) return i;
-                else count++;
+        unchecked {
+            for (uint256 i; i < _owners.length; i++) {
+                if (target == _owners[i]) {
+                    if (count == index) return i;
+                    else count++;
+                }
             }
         }
         require(false, "ERC721Enumerable: owner index out of bounds");

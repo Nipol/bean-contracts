@@ -129,11 +129,11 @@ describe('Wizadry', () => {
     it('should be successfully transfer token with delegatecall', async () => {
       const ABI = [
         'function balanceOf(address ERC20,address target)',
-        'function transfer(address ERC20,address to,uint256 value)',
+        'function safeTransfer(address ERC20,address to,uint256 value)',
       ];
       const interfaces = new Interface(ABI);
       const balanceOfsig = interfaces.getSighash('balanceOf');
-      const transferSig = interfaces.getSighash('transfer');
+      const transferSig = interfaces.getSighash('safeTransfer');
       const elements = [
         '0x000000000000000000000000' + TokenMock.address.slice(2), // tokenlib
         '0x000000000000000000000000' + WizadryMock.address.slice(2), // for balanceof
