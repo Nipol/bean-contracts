@@ -47,6 +47,10 @@
     "[solidity]": {
       "editor.defaultFormatter": "JuanBlanco.solidity"
     },
+    "files.associations": {
+      "*.yul": "solidity",
+      "*.yulp": "solidity"
+    },
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     }

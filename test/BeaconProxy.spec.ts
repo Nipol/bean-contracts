@@ -4,7 +4,10 @@ import { Contract, BigNumber, constants, Signer } from 'ethers';
 
 describe('Beacon Proxy', () => {
   let DummyTemplate: Contract;
+  let DummyTemplateAddr: string;
   let RevertDummyMock: Contract;
+  let RevertDummyAddr: string;
+
   let DummyDeployerMock: Contract;
   let RevertDeployerMock: Contract;
 
@@ -18,31 +21,35 @@ describe('Beacon Proxy', () => {
     [wallet, Dummy] = accounts;
 
     // 더미 배포
-    const DummyTemplateDeployer = await ethers.getContractFactory(
-      'contracts/mocks/DummyTemplate.sol:DummyTemplate',
-      wallet,
-    );
-    DummyTemplate = await DummyTemplateDeployer.deploy();
+    DummyTemplate = await (
+      await ethers.getContractFactory('contracts/mocks/DummyTemplate.sol:DummyTemplate', wallet)
+    ).deploy();
 
     // 무조건 취소되는 더미 배포
-    const RevertDummyMockDeployer = await ethers.getContractFactory(
-      'contracts/mocks/RevertDummyMock.sol:RevertDummyMock',
-      wallet,
-    );
-    RevertDummyMock = await RevertDummyMockDeployer.deploy();
+    RevertDummyMock = await (
+      await ethers.getContractFactory('contracts/mocks/RevertDummyMock.sol:RevertDummyMock', wallet)
+    ).deploy();
 
-    // 비콘 배포
-    const BeaconDeployer = await ethers.getContractFactory('contracts/library/Beacon.sol:Beacon', wallet);
-    DummyTemplate = await BeaconDeployer.deploy(DummyTemplate.address);
-    RevertDummyMock = await BeaconDeployer.deploy(RevertDummyMock.address);
+    // 각각 비콘 배포
+    const DummyTemplateTMP = await (
+      await ethers.getContractFactory('contracts/mocks/BeaconMock.sol:BeaconMock', wallet)
+    ).deploy();
+    await DummyTemplateTMP.deploy(DummyTemplate.address);
+    DummyTemplateAddr = await DummyTemplateTMP.deployedAddr();
+
+    const RevertDummyTMP = await (
+      await ethers.getContractFactory('contracts/mocks/BeaconMock.sol:BeaconMock', wallet)
+    ).deploy();
+    await RevertDummyTMP.deploy(RevertDummyMock.address);
+    RevertDummyAddr = await RevertDummyTMP.deployedAddr();
 
     // 대상을 비콘에 연결
     const BeaconDeployerMockDeployer = await ethers.getContractFactory(
       'contracts/mocks/BeaconDeployerMock.sol:BeaconDeployerMock',
       wallet,
     );
-    DummyDeployerMock = await BeaconDeployerMockDeployer.deploy(DummyTemplate.address, seedPhrase);
-    RevertDeployerMock = await BeaconDeployerMockDeployer.deploy(RevertDummyMock.address, seedPhrase);
+    DummyDeployerMock = await BeaconDeployerMockDeployer.deploy(DummyTemplateAddr, seedPhrase);
+    RevertDeployerMock = await BeaconDeployerMockDeployer.deploy(RevertDummyAddr, seedPhrase);
   });
 
   describe('#deploy()', () => {
