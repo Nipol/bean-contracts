@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
 
 describe('Beacon', () => {
-  let Beacon: Contract;
+  let BeaconMock: Contract;
 
   let wallet: Signer;
   let Dummy: Signer;
@@ -12,31 +12,34 @@ describe('Beacon', () => {
     const accounts = await ethers.getSigners();
     [wallet, Dummy] = accounts;
 
-    const BeaconDeployer = await ethers.getContractFactory('contracts/library/Beacon.sol:Beacon', wallet);
-    Beacon = await BeaconDeployer.deploy('0x0000000000000000000000000000000000000001');
-
-    await Beacon.deployed();
+    BeaconMock = await (await ethers.getContractFactory('contracts/mocks/BeaconMock.sol:BeaconMock', wallet)).deploy();
   });
 
   describe('#()', () => {
     it('should be changed implementdation from Owner', async () => {
-      await wallet.sendTransaction({
-        to: Beacon.address,
-        data: '0x0000000000000000000000000000000000000000000000000000000000000002',
-      });
+      await BeaconMock.deploy('0x0000000000000000000000000000000000000001');
+      const deployedAddr = await BeaconMock.deployedAddr();
+      await BeaconMock.changeImplementation('0x0000000000000000000000000000000000000002');
 
-      expect(await Beacon.callStatic._implementation()).to.equal('0x0000000000000000000000000000000000000002');
+      expect(
+        await Dummy.call({
+          to: deployedAddr,
+        }),
+      ).to.equal('0x0000000000000000000000000000000000000000000000000000000000000002');
     });
 
     it('should be not change implementation from non-Owner', async () => {
+      await BeaconMock.deploy('0x0000000000000000000000000000000000000001');
+      const deployedAddr = await BeaconMock.deployedAddr();
+
       await Dummy.sendTransaction({
-        to: Beacon.address,
+        to: deployedAddr,
         data: '0x0000000000000000000000000000000000000000000000000000000000000002',
       });
 
       expect(
         await Dummy.call({
-          to: Beacon.address,
+          to: deployedAddr,
         }),
       ).to.equal('0x0000000000000000000000000000000000000000000000000000000000000001');
     });

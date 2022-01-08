@@ -4,6 +4,7 @@
 
 pragma solidity ^0.8.0;
 
+import "../library/BeaconDeployer.sol";
 import "../library/BeaconProxyDeployer.sol";
 
 contract BeaconDeployerMock {
