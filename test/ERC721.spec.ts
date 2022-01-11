@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
 
-describe('ERC721', () => {
+describe.only('ERC721', () => {
   let ERC721Mock: Contract;
 
   let wallet: Signer;
@@ -100,7 +100,7 @@ describe('ERC721', () => {
         .to.emit(ERC721Mock, 'Transfer')
         .withArgs(walletaddr, constants.AddressZero, '0');
       expect(await ERC721Mock.ownerOf('0')).to.equal(constants.AddressZero);
-      expect(await ERC721Mock.totalSupply()).to.equal('2');
+      expect(await ERC721Mock.totalSupply()).to.equal('1');
     });
 
     it('should be revert with none existed nft', async () => {
@@ -125,6 +125,14 @@ describe('ERC721', () => {
     });
 
     it('initial totalsupply 0', async () => {
+      expect(await ERC721Mock.totalSupply()).to.equal('0');
+      const walletaddr = await wallet.getAddress();
+
+      await ERC721Mock.mintTo(walletaddr, '0');
+      expect(await ERC721Mock.totalSupply()).to.equal('1');
+      expect(await ERC721Mock.burn('0'))
+        .to.emit(ERC721Mock, 'Transfer')
+        .withArgs(walletaddr, constants.AddressZero, '0');
       expect(await ERC721Mock.totalSupply()).to.equal('0');
     });
   });
