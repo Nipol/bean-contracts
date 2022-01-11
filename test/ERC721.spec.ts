@@ -123,6 +123,10 @@ describe('ERC721', () => {
       await expect(ERC721Mock.burn('10')).reverted;
       expect(await ERC721Mock.totalSupply()).to.equal('5');
     });
+
+    it('initial totalsupply 0', async () => {
+      expect(await ERC721Mock.totalSupply()).to.equal('0');
+    });
   });
 
   describe('#balanceOf()', () => {
