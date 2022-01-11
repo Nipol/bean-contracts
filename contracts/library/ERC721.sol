@@ -133,6 +133,10 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     //------------------------------------------------------------------------------------------------------//
     // internal functions
     //------------------------------------------------------------------------------------------------------//
+    function _nextId() internal view returns (uint256 id) {
+        id = _owners.length;
+    }
+
     function _transfer(
         address from,
         address to,
