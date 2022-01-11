@@ -172,7 +172,7 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         success = (spender == _owner) || (_approves[tokenId] == spender) || isApprovedForAll(_owner, spender);
     }
 
-    function _exists(uint256 tokenId) private view returns (bool exist) {
+    function _exists(uint256 tokenId) internal view returns (bool exist) {
         exist = (tokenId < _owners.length) && (_owners[tokenId] != address(0));
     }
 
