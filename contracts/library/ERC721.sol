@@ -102,8 +102,13 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     //------------------------------------------------------------------------------------------------------//
     // ERC721 Enumerable Specification.
     //------------------------------------------------------------------------------------------------------//
-    function totalSupply() public view virtual returns (uint256) {
-        return _owners.length;
+    function totalSupply() public view virtual returns (uint256 total) {
+        address[] memory owners = _owners;
+        unchecked {
+            for (uint256 i = 0; i < owners.length; i++) {
+                if (owners[i] != address(0)) total++;
+            }
+        }
     }
 
     function tokenByIndex(uint256 index) public view virtual returns (uint256) {
@@ -128,6 +133,10 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     //------------------------------------------------------------------------------------------------------//
     // internal functions
     //------------------------------------------------------------------------------------------------------//
+    function _nextId() internal view returns (uint256 id) {
+        id = _owners.length;
+    }
+
     function _transfer(
         address from,
         address to,
