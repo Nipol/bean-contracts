@@ -9,13 +9,14 @@ import "../interfaces/IERC721Enumerable.sol";
 import "../interfaces/IERC721Metadata.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
 import "./Address.sol";
+import "./ReentrantSafe.sol";
 
 /**
  * @author yoonsung.eth
  * @notice ERC721의 모든 명세를 만족하는 구현체로써, NFT를 구성하는 외적 정보는 해당 라이브러리를 사용하는 유저가 구현하여 사용할 수 있도록 합니다.
  * @dev NFT는 추가발행될 필요가 있으므로 internal mint 함수를 포함하고 있으며, 이를 이용하는 라이브러리가 Ownership을 적절하게
  */
-abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
+abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, ReentrantSafe, IERC721 {
     using Address for address;
 
     string public name;
@@ -23,6 +24,33 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     address[] private _owners;
     mapping(uint256 => address) private _approves;
     mapping(address => mapping(address => bool)) private _operatorApprovals;
+
+    /**
+     * @notice 해당 컨트랙트와 상호작용 하는 대상이 컨트랙트인 경우, NFT를 컨트롤 할 수 있는
+     */
+    modifier checkERC721Receive(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) {
+        _;
+        if (to.isContract()) {
+            try IERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
+                if (retval == IERC721TokenReceiver.onERC721Received.selector) return;
+                else revert();
+            } catch (bytes memory reason) {
+                if (reason.length == 0) {
+                    revert("ERC721: transfer to non ERC721Receiver implementer");
+                } else {
+                    // solhint-disable-next-line no-inline-assembly
+                    assembly {
+                        revert(add(32, reason), mload(reason))
+                    }
+                }
+            }
+        }
+    }
 
     //------------------------------------------------------------------------------------------------------//
     // ERC721 Metadata Specification.
@@ -38,9 +66,11 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     //------------------------------------------------------------------------------------------------------//
     function balanceOf(address target) public view virtual returns (uint256 count) {
         require(target != address(0), "ERC721: balance query for the zero address");
+        address[] memory owners = _owners;
+        uint256 length = owners.length;
         unchecked {
-            for (uint256 i = 0; i < _owners.length; i++) {
-                if (target == _owners[i]) count++;
+            for (uint256 i = 0; i < length; i++) {
+                if (target == owners[i]) count++;
             }
         }
     }
@@ -104,8 +134,9 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     //------------------------------------------------------------------------------------------------------//
     function totalSupply() public view virtual returns (uint256 total) {
         address[] memory owners = _owners;
+        uint256 length = _owners.length;
         unchecked {
-            for (uint256 i = 0; i < owners.length; i++) {
+            for (uint256 i = 0; i < length; i++) {
                 if (owners[i] != address(0)) total++;
             }
         }
@@ -119,15 +150,16 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
     function tokenOfOwnerByIndex(address target, uint256 index) public view virtual returns (uint256 tokenId) {
         require(index < balanceOf(target), "ERC721Enumerable: owner index out of bounds");
         uint256 count;
+        address[] memory owners = _owners;
+        uint256 length = owners.length;
         unchecked {
-            for (uint256 i; i < _owners.length; i++) {
-                if (target == _owners[i]) {
+            for (uint256 i; i < length; i++) {
+                if (target == owners[i]) {
                     if (count == index) return i;
                     else count++;
                 }
             }
         }
-        require(false, "ERC721Enumerable: owner index out of bounds");
     }
 
     //------------------------------------------------------------------------------------------------------//
@@ -154,25 +186,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) internal virtual {
+    ) internal virtual reentrantSafer checkERC721Receive(from, to, tokenId, _data) {
         _transfer(from, to, tokenId);
-        require(_checkOnERC721Receive(from, to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
-    }
-
-    function _checkOnERC721Receive(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory data
-    ) internal returns (bool success) {
-        if (to.isContract()) {
-            try IERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
-                success = retval == IERC721TokenReceiver.onERC721Received.selector;
-            } catch {
-                return false;
-            }
-        }
-        return true;
     }
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
@@ -198,12 +213,8 @@ abstract contract ERC721 is IERC721Metadata, IERC721Enumerable, IERC721 {
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) internal virtual {
+    ) internal virtual reentrantSafer checkERC721Receive(address(0), to, tokenId, _data) {
         _mint(to, tokenId);
-        require(
-            _checkOnERC721Receive(address(0), to, tokenId, _data),
-            "ERC721: transfer to non ERC721Receiver implementer"
-        );
     }
 
     function _burn(uint256 tokenId) internal virtual {

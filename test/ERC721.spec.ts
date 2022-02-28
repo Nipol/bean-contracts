@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
+import { parseEther } from 'ethers/lib/utils';
 
-describe.only('ERC721', () => {
+describe('ERC721', () => {
   let ERC721Mock: Contract;
 
   let wallet: Signer;
@@ -80,6 +81,32 @@ describe.only('ERC721', () => {
       await expect(ERC721Mock['safeMint(address,uint256)'](ERC721ReceiveMock.address, '0'))
         .to.emit(ERC721Mock, 'Transfer')
         .withArgs(constants.AddressZero, ERC721ReceiveMock.address, '0');
+    });
+
+    it('should be success with wrong implemented receive function', async () => {
+      const ERC721ReceiveMockDeployer = await ethers.getContractFactory(
+        'contracts/mocks/ERC721ReceiveMock.sol:NoneERC721ReceiveMock',
+        wallet,
+      );
+      const ERC721ReceiveMock = await ERC721ReceiveMockDeployer.deploy();
+      await expect(ERC721Mock['safeMint(address,uint256)'](ERC721ReceiveMock.address, '0')).reverted;
+    });
+
+    it('should be denial `onERC721Received` recall', async () => {
+      const weakNFT = await (
+        await ethers.getContractFactory('contracts/mocks/ExploitERC721Mint.sol:ExploitERC721Mint', wallet)
+      ).deploy();
+
+      const Exploiter = await (
+        await ethers.getContractFactory('contracts/mocks/ExploitMinter.sol:ExploitMinter', wallet)
+      ).deploy(weakNFT.address);
+
+      await wallet.sendTransaction({
+        to: Exploiter.address,
+        value: parseEther('2'),
+      });
+
+      await expect(Exploiter.toMinter()).reverted;
     });
   });
 

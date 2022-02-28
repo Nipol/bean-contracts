@@ -12,7 +12,7 @@ import "../interfaces/IAggregatecall.sol";
  * @notice 컨트랙트가 가지고 있는 트랜잭션을 순서대로 실행시킬 수 있음.
  */
 abstract contract Aggregatecall is IAggregatecall {
-    function aggregate(Call[] memory calls) external override returns (bytes[] memory returnData) {
+    function aggregate(Call[] calldata calls) external override returns (bytes[] memory returnData) {
         returnData = new bytes[](calls.length);
         for (uint256 i = 0; i < calls.length; i++) {
             (bool success, bytes memory result) = calls[i].target.call(calls[i].data);

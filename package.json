@@ -65,7 +65,7 @@
     "build": "npx hardhat compile",
     "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
     "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
-    "coverage:server": "npm run coverage && http-server ./coverage -s",
+    "coverage:server": "npm run coverage && http-server ./coverage -s -c-1",
     "docs": "scripts/docs.sh",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:js": "eslint '*/**/*.{js,ts}' --quiet --fix",
