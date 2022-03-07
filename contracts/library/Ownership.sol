@@ -11,10 +11,10 @@ import "../interfaces/IERC173.sol";
  * @author yoonsung.eth
  * @notice 단일 Ownership을 가질 수 있도록 도와주는 추상 컨트랙트
  * @dev constructor 기반 컨트랙트에서는 생성 시점에 owner가 msg.sender로 지정되며,
- *      Proxy로 작동되는 컨트랙트의 경우 `__transferOwnership(address)`를 명시적으로 호출하여 owner를 지정하여야 한다.
+ *      Proxy로 작동되는 컨트랙트의 경우 `_transferOwnership(address)`를 명시적으로 호출하여 owner를 지정하여야 한다.
  */
 abstract contract Ownership is IERC173 {
-    address public override owner;
+    address public owner;
 
     modifier onlyOwner() {
         require(owner == msg.sender, "Ownership/Not-Authorized");
@@ -26,7 +26,7 @@ abstract contract Ownership is IERC173 {
         emit OwnershipTransferred(address(0), msg.sender);
     }
 
-    function transferOwnership(address newOwner) external virtual override onlyOwner {
+    function transferOwnership(address newOwner) external virtual onlyOwner {
         require(newOwner != address(0), "Ownership/Not-Allowed-Zero");
         _transferOwnership(newOwner);
     }

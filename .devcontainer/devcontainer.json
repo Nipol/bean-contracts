@@ -23,13 +23,14 @@
       }
     },
     "terminal.integrated.defaultProfile.linux": "zsh (login)",
-    "solidity.packageDefaultDependenciesContractsDirectory": "",
-    "solidity.packageDefaultDependenciesDirectory": "node_modules",
+    "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
+    "solidity.packageDefaultDependenciesDirectory": "lib",
     "solidity.linter": "solhint",
     "solidity.formatter": "prettier",
-    "solidity.compileUsingRemoteVersion": "latest",
+    "solidity.compileUsingRemoteVersion": "0.8.11",
     "solidity.compileUsingLocalVersion": "/home/node/.local/bin/solc",
     "solidity.enableLocalNodeCompiler": true,
+    "search.exclude": { "lib": true },
     "git.ignoreLimitWarning": true,
     "editor.rulers": [120],
     "workbench.colorCustomizations": {
@@ -80,5 +81,5 @@
   "remoteUser": "node",
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "sudo mkdir -p /home/node/.ssh && sudo cp -r /home/node/.ssh-localhost/* /home/node/.ssh && sudo chmod 707 /home/node/.ssh && sudo chmod 606 /home/node/.ssh/* && solc-select install 0.8.12 && solc-select use 0.8.12 && npm install"
+  "postCreateCommand": "sudo mkdir -p /home/node/.ssh && sudo cp -r /home/node/.ssh-localhost/* /home/node/.ssh && sudo chmod 707 /home/node/.ssh && sudo chmod 606 /home/node/.ssh/* && solc-select install 0.8.12 && solc-select use 0.8.12 && foundryup && npm install"
 }

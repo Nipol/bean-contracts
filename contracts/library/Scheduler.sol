@@ -13,46 +13,43 @@ import "../interfaces/IScheduler.sol";
  */
 abstract contract Scheduler is IScheduler {
     uint32 public delay;
-    mapping(bytes32 => uint32) public endOf;
-    mapping(bytes32 => STATE) public stateOf;
+    mapping(bytes32 => Task) public taskOf;
 
     function setDelay(
-        uint32 value,
+        uint32 delayValue,
         uint32 minimumDelay,
         uint32 maximumDelay
     ) internal {
         require(
-            value >= minimumDelay && value <= maximumDelay && minimumDelay < maximumDelay,
+            delayValue >= minimumDelay && delayValue <= maximumDelay && minimumDelay < maximumDelay,
             "Scheduler/Delay-is-not-within-Range"
         );
-        delay = value;
-        emit Delayed(value);
+        delay = delayValue;
+        emit Delayed(delayValue);
     }
 
-    function queue(bytes32 uid) internal {
-        queue(uid, uint32(block.timestamp));
+    function queue(bytes32 taskid) internal {
+        queue(taskid, uint32(block.timestamp));
     }
 
-    function queue(bytes32 uid, uint32 from) internal {
-        require(stateOf[uid] == STATE.UNKNOWN, "Scheduler/Already-Scheduled");
+    function queue(bytes32 taskid, uint32 from) internal {
+        require(taskOf[taskid].state == STATE.UNKNOWN, "Scheduler/Already-Scheduled");
         assert(from >= uint32(block.timestamp));
-        endOf[uid] = from + delay;
-        stateOf[uid] = STATE.APPROVED;
-        emit Approved(uid, from + delay);
+        (taskOf[taskid].endTime, taskOf[taskid].state) = (from + delay, STATE.QUEUED);
+        emit Queued(taskid, from + delay);
     }
 
-    function resolve(bytes32 uid, uint32 gracePeriod) internal {
-        require(stateOf[uid] == STATE.APPROVED, "Scheduler/Not-Queued");
-        require(uint32(block.timestamp) >= endOf[uid], "Scheduler/Not-Reached-Lock");
+    function resolve(bytes32 taskid, uint32 gracePeriod) internal {
+        Task memory t = taskOf[taskid];
+        require(t.state == STATE.QUEUED, "Scheduler/Not-Queued");
+        require(uint32(block.timestamp) >= t.endTime, "Scheduler/Not-Reached-Lock");
 
-        if (uint32(block.timestamp) >= endOf[uid] + gracePeriod) {
-            delete endOf[uid];
-            stateOf[uid] = STATE.STALED;
-            emit Staled(uid);
+        if (uint32(block.timestamp) >= t.endTime + gracePeriod) {
+            (taskOf[taskid].endTime, taskOf[taskid].state) = (0, STATE.STALED);
+            emit Staled(taskid);
         } else {
-            delete endOf[uid];
-            stateOf[uid] = STATE.RESOLVED;
-            emit Resolved(uid);
+            (taskOf[taskid].endTime, taskOf[taskid].state) = (0, STATE.RESOLVED);
+            emit Resolved(taskid);
         }
     }
 }

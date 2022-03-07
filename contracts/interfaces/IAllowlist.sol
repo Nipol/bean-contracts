@@ -8,7 +8,7 @@ interface IAllowlist {
     event Allowed(address indexed addr);
     event Revoked(address indexed addr);
 
-    function allowance(address) external returns (bool);
+    function authority(address) external returns (bool);
 
     function authorise(address allowAddr) external;
 

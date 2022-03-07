@@ -37,7 +37,7 @@ describe('Scheduler', () => {
 
     it('should be revert minimumDelay value upper than maximumDelay', async () => {
       await expect(SchedulerMock.set2(day.sub('1'))).revertedWith('Scheduler/Delay-is-not-within-Range');
-    })
+    });
   });
 
   describe('#queue()', () => {
@@ -53,9 +53,9 @@ describe('Scheduler', () => {
       const next = day.add(nextLevel.toString());
       id = keccak256('0x1234');
       expect(await SchedulerMock['_queue(bytes32)'](id))
-        .to.emit(SchedulerMock, 'Approved')
+        .to.emit(SchedulerMock, 'Queued')
         .withArgs(id, next);
-      await expect((await SchedulerMock.endOf(id)).toString()).to.equal(next.toString());
+      await expect((await SchedulerMock.taskOf(id))['endTime'].toString()).to.equal(next.toString());
     });
 
     it('should be revert with already queued uid.', async () => {
@@ -64,7 +64,7 @@ describe('Scheduler', () => {
       await ethers.provider.send('evm_setNextBlockTimestamp', [nextLevel]);
       id = keccak256('0x1234');
       expect(await SchedulerMock['_queue(bytes32)'](id))
-        .to.emit(SchedulerMock, 'Approved')
+        .to.emit(SchedulerMock, 'Queued')
         .withArgs(id, day.add(nextLevel));
       await expect(SchedulerMock['_queue(bytes32)'](id)).revertedWith('Scheduler/Already-Scheduled');
     });
@@ -108,8 +108,8 @@ describe('Scheduler', () => {
       expect(await SchedulerMock._resolve(id))
         .to.emit(SchedulerMock, 'Staled')
         .withArgs(id);
-      await expect(await SchedulerMock.stateOf(id)).to.equal(3);
-      await expect(await SchedulerMock.endOf(id)).to.equal(0);
+      await expect((await SchedulerMock.taskOf(id))['state']).to.equal(3);
+      await expect((await SchedulerMock.taskOf(id))['endTime']).to.equal(0);
     });
 
     it('should be success resolved id', async () => {
@@ -119,8 +119,8 @@ describe('Scheduler', () => {
       expect(await SchedulerMock._resolve(id))
         .to.emit(SchedulerMock, 'Resolved')
         .withArgs(id);
-      await expect(await SchedulerMock.stateOf(id)).to.equal(2);
-      await expect(await SchedulerMock.endOf(id)).to.equal(0);
+      await expect((await SchedulerMock.taskOf(id))['state']).to.equal(2);
+      await expect((await SchedulerMock.taskOf(id))['endTime']).to.equal(0);
     });
 
     it('should be revert with already resolved', async () => {
@@ -130,8 +130,8 @@ describe('Scheduler', () => {
       expect(await SchedulerMock._resolve(id))
         .to.emit(SchedulerMock, 'Resolved')
         .withArgs(id);
-      await expect(await SchedulerMock.stateOf(id)).to.equal(2);
-      await expect(await SchedulerMock.endOf(id)).to.equal(0);
+      await expect((await SchedulerMock.taskOf(id))['state']).to.equal(2);
+      await expect((await SchedulerMock.taskOf(id))['endTime']).to.equal(0);
       await expect(SchedulerMock._resolve(id)).revertedWith('Scheduler/Not-Queued');
     });
   });

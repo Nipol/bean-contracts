@@ -32,5 +32,5 @@ module.exports = {
   providerOptions: {
     accounts,
   },
-  skipFiles: ['mocks', 'interfaces'],
+  skipFiles: ['mocks', 'interfaces', 'test'],
 };

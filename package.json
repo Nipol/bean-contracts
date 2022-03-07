@@ -44,7 +44,8 @@
   "files": [
     "contracts/**/*.sol",
     "/build/contracts/*.json",
-    "!/contracts/mocks/**/*"
+    "!/contracts/mocks/**/*",
+    "!/contracts/test/**/*"
   ],
   "homepage": "https://github.com/Nipol/bean-contracts#readme",
   "keywords": [
@@ -63,7 +64,9 @@
   },
   "scripts": {
     "build": "npx hardhat compile",
-    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
+    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test && forge test --gas-report",
+    "test:forge": "forge test",
+    "test:hardhat": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
     "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
     "coverage:server": "npm run coverage && http-server ./coverage -s -c-1",
     "docs": "scripts/docs.sh",

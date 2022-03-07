@@ -8,19 +8,19 @@ import "./Ownership.sol";
 import "../interfaces/IAllowlist.sol";
 
 contract Allowlist is IAllowlist, Ownership {
-    mapping(address => bool) public override allowance;
+    mapping(address => bool) public authority;
 
     constructor() Ownership() {}
 
-    function authorise(address allowAddr) external override onlyOwner {
-        require(allowance[allowAddr] == false, "Allowlist/Already-Authorized");
-        allowance[allowAddr] = true;
+    function authorise(address allowAddr) external onlyOwner {
+        require(authority[allowAddr] == false, "Allowlist/Already-Authorized");
+        authority[allowAddr] = true;
         emit Allowed(allowAddr);
     }
 
-    function revoke(address revokeAddr) external override onlyOwner {
-        require(allowance[revokeAddr] == true, "Allowlist/Not-Authorized");
-        delete allowance[revokeAddr];
+    function revoke(address revokeAddr) external onlyOwner {
+        require(authority[revokeAddr] == true, "Allowlist/Not-Authorized");
+        delete authority[revokeAddr];
         emit Revoked(revokeAddr);
     }
 }

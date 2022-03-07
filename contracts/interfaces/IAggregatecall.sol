@@ -10,5 +10,5 @@ interface IAggregatecall {
         bytes data;
     }
 
-    function aggregate(Call[] memory calls) external returns (bytes[] memory returnData);
+    function aggregate(Call[] calldata calls) external returns (bytes[] memory returnData);
 }

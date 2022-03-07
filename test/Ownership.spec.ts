@@ -25,11 +25,9 @@ describe('Ownership', () => {
     OwnershipMockConstruct = await ConstructDeployer.deploy();
     const MockInitialize = await InitializeDeployer.deploy();
 
-    const MinimalDeployerMockDeployer = await ethers.getContractFactory(
-      'contracts/mocks/MinimalDeployerMock.sol:MinimalDeployerMock',
-      wallet,
-    );
-    MinimalDeployerMock = await MinimalDeployerMockDeployer.deploy(MockInitialize.address, '');
+    MinimalDeployerMock = await (
+      await ethers.getContractFactory('contracts/mocks/MinimalDeployMock.sol:MinimalDeployMock', wallet)
+    ).deploy(MockInitialize.address);
   });
 
   describe('#onlyOwner modifier', () => {
