@@ -56,6 +56,20 @@ contract AggregatecallTest is DSTest {
         assertEq(c.counter(), 3);
     }
 
+    function test6TimesCall() public {
+        IAggregatecall.Call memory cd = IAggregatecall.Call({
+            target: address(c),
+            data: abi.encodeWithSelector(bytes4(keccak256("increase()")))
+        });
+
+        IAggregatecall.Call[] memory cds = new IAggregatecall.Call[](6);
+        (cds[0], cds[1], cds[2], cds[3], cds[4], cds[5]) = (cd, cd, cd, cd, cd, cd);
+
+        ac.aggregate(cds);
+
+        assertEq(c.counter(), 6);
+    }
+
     function testFailRevertCaseCall() public {
         IAggregatecall.Call memory cd = IAggregatecall.Call({
             target: address(c),

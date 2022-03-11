@@ -103,7 +103,7 @@ abstract contract Wizadry {
      *       └──────┴───────────────────┘
      *       if 0xfe, use Entire ELEMENTS.
      */
-    function cast(bytes32[] memory spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
+    function cast(bytes32[] calldata spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
         bytes32 command;
         uint8 flags;
         bytes32 indices;
@@ -112,13 +112,15 @@ abstract contract Wizadry {
         bool success;
         bytes memory outdata;
 
-        for (uint256 i = 0; i < spells.length; i++) {
+        for (uint256 i; i != spells.length; ) {
             command = spells[i];
             flags = uint8(bytes1(command << 32));
 
             if (flags & FLAG_EXTENSION != 0) {
-                indices = spells[++i];
-                outputPos = bytes1(indices << 248);
+                unchecked {
+                    indices = spells[++i];
+                    outputPos = bytes1(indices << 248);
+                }
             } else {
                 indices = bytes32(uint256(command << 40) | SHORT_SPELL_FILL);
                 outputPos = bytes1(command << 88);
@@ -158,6 +160,10 @@ abstract contract Wizadry {
                 elements.writeTuple(outputPos, outdata);
             } else {
                 elements = elements.writeOutputs(outputPos, outdata);
+            }
+
+            unchecked {
+                i++;
             }
         }
         return elements;

@@ -26,7 +26,7 @@
     "eth-gas-reporter": "^0.2.23",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.5.2",
-    "hardhat": "^2.8.0",
+    "hardhat": "^2.9.0",
     "hardhat-gas-reporter": "^1.0.6",
     "http-server": "^0.12.3",
     "keccak256": "^1.0.6",
@@ -64,7 +64,7 @@
   },
   "scripts": {
     "build": "npx hardhat compile",
-    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test && forge test --gas-report",
+    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test && forge test",
     "test:forge": "forge test",
     "test:hardhat": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
     "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",

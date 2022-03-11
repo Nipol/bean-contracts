@@ -8,7 +8,6 @@ import "../interfaces/IERC721.sol";
 import "../interfaces/IERC721Enumerable.sol";
 import "../interfaces/IERC721Metadata.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
-import "./Address.sol";
 import "./ReentrantSafe.sol";
 
 /**
@@ -17,8 +16,6 @@ import "./ReentrantSafe.sol";
  * @dev NFT는 추가발행될 필요가 있으므로 internal mint 함수를 포함하고 있으며, 이를 이용하는 라이브러리가 Ownership을 적절하게
  */
 abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, ReentrantSafe, IERC721 {
-    using Address for address;
-
     string public name;
     string public symbol;
     address[] private _owners;
@@ -35,7 +32,7 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         bytes memory data
     ) {
         _;
-        if (to.isContract()) {
+        if (to.code.length != 0) {
             try IERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
                 if (retval == IERC721TokenReceiver.onERC721Received.selector) return;
                 else revert("ERC721: transfer to wrong ERC721Receiver implementer");
@@ -56,18 +53,21 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
     // ERC721 Specification.
     //------------------------------------------------------------------------------------------------------//
     function balanceOf(address target) public view virtual returns (uint256 count) {
-        require(target != address(0), "ERC721: balance query for the zero address");
+        if (target == address(0)) return 0;
         address[] memory owners = _owners;
         uint256 length = owners.length;
+        address owneri;
         unchecked {
             for (uint256 i = 0; i != length; i++) {
-                if (target == owners[i]) count++;
+                owneri = owners[i];
+                if (target == owneri) count++;
             }
         }
     }
 
     function ownerOf(uint256 tokenId) public view virtual returns (address target) {
-        target = _owners[tokenId];
+        if (tokenId < _owners.length) return _owners[tokenId];
+        else return address(0);
     }
 
     function safeTransferFrom(

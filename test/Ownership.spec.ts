@@ -7,7 +7,7 @@ describe('Ownership', () => {
 
   let OwnershipMockConstruct: Contract;
   let OwnershipMockInitialize: Contract;
-  let MinimalDeployerMock: Contract;
+  let MinimalProxyMock: Contract;
 
   let wallet: Signer;
   let Dummy1: Signer;
@@ -17,16 +17,18 @@ describe('Ownership', () => {
     const accounts = await ethers.getSigners();
     [wallet, Dummy1, Dummy2] = accounts;
 
-    const ConstructDeployer = await ethers.getContractFactory(
-      'contracts/mocks/OwnershipMock.sol:OwnershipMock1',
-      wallet,
-    );
+    // constructor로 초기화 되는 컨트랙트 템플릿
+    OwnershipMockConstruct = await (
+      await ethers.getContractFactory('contracts/mocks/OwnershipMock.sol:OwnershipMock1', wallet)
+    ).deploy();
+
+    // initialize 함수로 초기화 되는 컨트랙트 템플릿
     InitializeDeployer = await ethers.getContractFactory('contracts/mocks/OwnershipMock.sol:OwnershipMock2', wallet);
-    OwnershipMockConstruct = await ConstructDeployer.deploy();
     const MockInitialize = await InitializeDeployer.deploy();
 
-    MinimalDeployerMock = await (
-      await ethers.getContractFactory('contracts/mocks/MinimalDeployMock.sol:MinimalDeployMock', wallet)
+    // Proxy 환경에서 작동하는지 파악하기 위한 initialize 템플릿 등록
+    MinimalProxyMock = await (
+      await ethers.getContractFactory('contracts/mocks/MinimalProxyMock.sol:MinimalProxyMock', wallet)
     ).deploy(MockInitialize.address);
   });
 
@@ -41,8 +43,9 @@ describe('Ownership', () => {
 
     it('should be success non-constructor contract', async () => {
       const addr = await wallet.getAddress();
-      const deployaddr = await MinimalDeployerMock['deployCalculate()']();
-      await MinimalDeployerMock['deploy()']();
+      // 자동으로 주소가 겹치지 않게 배포되도록 (seed, address로 받아옴)
+      const deployaddr = (await MinimalProxyMock.calculateIncrement())[1];
+      await MinimalProxyMock.deployIncrement();
       OwnershipMockInitialize = InitializeDeployer.attach(deployaddr);
       await expect(OwnershipMockInitialize.initialize())
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')
@@ -53,8 +56,8 @@ describe('Ownership', () => {
 
     it('should be revert with non-owner non-constructor contract', async () => {
       const addr = await wallet.getAddress();
-      const deployaddr = await MinimalDeployerMock['deployCalculate()']();
-      await MinimalDeployerMock['deploy()']();
+      const deployaddr = (await MinimalProxyMock.calculateIncrement())[1];
+      await MinimalProxyMock.deployIncrement();
       OwnershipMockInitialize = InitializeDeployer.attach(deployaddr);
       await expect(OwnershipMockInitialize.initialize())
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')
@@ -73,8 +76,8 @@ describe('Ownership', () => {
 
     it('should be revert with zero address from non-constructor contract', async () => {
       const addr = await wallet.getAddress();
-      const deployaddr = await MinimalDeployerMock['deployCalculate()']();
-      await MinimalDeployerMock['deploy()']();
+      const deployaddr = (await MinimalProxyMock.calculateIncrement())[1];
+      await MinimalProxyMock.deployIncrement();
       OwnershipMockInitialize = InitializeDeployer.attach(deployaddr);
       await expect(OwnershipMockInitialize.initialize())
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')
@@ -110,8 +113,8 @@ describe('Ownership', () => {
 
     it('should be success from non-constructor contract', async () => {
       const addr = await wallet.getAddress();
-      const deployaddr = await MinimalDeployerMock['deployCalculate()']();
-      await MinimalDeployerMock['deploy()']();
+      const deployaddr = (await MinimalProxyMock.calculateIncrement())[1];
+      await MinimalProxyMock.deployIncrement();
       OwnershipMockInitialize = InitializeDeployer.attach(deployaddr);
       await expect(OwnershipMockInitialize.initialize())
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')
@@ -124,8 +127,8 @@ describe('Ownership', () => {
 
     it('should be revert with non-owner from non-constructor contract', async () => {
       const addr = await wallet.getAddress();
-      const deployaddr = await MinimalDeployerMock['deployCalculate()']();
-      await MinimalDeployerMock['deploy()']();
+      const deployaddr = (await MinimalProxyMock.calculateIncrement())[1];
+      await MinimalProxyMock.deployIncrement();
       OwnershipMockInitialize = InitializeDeployer.attach(deployaddr);
       await expect(OwnershipMockInitialize.initialize())
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')

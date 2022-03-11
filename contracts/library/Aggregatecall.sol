@@ -15,8 +15,10 @@ abstract contract Aggregatecall is IAggregatecall {
     function aggregate(Call[] calldata calls) public returns (bytes[] memory returnData) {
         uint256 length = calls.length;
         returnData = new bytes[](length);
+        Call calldata calli;
         for (uint256 i; i != length; ) {
-            (bool success, bytes memory result) = calls[i].target.call(calls[i].data);
+            calli = calls[i];
+            (bool success, bytes memory result) = calli.target.call(calli.data);
             // Next 5 lines from https://ethereum.stackexchange.com/a/83577
             if (!success) {
                 // revert called without a message
@@ -31,7 +33,7 @@ abstract contract Aggregatecall is IAggregatecall {
             returnData[i] = result;
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }

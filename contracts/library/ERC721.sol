@@ -7,7 +7,6 @@ pragma solidity ^0.8.0;
 import "../interfaces/IERC721.sol";
 import "../interfaces/IERC721Metadata.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
-import "./Address.sol";
 import "./ReentrantSafe.sol";
 
 /**
@@ -16,8 +15,6 @@ import "./ReentrantSafe.sol";
  * @dev NFT는 추가발행될 필요가 있으므로 internal mint 함수를 포함하고 있으며, 이를 이용하는 라이브러리가 Ownership을 적절하게
  */
 abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
-    using Address for address;
-
     string public name;
     string public symbol;
     mapping(address => uint256) public balanceOf;
@@ -35,7 +32,7 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
         bytes memory data
     ) {
         _;
-        if (to.isContract()) {
+        if (to.code.length != 0) {
             try IERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
                 if (retval == IERC721TokenReceiver.onERC721Received.selector) return;
                 else revert("ERC721: transfer to wrong ERC721Receiver implementer");
@@ -120,6 +117,11 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
         require(to != address(0), "ERC721: transfer to the zero address");
         _approves[tokenId] = address(0);
         ownerOf[tokenId] = to;
+
+        unchecked {
+            --balanceOf[from];
+            ++balanceOf[to];
+        }
         emit Transfer(from, to, tokenId);
     }
 
@@ -145,7 +147,6 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
     function _mint(address to, uint256 tokenId) internal virtual {
         require(to != address(0), "ERC721: mint to the zero address");
         require(!_exists(tokenId), "ERC721: token already minted");
-
         ownerOf[tokenId] = to;
 
         unchecked {
@@ -165,8 +166,10 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
 
     function _burn(uint256 tokenId) internal virtual {
         address _owner = ownerOf[tokenId];
+        require(_owner != address(0));
         delete _approves[tokenId];
         delete ownerOf[tokenId];
+
         unchecked {
             balanceOf[_owner]--;
         }
