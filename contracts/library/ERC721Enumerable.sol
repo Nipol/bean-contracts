@@ -57,10 +57,15 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         address[] memory owners = _owners;
         uint256 length = owners.length;
         address owneri;
-        unchecked {
-            for (uint256 i = 0; i != length; i++) {
-                owneri = owners[i];
+
+        for (uint256 i; i != length;) {
+            owneri = owners[i];
+            unchecked {
                 if (target == owneri) count++;
+            }
+            
+            unchecked {
+                ++i;
             }
         }
     }
@@ -126,9 +131,14 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
     function totalSupply() public view virtual returns (uint256 total) {
         address[] memory owners = _owners;
         uint256 length = _owners.length;
-        unchecked {
-            for (uint256 i = 0; i != length; i++) {
+        
+        for (uint256 i; i != length;) {
+            unchecked {
                 if (owners[i] != address(0)) total++;
+            }
+
+            unchecked {
+                ++i;
             }
         }
     }
@@ -143,12 +153,17 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         uint256 count;
         address[] memory owners = _owners;
         uint256 length = owners.length;
-        unchecked {
-            for (uint256 i; i != length; i++) {
+        
+        for (uint256 i; i != length;) {
+            unchecked {
                 if (target == owners[i]) {
                     if (count == index) return i;
                     else count++;
                 }
+            }
+
+            unchecked {
+                ++i;
             }
         }
     }

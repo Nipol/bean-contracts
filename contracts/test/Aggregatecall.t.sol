@@ -21,11 +21,11 @@ contract Encounter {
         counter--;
     }
 
-    function revertCall() external {
+    function revertCall() external pure {
         revert("Message From Revert");
     }
 
-    function emptyRevertCall() external {
+    function emptyRevertCall() external pure {
         revert();
     }
 }

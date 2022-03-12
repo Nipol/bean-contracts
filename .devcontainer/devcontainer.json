@@ -71,7 +71,8 @@
     "tintinweb.solidity-visual-auditor",
     "ms-vscode.vscode-typescript-tslint-plugin",
     "github.vscode-pull-request-github",
-    "styled-components.vscode-styled-components"
+    "styled-components.vscode-styled-components",
+    "NomicFoundation.hardhat-solidity"
   ],
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.

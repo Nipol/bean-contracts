@@ -64,8 +64,8 @@
   },
   "scripts": {
     "build": "npx hardhat compile",
-    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test && forge test",
-    "test:forge": "forge test",
+    "test": "npm run test:forge && npm run test:hardhat",
+    "test:forge": "forge snapshot",
     "test:hardhat": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
     "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
     "coverage:server": "npm run coverage && http-server ./coverage -s -c-1",

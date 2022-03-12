@@ -19,14 +19,14 @@ contract BeaconTest is DSTest {
     function testUpgrade() public {
         bool success;
         bytes memory data;
-        bytes memory newAddr = abi.encode(address(2));
+        bytes memory newAddr = abi.encode(address(9));
         (success, ) = deployed.call(newAddr);
         assertTrue(success);
 
         cheats.prank(address(3));
         (success, data) = deployed.staticcall(data);
         assertTrue(success);
-        assertEq(bytes32(data), 0x0000000000000000000000000000000000000000000000000000000000000002);
+        assertEq(bytes32(data), 0x0000000000000000000000000000000000000000000000000000000000000009);
     }
 
     function testFailUpgradeFromNotOwner() public {

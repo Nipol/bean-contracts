@@ -416,7 +416,10 @@ describe('Wizadry', () => {
       const castSig = interfaces.getSighash('cast');
       const emitSig = interfaces.getSighash('emitAddress');
 
-      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+      const contractDeployer = await ethers.getContractFactory(
+        'contracts/mocks/DummyTemplate.sol:DummyTemplate',
+        wallet,
+      );
 
       const elements = [constants.HashZero, contractDeployer.bytecode];
 
@@ -464,7 +467,10 @@ describe('Wizadry', () => {
       const castSig = interfaces.getSighash('cast');
       const emitSig = interfaces.getSighash('emitAddress');
 
-      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+      const contractDeployer = await ethers.getContractFactory(
+        'contracts/mocks/DummyTemplate.sol:DummyTemplate',
+        wallet,
+      );
 
       const elements = [constants.HashZero, contractDeployer.bytecode];
 
@@ -509,7 +515,10 @@ describe('Wizadry', () => {
       const emitSig = interfaces.getSighash('emitAddress');
       const addSig = interfaces.getSighash('add');
 
-      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+      const contractDeployer = await ethers.getContractFactory(
+        'contracts/mocks/DummyTemplate.sol:DummyTemplate',
+        wallet,
+      );
 
       const elements = [
         constants.HashZero, // value
@@ -587,7 +596,10 @@ describe('Wizadry', () => {
       const emitSig = interfaces.getSighash('emitAddress');
       const addSig = interfaces.getSighash('add');
 
-      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+      const contractDeployer = await ethers.getContractFactory(
+        'contracts/mocks/DummyTemplate.sol:DummyTemplate',
+        wallet,
+      );
 
       const elements = [
         constants.HashZero, // value
@@ -636,7 +648,10 @@ describe('Wizadry', () => {
       const castSig = interfaces.getSighash('cast');
       const transferSig = interfaces.getSighash('transfer');
 
-      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+      const contractDeployer = await ethers.getContractFactory(
+        'contracts/mocks/DummyTemplate.sol:DummyTemplate',
+        wallet,
+      );
 
       const elements = [
         constants.HashZero, // value
@@ -688,7 +703,10 @@ describe('Wizadry', () => {
       const sendSig = interfaces.getSighash('send');
       const emitBytes32Sig = interfaces.getSighash('emitBytes32');
 
-      const contractDeployer = await ethers.getContractFactory('contracts/library/Allowlist.sol:Allowlist', wallet);
+      const contractDeployer = await ethers.getContractFactory(
+        'contracts/mocks/DummyTemplate.sol:DummyTemplate',
+        wallet,
+      );
 
       const elements = [
         constants.HashZero, // value

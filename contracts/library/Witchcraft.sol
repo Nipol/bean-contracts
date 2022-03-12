@@ -93,7 +93,7 @@ library Witchcraft {
             }
 
             unchecked {
-                i++;
+                ++i;
             }
         }
 
@@ -163,7 +163,7 @@ library Witchcraft {
             }
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }

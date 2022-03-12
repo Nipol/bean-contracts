@@ -31,7 +31,7 @@ abstract contract Multicall is IMulticall {
             returnData[i] = result;
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }

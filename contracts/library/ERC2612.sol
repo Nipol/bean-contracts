@@ -62,9 +62,10 @@ abstract contract ERC2612 is ERC20, IERC2612 {
         require(deadline >= block.timestamp, "ERC2612/Expired-time");
 
         unchecked {
+            uint256 nonce = nonces[owner]++;
             bytes32 digest = EIP712.hashMessage(
                 DOMAIN_SEPARATOR,
-                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline))
             );
 
             address recovered = ecrecover(digest, v, r, s);

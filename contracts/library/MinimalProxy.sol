@@ -95,29 +95,29 @@ library MinimalProxy {
             creationHash := keccak256(creationPtr, creationSize)
         }
 
-        unchecked {
-            while (true) {
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    mstore(0x0, caller())
-                    mstore(0x20, nonce)
-                    seed := keccak256(0x00, 0x40)
-                }
+        
+        while (true) {
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                mstore(0x0, caller())
+                mstore(0x20, nonce)
+                seed := keccak256(0x00, 0x40)
+            }
 
-                target = address(
-                    uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), seed, creationHash))))
-                );
+            target = address(
+                uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), seed, creationHash))))
+            );
 
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    exist := gt(extcodesize(target), 0)
-                }
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                exist := gt(extcodesize(target), 0)
+            }
 
-                if (!exist) {
-                    break;
-                }
-
-                nonce++;
+            if (!exist) {
+                break;
+            }
+            unchecked {
+                ++nonce;
             }
         }
     }

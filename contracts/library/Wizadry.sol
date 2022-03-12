@@ -163,7 +163,7 @@ abstract contract Wizadry {
             }
 
             unchecked {
-                i++;
+                ++i;
             }
         }
         return elements;

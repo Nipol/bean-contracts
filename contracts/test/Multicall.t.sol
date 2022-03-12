@@ -26,11 +26,11 @@ contract MulticallTest is Multicall, DSTest {
         counter--;
     }
 
-    function revertCall() public {
+    function revertCall() public pure {
         revert("Message From Revert");
     }
 
-    function emptyRevertCall() public {
+    function emptyRevertCall() public pure {
         revert();
     }
 
