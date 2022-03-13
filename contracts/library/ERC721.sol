@@ -38,7 +38,7 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
                 else revert("ERC721: transfer to wrong ERC721Receiver implementer");
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
-                    revert("ERC721: transfer to non ERC721Receiver implementer");
+                    revert("ERC721: transfer to none ERC721Receiver implementer");
                 } else {
                     // solhint-disable-next-line no-inline-assembly
                     assembly {

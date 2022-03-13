@@ -32,6 +32,12 @@ describe('ERC721Enumerable', () => {
     it('should be revert with to zero address', async () => {
       await expect(ERC721Mock.mintTo(constants.AddressZero)).revertedWith('ERC721: mint to the zero address');
     });
+
+    it('should be reverted with already minted token id', async () => {
+      const addr = await Dummy.getAddress();
+      await ERC721Mock.mintToId(addr, 0);
+      await expect(ERC721Mock.mintToId(addr, 0)).revertedWith('ERC721: token already minted');
+    });
   });
 
   describe('#_safemint()', () => {
@@ -55,7 +61,7 @@ describe('ERC721Enumerable', () => {
       );
       const DummyTemplate = await DummyTemplateDeployer.deploy();
       await expect(ERC721Mock['safeMint(address)'](DummyTemplate.address)).revertedWith(
-        'ERC721: transfer to non ERC721Receiver implementer',
+        'ERC721: transfer to none ERC721Receiver implementer',
       );
     });
 
@@ -77,6 +83,15 @@ describe('ERC721Enumerable', () => {
       );
       const ERC721ReceiveMock = await ERC721ReceiveMockDeployer.deploy();
       await expect(ERC721Mock['safeMint(address)'](ERC721ReceiveMock.address)).reverted;
+    });
+
+    it('should be success with wrong implemented receive function', async () => {
+      const ERC721ReceiveMockDeployer = await ethers.getContractFactory(
+        'contracts/mocks/ERC721ReceiveMock.sol:RevertERC721ReceiveMock',
+        wallet,
+      );
+      const ERC721ReceiveMock = await ERC721ReceiveMockDeployer.deploy();
+      await expect(ERC721Mock['safeMint(address)'](ERC721ReceiveMock.address)).revertedWith('Slurp');
     });
 
     it('should be denial `onERC721Received` recall', async () => {
@@ -483,39 +498,45 @@ describe('ERC721Enumerable', () => {
     it('should be revert with not impl receive function', async () => {
       const walletaddr = await wallet.getAddress();
 
-      const DummyTemplateDeployer = await ethers.getContractFactory(
-        'contracts/mocks/DummyTemplate.sol:DummyTemplate',
-        wallet,
-      );
-      const DummyTemplate = await DummyTemplateDeployer.deploy();
+      const DummyTemplate = await (
+        await ethers.getContractFactory('contracts/mocks/DummyTemplate.sol:DummyTemplate', wallet)
+      ).deploy();
 
       await expect(
         ERC721Mock['safeTransferFrom(address,address,uint256)'](walletaddr, DummyTemplate.address, '0'),
-      ).revertedWith('ERC721: transfer to non ERC721Receiver implementer');
+      ).revertedWith('ERC721: transfer to none ERC721Receiver implementer');
     });
 
     it('should be success with implemented receive function', async () => {
       const walletaddr = await wallet.getAddress();
 
-      const ERC721ReceiveMockDeployer = await ethers.getContractFactory(
-        'contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock',
-        wallet,
-      );
-      const ERC721ReceiveMock = await ERC721ReceiveMockDeployer.deploy();
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock', wallet)
+      ).deploy();
 
       expect(await ERC721Mock['safeTransferFrom(address,address,uint256)'](walletaddr, ERC721ReceiveMock.address, '0'))
         .to.emit(ERC721Mock, 'Transfer')
         .withArgs(walletaddr, ERC721ReceiveMock.address, '0');
     });
 
+    it('should be revert with implemented revert receive function', async () => {
+      const walletaddr = await wallet.getAddress();
+
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:RevertERC721ReceiveMock', wallet)
+      ).deploy();
+
+      await expect(
+        ERC721Mock['safeTransferFrom(address,address,uint256)'](walletaddr, ERC721ReceiveMock.address, '0'),
+      ).revertedWith('Slurp');
+    });
+
     it('should be success call from approved address', async () => {
       const walletaddr = await wallet.getAddress();
       const addr2 = await Dummy2.getAddress();
-      const ERC721ReceiveMockDeployer = await ethers.getContractFactory(
-        'contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock',
-        wallet,
-      );
-      const ERC721ReceiveMock = await ERC721ReceiveMockDeployer.deploy();
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock', wallet)
+      ).deploy();
       expect(await ERC721Mock.approve(addr2, '0'))
         .to.emit(ERC721Mock, 'Approval')
         .withArgs(walletaddr, addr2, '0');
@@ -536,11 +557,9 @@ describe('ERC721Enumerable', () => {
     it('should be success call from approved operator', async () => {
       const walletaddr = await wallet.getAddress();
       const addr2 = await Dummy2.getAddress();
-      const ERC721ReceiveMockDeployer = await ethers.getContractFactory(
-        'contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock',
-        wallet,
-      );
-      const ERC721ReceiveMock = await ERC721ReceiveMockDeployer.deploy();
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock', wallet)
+      ).deploy();
       expect(await ERC721Mock.setApprovalForAll(addr2, true))
         .to.emit(ERC721Mock, 'ApprovalForAll')
         .withArgs(walletaddr, addr2, true);

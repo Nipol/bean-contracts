@@ -148,11 +148,23 @@ describe('Beacon Proxy', () => {
     it('should be success check the deployed beacon', async () => {
       let deployaddr = await DummyDeployerMock['calculateIncrement()']();
       await DummyDeployerMock['deployIncrement()']();
-      expect(await DummyDeployerMock.isBeacon(deployaddr['addr'])).equal(true);
+      expect(await DummyDeployerMock['isBeacon(address)'](deployaddr['addr'])).equal(true);
+    });
+
+    it('should be success check the deployed beacon with template', async () => {
+      let deployaddr = await DummyDeployerMock['calculateIncrement()']();
+      await DummyDeployerMock['deployIncrement()']();
+      expect(await DummyDeployerMock['isBeacon(address,address)'](DummyTemplateAddr, deployaddr['addr'])).equal(true);
     });
 
     it('should be success with detect dummy contract', async () => {
-      expect(await DummyDeployerMock.isBeacon(DummyTemplate.address)).to.equal(false);
+      expect(await DummyDeployerMock['isBeacon(address)'](DummyTemplate.address)).to.equal(false);
+    });
+
+    it('should be success with detect dummy contract with template', async () => {
+      expect(await DummyDeployerMock['isBeacon(address,address)'](DummyTemplateAddr, DummyTemplate.address)).to.equal(
+        false,
+      );
     });
   });
 });

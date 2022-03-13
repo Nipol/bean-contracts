@@ -38,7 +38,7 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
                 else revert("ERC721: transfer to wrong ERC721Receiver implementer");
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
-                    revert("ERC721: transfer to non ERC721Receiver implementer");
+                    revert("ERC721: transfer to none ERC721Receiver implementer");
                 } else {
                     // solhint-disable-next-line no-inline-assembly
                     assembly {
@@ -58,12 +58,12 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         uint256 length = owners.length;
         address owneri;
 
-        for (uint256 i; i != length;) {
+        for (uint256 i; i != length; ) {
             owneri = owners[i];
             unchecked {
                 if (target == owneri) count++;
             }
-            
+
             unchecked {
                 ++i;
             }
@@ -131,8 +131,8 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
     function totalSupply() public view virtual returns (uint256 total) {
         address[] memory owners = _owners;
         uint256 length = _owners.length;
-        
-        for (uint256 i; i != length;) {
+
+        for (uint256 i; i != length; ) {
             unchecked {
                 if (owners[i] != address(0)) total++;
             }
@@ -153,8 +153,8 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         uint256 count;
         address[] memory owners = _owners;
         uint256 length = owners.length;
-        
-        for (uint256 i; i != length;) {
+
+        for (uint256 i; i != length; ) {
             unchecked {
                 if (target == owners[i]) {
                     if (count == index) return i;

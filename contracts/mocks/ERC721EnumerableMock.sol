@@ -21,6 +21,10 @@ contract ERC721EnumerableMock is ERC721Enumerable, Ownership {
         _mint(to, _nextId());
     }
 
+    function mintToId(address to, uint256 Id) external {
+        _mint(to, Id);
+    }
+
     function safeMint(address to, bytes memory data) external {
         _safeMint(to, _nextId(), data);
     }

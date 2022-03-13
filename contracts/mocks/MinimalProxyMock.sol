@@ -43,7 +43,11 @@ contract MinimalProxyMock {
         addr = MinimalProxy.computeAddress(template, seed);
     }
 
+    function isMinimal(address _template, address target) external view returns (bool result) {
+        result = MinimalProxy.isMinimal(_template, target);
+    }
+
     function isMinimal(address target) external view returns (bool result) {
-        result = MinimalProxy.isMinimal(template, target);
+        result = MinimalProxy.isMinimal(target);
     }
 }

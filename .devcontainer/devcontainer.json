@@ -50,7 +50,7 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[solidity]": {
-      "editor.defaultFormatter": "JuanBlanco.solidity"
+      "editor.defaultFormatter": "NomicFoundation.hardhat-solidity"
     },
     "files.associations": {
       "*.yul": "solidity",
@@ -67,7 +67,7 @@
     "dbaeumer.vscode-eslint",
     "tintinweb.graphviz-interactive-preview",
     "esbenp.prettier-vscode",
-    "juanblanco.solidity",
+    "JuanBlanco.solidity",
     "tintinweb.solidity-visual-auditor",
     "ms-vscode.vscode-typescript-tslint-plugin",
     "github.vscode-pull-request-github",

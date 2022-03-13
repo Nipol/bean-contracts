@@ -12,9 +12,10 @@ pragma solidity ^0.8.0;
 library MinimalProxy {
     /**
      * @notice template를 기반으로 Minimal Proxy를 배포합니다.
-     * @dev seed 값이 0x0이라면 create로 배포되지만, 그 외의 값인 경우 seed를 이용하여 create2로 배포됩니다. 만약 같은 seed라면, 
+     * @dev If the seed value is 0x0, it is deploy use "create",
+     * but if it is other values, it is deploy use "create2" using seed. If it is the same seed, it will fail.
      * @param template 복사할 컨트랙트 주소
-     * @param seed 해당 값을 기반으로 create2로 배포됩니다.
+     * @param seed This value is not 0x0, it is deploy as create2 based on the corresponding seed.
      */
     function deploy(address template, bytes32 seed) internal returns (address result) {
         (uint256 creationPtr, uint256 creationSize) = creationCode(template);
@@ -70,6 +71,23 @@ library MinimalProxy {
         }
     }
 
+    function isMinimal(address target) internal view returns (bool result) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let template := mload(0x40)
+            let clone := add(template, 0x40)
+            extcodecopy(target, template, 0xa, 0x15)
+
+            mstore(clone, 0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000)
+            mstore(add(clone, 0xa), mload(template))
+            mstore(add(clone, 0x1e), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+
+            let other := add(clone, 0x40)
+            extcodecopy(target, other, 0, 0x2d)
+            result := eq(mload(clone), mload(other))
+        }
+    }
+
     function computeAddress(address template, bytes32 seed) internal view returns (address target) {
         (uint256 creationPtr, uint256 creationSize) = creationCode(template);
         bytes32 creationHash;
@@ -95,7 +113,6 @@ library MinimalProxy {
             creationHash := keccak256(creationPtr, creationSize)
         }
 
-        
         while (true) {
             // solhint-disable-next-line no-inline-assembly
             assembly {

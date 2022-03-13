@@ -1,4 +1,7 @@
-// SPDX-License-Identifier: UNLICENSED
+/**
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
+
 pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
@@ -211,7 +214,7 @@ contract ERC721EnumerableTest is DSTest {
         NoneERC721Receiver r = new NoneERC721Receiver();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("ERC721: transfer to non ERC721Receiver implementer"));
+        cheats.expectRevert(bytes("ERC721: transfer to none ERC721Receiver implementer"));
         nft.safeMint(address(r));
 
         assertEq(nft.balanceOf(address(r)), 0);
@@ -265,7 +268,7 @@ contract ERC721EnumerableTest is DSTest {
         nft.mint();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("ERC721: transfer to non ERC721Receiver implementer"));
+        cheats.expectRevert(bytes("ERC721: transfer to none ERC721Receiver implementer"));
         nft.safeTransferFrom(address(this), address(r), 0);
 
         assertEq(nft.balanceOf(address(r)), 0);

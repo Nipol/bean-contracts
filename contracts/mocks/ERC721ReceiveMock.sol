@@ -27,3 +27,14 @@ contract NoneERC721ReceiveMock is IERC721TokenReceiver {
         return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)asdf"));
     }
 }
+
+contract RevertERC721ReceiveMock is IERC721TokenReceiver {
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) external pure returns (bytes4) {
+        revert("Slurp");
+    }
+}
