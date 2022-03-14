@@ -6,6 +6,8 @@ pragma solidity ^0.8.0;
 
 import "./Witchcraft.sol";
 
+
+
 // Call Type
 uint8 constant FLAG_CT_MASK = 0xc0;
 uint8 constant FLAG_CT_DELEGATECALL = 0x00;

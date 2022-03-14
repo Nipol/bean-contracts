@@ -13,6 +13,11 @@ import {
   recoverAddress,
 } from 'ethers/lib/utils';
 
+enum ERC2612Errors {
+  EXPIRED_TIME = 'ExpiredTime',
+  INVALID_SIGNATURE = 'InvalidSignature',
+}
+
 const EIP712DOMAIN_TYPEHASH = keccak256(
   toUtf8Bytes('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
 );
@@ -103,8 +108,6 @@ describe('StandardToken/ERC2612', () => {
       const sig = joinSignature(
         new SigningKey('0x7c299dda7c704f9d474b6ca5d7fee0b490c8decca493b5764541fe5ec6b65114').signDigest(hash),
       );
-      // console.log(walletAddress);
-      // console.log(recoverAddress(hash, sig));
       const { v, r, s } = splitSignature(sig);
 
       ERC20Mock = ERC20Mock.connect(walletTo);
@@ -120,7 +123,7 @@ describe('StandardToken/ERC2612', () => {
       const walletToAddress = await walletTo.getAddress();
 
       const value = constants.MaxUint256;
-      const chainId = 1;
+      const chainId = 31337;
       const deadline = BigNumber.from('1');
       const nonce = await ERC20Mock.nonces(walletAddress);
 
@@ -142,41 +145,8 @@ describe('StandardToken/ERC2612', () => {
       ERC20Mock = ERC20Mock.connect(walletTo);
 
       await expect(ERC20Mock.permit(walletAddress, walletToAddress, value, deadline, v, r, s)).to.be.revertedWith(
-        'ERC2612/Expired-time',
+        ERC2612Errors.EXPIRED_TIME,
       );
-    });
-
-    it('should be reverted when owner for zero address', async () => {
-      const walletAddress = await wallet.getAddress();
-      const walletToAddress = await walletTo.getAddress();
-
-      const value = constants.MaxUint256;
-      const chainId = 1;
-      const deadline = constants.MaxUint256;
-      const nonce = await ERC20Mock.nonces(walletAddress);
-
-      const digest = await getApprovalDigest(
-        chainId,
-        ERC20Mock,
-        { owner: walletAddress, spender: walletToAddress, value },
-        nonce,
-        deadline,
-      );
-
-      const hash = arrayify(digest);
-
-      const sig = joinSignature(
-        new SigningKey('0x7c299dda7c704f9d474b6ca5d7fee0b490c8decca493b5764541fe5ec6b65114').signDigest(hash),
-      );
-      // console.log(walletAddress);
-      // console.log(recoverAddress(hash, sig));
-      const { v, r, s } = splitSignature(sig);
-
-      ERC20Mock = ERC20Mock.connect(walletTo);
-
-      await expect(
-        ERC20Mock.permit(constants.AddressZero, walletToAddress, value, deadline, v, r, s),
-      ).to.be.revertedWith('ERC2612/Invalid-address-0');
     });
 
     it('should be reverted with invalid signature', async () => {
@@ -184,7 +154,7 @@ describe('StandardToken/ERC2612', () => {
       const walletToAddress = await walletTo.getAddress();
 
       const value = constants.MaxUint256;
-      const chainId = 1;
+      const chainId = 31337;
       const deadline = constants.MaxUint256;
       const nonce = await ERC20Mock.nonces(walletAddress);
 
@@ -207,7 +177,7 @@ describe('StandardToken/ERC2612', () => {
       ERC20Mock = ERC20Mock.connect(walletTo);
 
       await expect(ERC20Mock.permit(walletAddress, walletToAddress, value, deadline, v, fakeR, s)).to.be.revertedWith(
-        'ERC2612/Invalid-Signature',
+        ERC2612Errors.INVALID_SIGNATURE,
       );
     });
 

@@ -2,6 +2,14 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer, ContractFactory } from 'ethers';
 
+enum ERC173Errors {
+  NOT_AUTHORIZED = 'ERC173_NotAuthorized',
+  NOT_ALLOWED = 'ERC173_NotAllowedTo',
+  ASSERT = '0x1',
+  ARITHMETIC_OVERFLOW_OR_UNDERFLOW = '0x11',
+  DIVISION_BY_ZERO = '0x12',
+}
+
 describe('Ownership', () => {
   let InitializeDeployer: ContractFactory;
 
@@ -38,7 +46,7 @@ describe('Ownership', () => {
     });
 
     it('should be revert with non-owner constructor contract', async () => {
-      await expect(OwnershipMockConstruct.connect(Dummy1).trigger()).revertedWith('Ownership/Not-Authorized');
+      await expect(OwnershipMockConstruct.connect(Dummy1).trigger()).revertedWith(ERC173Errors.NOT_AUTHORIZED);
     });
 
     it('should be success non-constructor contract', async () => {
@@ -62,7 +70,7 @@ describe('Ownership', () => {
       await expect(OwnershipMockInitialize.initialize())
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')
         .withArgs(constants.AddressZero, addr);
-      await expect(OwnershipMockInitialize.connect(Dummy1).trigger()).revertedWith('Ownership/Not-Authorized');
+      await expect(OwnershipMockInitialize.connect(Dummy1).trigger()).revertedWith(ERC173Errors.NOT_AUTHORIZED);
       expect(await OwnershipMockInitialize.owner()).to.equal(addr);
     });
   });
@@ -70,7 +78,7 @@ describe('Ownership', () => {
   describe('#transferOwnership()', () => {
     it('should be revert with zero address from constructor contract', async () => {
       await expect(OwnershipMockConstruct.transferOwnership(constants.AddressZero)).revertedWith(
-        'Ownership/Not-Allowed-Zero',
+        ERC173Errors.NOT_ALLOWED,
       );
     });
 
@@ -83,7 +91,7 @@ describe('Ownership', () => {
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')
         .withArgs(constants.AddressZero, addr);
       await expect(OwnershipMockInitialize.transferOwnership(constants.AddressZero)).revertedWith(
-        'Ownership/Not-Allowed-Zero',
+        ERC173Errors.NOT_ALLOWED,
       );
       expect(await OwnershipMockInitialize.owner()).to.equal(addr);
     });
@@ -108,7 +116,7 @@ describe('Ownership', () => {
 
     it('should be revert with non-owner from constructor contract', async () => {
       await OwnershipMockConstruct.resignOwnership();
-      await expect(OwnershipMockConstruct.resignOwnership()).revertedWith('Ownership/Not-Authorized');
+      await expect(OwnershipMockConstruct.resignOwnership()).revertedWith(ERC173Errors.NOT_AUTHORIZED);
     });
 
     it('should be success from non-constructor contract', async () => {
@@ -136,7 +144,7 @@ describe('Ownership', () => {
       await expect(OwnershipMockInitialize.resignOwnership())
         .to.emit(OwnershipMockInitialize, 'OwnershipTransferred')
         .withArgs(addr, constants.AddressZero);
-      await expect(OwnershipMockInitialize.resignOwnership()).revertedWith('Ownership/Not-Authorized');
+      await expect(OwnershipMockInitialize.resignOwnership()).revertedWith(ERC173Errors.NOT_AUTHORIZED);
     });
   });
 });

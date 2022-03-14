@@ -53,9 +53,9 @@ contract SchedulerTest is Scheduler, DSTest {
     }
 
     function testDelaySetWithWrongRange() public {
-        cheats.expectRevert("Scheduler/Delay-is-not-within-Range");
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler_DelayIsNotRange()"))));
         sch.set(2 days, MAXIMUM_DELAY, MINIMUM_DELAY);
-        cheats.expectRevert("Scheduler/Delay-is-not-within-Range");
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler_DelayIsNotRange()"))));
         sch.set(32 days, MINIMUM_DELAY, MAXIMUM_DELAY);
     }
 
@@ -76,7 +76,12 @@ contract SchedulerTest is Scheduler, DSTest {
     function testAlreadyQueued() public {
         sch.set(2 days, MINIMUM_DELAY, MAXIMUM_DELAY);
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
-        cheats.expectRevert("Scheduler/Already-Scheduled");
+        cheats.expectRevert(
+            abi.encodeWithSelector(
+                bytes4(keccak256("Scheduler_AlreadyQueued(bytes32)")),
+                0x0000000000000000000000000000000000000000000000000000000000000001
+            )
+        );
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
     }
 
@@ -87,7 +92,12 @@ contract SchedulerTest is Scheduler, DSTest {
     }
 
     function testNotQueuedTaskResolve() public {
-        cheats.expectRevert("Scheduler/Not-Queued");
+        cheats.expectRevert(
+            abi.encodeWithSelector(
+                bytes4(keccak256("Scheduler_NotQueued(bytes32)")),
+                0x0000000000000000000000000000000000000000000000000000000000000001
+            )
+        );
         sch.setResolve(0x0000000000000000000000000000000000000000000000000000000000000001, GRACE_PERIOD);
     }
 
@@ -95,7 +105,12 @@ contract SchedulerTest is Scheduler, DSTest {
         sch.set(2 days, MINIMUM_DELAY, MAXIMUM_DELAY);
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
 
-        cheats.expectRevert("Scheduler/Not-Reached-Lock");
+        cheats.expectRevert(
+            abi.encodeWithSelector(
+                bytes4(keccak256("Scheduler_RemainingTime(bytes32)")),
+                0x0000000000000000000000000000000000000000000000000000000000000001
+            )
+        );
         sch.setResolve(0x0000000000000000000000000000000000000000000000000000000000000001, GRACE_PERIOD);
     }
 

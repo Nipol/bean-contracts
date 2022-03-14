@@ -4,11 +4,13 @@
 
 pragma solidity ^0.8.0;
 
+error AlreadyInitialized();
+
 abstract contract Initializer {
     bool private _initialized;
 
     modifier initializer() {
-        require(!_initialized || !(address(this).code.length != 0), "Initializer/Already Initialized");
+        if (_initialized && (address(this).code.length != 0)) revert AlreadyInitialized();
         _initialized = true;
         _;
     }

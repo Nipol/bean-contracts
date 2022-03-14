@@ -77,13 +77,6 @@ contract ERC20Test is DSTest {
         assertEq(token.balanceOf(address(this)), 99e18);
     }
 
-    function testCallBurnFromNotOwner() public {
-        token.mintTo(address(1), 100e18);
-        cheats.prank(address(1));
-        cheats.expectRevert(bytes("Ownership/Not-Authorized"));
-        token.burn(1e18);
-    }
-
     function testFailBurnWithNotEnoughAmount() public {
         token.burn(1e18);
     }
@@ -95,7 +88,7 @@ contract ERC20Test is DSTest {
     }
 
     function testApproveForTokenAddr() public {
-        cheats.expectRevert("ERC20/Impossible-Approve-to-Self");
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC20_ApproveToSelf()"))));
         token.approve(address(token), 1);
     }
 

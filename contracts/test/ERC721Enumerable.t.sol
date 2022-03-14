@@ -194,7 +194,9 @@ contract ERC721EnumerableTest is DSTest {
         WrongERC721Receiver r = new WrongERC721Receiver();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("ERC721: transfer to wrong ERC721Receiver implementer"));
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_WrongERC721Receiver(address)")), address(r))
+        );
         nft.safeMint(address(r));
 
         assertEq(nft.balanceOf(address(r)), 0);
@@ -214,7 +216,9 @@ contract ERC721EnumerableTest is DSTest {
         NoneERC721Receiver r = new NoneERC721Receiver();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("ERC721: transfer to none ERC721Receiver implementer"));
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_NoneERC721Receiver(address)")), address(r))
+        );
         nft.safeMint(address(r));
 
         assertEq(nft.balanceOf(address(r)), 0);
@@ -246,7 +250,9 @@ contract ERC721EnumerableTest is DSTest {
         nft.mint();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("ERC721: transfer to wrong ERC721Receiver implementer"));
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_WrongERC721Receiver(address)")), address(r))
+        );
         nft.safeTransferFrom(address(this), address(r), 0);
 
         assertEq(nft.balanceOf(address(r)), 0);
@@ -268,7 +274,9 @@ contract ERC721EnumerableTest is DSTest {
         nft.mint();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("ERC721: transfer to none ERC721Receiver implementer"));
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_NoneERC721Receiver(address)")), address(r))
+        );
         nft.safeTransferFrom(address(this), address(r), 0);
 
         assertEq(nft.balanceOf(address(r)), 0);

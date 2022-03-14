@@ -6,6 +6,8 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IERC20.sol";
 
+error ERC20_ApproveToSelf();
+
 abstract contract ERC20 is IERC20 {
     string public name;
     string public symbol;
@@ -41,7 +43,9 @@ abstract contract ERC20 is IERC20 {
         uint256 value
     ) internal virtual {
         balanceOf[from] -= value;
-        balanceOf[to] += value;
+        unchecked {
+            balanceOf[to] += value;
+        }
         emit Transfer(from, to, value);
     }
 
@@ -50,7 +54,7 @@ abstract contract ERC20 is IERC20 {
         address spender,
         uint256 value
     ) internal virtual {
-        require(spender != address(this), "ERC20/Impossible-Approve-to-Self");
+        if(spender == address(this)) revert ERC20_ApproveToSelf();
         allowance[_owner][spender] = value;
         emit Approval(_owner, spender, value);
     }

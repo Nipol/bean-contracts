@@ -6,6 +6,14 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IScheduler.sol";
 
+error Scheduler_DelayIsNotRange();
+
+error Scheduler_AlreadyQueued(bytes32 taskId);
+
+error Scheduler_NotQueued(bytes32 taskId);
+
+error Scheduler_RemainingTime(bytes32 taskId);
+
 /**
  * @title Scheduler
  * @author yoonsung.eth
@@ -20,10 +28,8 @@ abstract contract Scheduler is IScheduler {
         uint32 minimumDelay,
         uint32 maximumDelay
     ) internal {
-        require(
-            delayValue >= minimumDelay && delayValue <= maximumDelay && minimumDelay < maximumDelay,
-            "Scheduler/Delay-is-not-within-Range"
-        );
+        if (delayValue < minimumDelay || delayValue > maximumDelay || minimumDelay > maximumDelay)
+            revert Scheduler_DelayIsNotRange();
         delay = delayValue;
         emit Delayed(delayValue);
     }
@@ -33,7 +39,7 @@ abstract contract Scheduler is IScheduler {
     }
 
     function queue(bytes32 taskid, uint32 from) internal {
-        require(taskOf[taskid].state == STATE.UNKNOWN, "Scheduler/Already-Scheduled");
+        if (taskOf[taskid].state != STATE.UNKNOWN) revert Scheduler_AlreadyQueued(taskid);
         assert(from >= uint32(block.timestamp));
         uint32 total = from + delay;
         (taskOf[taskid].endTime, taskOf[taskid].state) = (total, STATE.QUEUED);
@@ -42,8 +48,8 @@ abstract contract Scheduler is IScheduler {
 
     function resolve(bytes32 taskid, uint32 gracePeriod) internal {
         Task memory t = taskOf[taskid];
-        require(t.state == STATE.QUEUED, "Scheduler/Not-Queued");
-        require(uint32(block.timestamp) >= t.endTime, "Scheduler/Not-Reached-Lock");
+        if (t.state != STATE.QUEUED) revert Scheduler_NotQueued(taskid);
+        if (t.endTime > uint32(block.timestamp)) revert Scheduler_RemainingTime(taskid);
 
         if (uint32(block.timestamp) >= t.endTime + gracePeriod) {
             (taskOf[taskid].endTime, taskOf[taskid].state) = (0, STATE.STALED);

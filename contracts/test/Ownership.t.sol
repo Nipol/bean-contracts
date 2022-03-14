@@ -33,6 +33,12 @@ contract OwnershipTest is DSTest {
         assertEq(o.owner(), address(1));
     }
 
+    function testTransferOwnershipToZero() public {
+        assertEq(o.owner(), 0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC173_NotAllowedTo(address)")), address(0)));
+        o.transferOwnership(address(0));
+    }
+
     function testResignOwnership() public {
         assertEq(o.owner(), 0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
         o.resignOwnership();
@@ -46,7 +52,7 @@ contract OwnershipTest is DSTest {
     }
 
     function testCallTransferOwnershipFromZeroAddress() public {
-        cheats.expectRevert(bytes("Ownership/Not-Authorized"));
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC173_NotAuthorized(address)")), address(0)));
         cheats.prank(address(0));
         o.transferOwnership(address(1));
     }

@@ -8,6 +8,10 @@ import "./EIP712.sol";
 import "../interfaces/IERC2612.sol";
 import {ERC20} from "./ERC20.sol";
 
+error ExpiredTime();
+
+error InvalidSignature(address recovered);
+
 /**
  * @title Permit
  * @notice An alternative to approveWithAuthorization, provided for
@@ -58,8 +62,7 @@ abstract contract ERC2612 is ERC20, IERC2612 {
         bytes32 r,
         bytes32 s
     ) external virtual {
-        require(owner != address(0), "ERC2612/Invalid-address-0");
-        require(deadline >= block.timestamp, "ERC2612/Expired-time");
+        if(deadline < block.timestamp) revert ExpiredTime();
 
         unchecked {
             uint256 nonce = nonces[owner]++;
@@ -69,7 +72,7 @@ abstract contract ERC2612 is ERC20, IERC2612 {
             );
 
             address recovered = ecrecover(digest, v, r, s);
-            require(recovered != address(0) && recovered == owner, "ERC2612/Invalid-Signature");
+            if(recovered == address(0) || recovered != owner) revert InvalidSignature(recovered);
         }
 
         _approve(owner, spender, value);

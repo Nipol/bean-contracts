@@ -1,7 +1,15 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { Contract, BigNumber, constants, Signer } from 'ethers';
-import { Interface, keccak256 } from 'ethers/lib/utils';
+import { Contract, BigNumber, Signer } from 'ethers';
+import { keccak256 } from 'ethers/lib/utils';
+
+enum SchedulerErrors {
+  DELAY_IS_NOT_RANGED = 'Scheduler_DelayIsNotRange',
+  ALREADY_QUEUED = 'Scheduler_AlreadyQueued',
+  NOT_QUEUED = 'Scheduler_NotQueued',
+  REMAINING_TIME = 'Scheduler_RemainingTime',
+  ASSERT = '0x1',
+}
 
 export async function latestTimestamp(): Promise<number> {
   return (await ethers.provider.getBlock('latest')).timestamp;
@@ -32,11 +40,11 @@ describe('Scheduler', () => {
     });
 
     it('should be revert with minimum delay', async () => {
-      await expect(SchedulerMock.set(day.sub('1'))).revertedWith('Scheduler/Delay-is-not-within-Range');
+      await expect(SchedulerMock.set(day.sub('1'))).revertedWith(SchedulerErrors.DELAY_IS_NOT_RANGED);
     });
 
     it('should be revert minimumDelay value upper than maximumDelay', async () => {
-      await expect(SchedulerMock.set2(day.sub('1'))).revertedWith('Scheduler/Delay-is-not-within-Range');
+      await expect(SchedulerMock.set2(day.sub('1'))).revertedWith(SchedulerErrors.DELAY_IS_NOT_RANGED);
     });
   });
 
@@ -66,7 +74,7 @@ describe('Scheduler', () => {
       expect(await SchedulerMock['_queue(bytes32)'](id))
         .to.emit(SchedulerMock, 'Queued')
         .withArgs(id, day.add(nextLevel));
-      await expect(SchedulerMock['_queue(bytes32)'](id)).revertedWith('Scheduler/Already-Scheduled');
+      await expect(SchedulerMock['_queue(bytes32)'](id)).revertedWith(SchedulerErrors.ALREADY_QUEUED);
     });
 
     it('should be revert with prev time', async () => {
@@ -74,7 +82,7 @@ describe('Scheduler', () => {
       const nextLevel = now + 1;
       await ethers.provider.send('evm_setNextBlockTimestamp', [nextLevel]);
       id = keccak256('0x1234');
-      await expect(SchedulerMock['_queue(bytes32,uint32)'](id, now - 1)).reverted;
+      await expect(SchedulerMock['_queue(bytes32,uint32)'](id, now - 1)).revertedWith(SchedulerErrors.ASSERT);
     });
   });
 
@@ -91,11 +99,11 @@ describe('Scheduler', () => {
 
     it('should be revert with unqueued uid', async () => {
       id = keccak256('0x1234');
-      await expect(SchedulerMock._resolve(id)).revertedWith('Scheduler/Not-Queued');
+      await expect(SchedulerMock._resolve(id)).revertedWith(SchedulerErrors.NOT_QUEUED);
     });
 
     it('should be revert with not reached time', async () => {
-      await expect(SchedulerMock._resolve(id)).revertedWith('Scheduler/Not-Reached-Lock');
+      await expect(SchedulerMock._resolve(id)).revertedWith(SchedulerErrors.REMAINING_TIME);
     });
 
     it('should be success staled id with over the grace period', async () => {
@@ -132,7 +140,7 @@ describe('Scheduler', () => {
         .withArgs(id);
       await expect((await SchedulerMock.taskOf(id))['state']).to.equal(2);
       await expect((await SchedulerMock.taskOf(id))['endTime']).to.equal(0);
-      await expect(SchedulerMock._resolve(id)).revertedWith('Scheduler/Not-Queued');
+      await expect(SchedulerMock._resolve(id)).revertedWith(SchedulerErrors.NOT_QUEUED);
     });
   });
 });

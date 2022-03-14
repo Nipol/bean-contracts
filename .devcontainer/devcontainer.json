@@ -50,7 +50,7 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[solidity]": {
-      "editor.defaultFormatter": "NomicFoundation.hardhat-solidity"
+      "editor.defaultFormatter": "JuanBlanco.solidity"
     },
     "files.associations": {
       "*.yul": "solidity",
@@ -71,8 +71,7 @@
     "tintinweb.solidity-visual-auditor",
     "ms-vscode.vscode-typescript-tslint-plugin",
     "github.vscode-pull-request-github",
-    "styled-components.vscode-styled-components",
-    "NomicFoundation.hardhat-solidity"
+    "styled-components.vscode-styled-components"
   ],
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
