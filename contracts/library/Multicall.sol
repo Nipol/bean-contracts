@@ -17,15 +17,11 @@ abstract contract Multicall is IMulticall {
         returnData = new bytes[](length);
         for (uint256 i; i != length; ) {
             (bool success, bytes memory result) = address(this).delegatecall(callData[i]);
-            // Next 5 lines from https://ethereum.stackexchange.com/a/83577
             if (!success) {
-                // revert called without a message
-                if (result.length < 68) revert();
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
-                    result := add(result, 0x04)
+                    revert(add(32, result), mload(result))
                 }
-                revert(abi.decode(result, (string)));
             }
 
             returnData[i] = result;

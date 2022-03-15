@@ -58,11 +58,12 @@ contract MulticallTest is Multicall, DSTest {
         assertEq(counter, 6);
     }
 
-    function testFailRevertCaseCall() public {
+    function testRevertCaseCall() public {
         bytes memory cd = abi.encodeWithSelector(bytes4(keccak256("decrease()")));
         bytes[] memory cds = new bytes[](1);
         (cds[0]) = (cd);
 
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         IMulticall(address(this)).multicall(cds);
     }
 

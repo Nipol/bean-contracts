@@ -73,12 +73,13 @@ contract AggregatecallTest is DSTest {
         assertEq(c.counter(), 6);
     }
 
-    function testFailRevertCaseCall() public {
+    function testRevertCaseCall() public {
         IAggregatecall.Call memory cd = IAggregatecall.Call({
             target: address(c),
             data: abi.encodeWithSelector(bytes4(keccak256("decrease()")))
         });
 
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         IAggregatecall.Call[] memory cds = new IAggregatecall.Call[](1);
         (cds[0]) = (cd);
 
