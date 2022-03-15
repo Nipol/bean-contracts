@@ -84,7 +84,8 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
         address to,
         uint256 tokenId
     ) public payable virtual {
-        safeTransferFrom(from, to, tokenId, "");
+        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721_NotOwnerOrApprover(msg.sender);
+        _safeTransfer(from, to, tokenId, "");
     }
 
     function transferFrom(
@@ -151,7 +152,7 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
         if (!_exists(tokenId)) revert ERC721_NotExist(tokenId);
         address _owner = ownerOf[tokenId];
-        success = (spender == _owner) || (_approves[tokenId] == spender) || isApprovedForAll(_owner, spender);
+        success = (spender == _owner) || isApprovedForAll(_owner, spender) || (_approves[tokenId] == spender);
     }
 
     function _exists(uint256 tokenId) internal view returns (bool exist) {

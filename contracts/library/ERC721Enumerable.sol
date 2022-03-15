@@ -106,7 +106,8 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         address to,
         uint256 tokenId
     ) public payable virtual {
-        safeTransferFrom(from, to, tokenId, "");
+        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721_NotOwnerOrApprover(msg.sender);
+        _safeTransfer(from, to, tokenId, "");
     }
 
     function transferFrom(
@@ -160,7 +161,7 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
     }
 
     function tokenByIndex(uint256 index) public view virtual returns (uint256) {
-        if(index >= _owners.length) revert ERC721_NotExist(index);
+        if (index >= _owners.length) revert ERC721_NotExist(index);
         return index;
     }
 

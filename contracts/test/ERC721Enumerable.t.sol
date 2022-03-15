@@ -281,4 +281,67 @@ contract ERC721EnumerableTest is DSTest {
 
         assertEq(nft.balanceOf(address(r)), 0);
     }
+
+    function testApprovalForAll() public {
+        nft.mint();
+        nft.setApprovalForAll(address(1), true);
+
+        cheats.prank(address(1));
+        nft.transferFrom(address(this), address(2), 0);
+        assertEq(nft.ownerOf(0), address(2));
+        assertTrue(nft.isApprovedForAll(address(this), address(1)));
+    }
+
+    function testApprovalForAllToSelf() public {
+        cheats.expectRevert(
+            abi.encodeWithSelector(
+                bytes4(keccak256("ERC721_NotApproved(address,address)")),
+                address(this),
+                address(this)
+            )
+        );
+        nft.setApprovalForAll(address(this), true);
+    }
+
+    function testNotExistTransfer() public {
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721_NotExist(uint256)")), 0));
+        nft.transferFrom(address(this), address(1), 0);
+    }
+
+    function testNotApprovedTransfer() public {
+        nft.mintTo(address(1));
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_NotOwnerOrApprover(address)")), address(this))
+        );
+        nft.transferFrom(address(this), address(2), 0);
+    }
+
+    function testTransferToZero() public {
+        nft.mint();
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_NotAllowed(address,uint256)")), address(0), 0)
+        );
+        nft.transferFrom(address(this), address(0), 0);
+    }
+
+    function testNotExistSafeTransfer() public {
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721_NotExist(uint256)")), 0));
+        nft.safeTransferFrom(address(this), address(1), 0, "");
+    }
+
+    function testNotApprovedSafeTransfer() public {
+        nft.mintTo(address(1));
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_NotOwnerOrApprover(address)")), address(this))
+        );
+        nft.safeTransferFrom(address(this), address(2), 0, "");
+    }
+
+    function testSafeTransferToZero() public {
+        nft.mint();
+        cheats.expectRevert(
+            abi.encodeWithSelector(bytes4(keccak256("ERC721_NotAllowed(address,uint256)")), address(0), 0)
+        );
+        nft.safeTransferFrom(address(this), address(0), 0, "");
+    }
 }

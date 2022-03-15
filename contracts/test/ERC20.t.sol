@@ -5,7 +5,7 @@
 pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
-import "../mocks/TokenMock.sol";
+import {TokenMock, IERC20, IERC165, IERC173, IERC2612} from "../mocks/TokenMock.sol";
 
 interface CheatCodes {
     function prank(address) external;
@@ -44,6 +44,17 @@ contract ERC20Test is DSTest {
         assertEq(token.balanceOf(address(1)), 100e18);
     }
 
+    function testBurnTheToken() public {
+        token.mint(100e18);
+        assertEq(token.balanceOf(address(this)), 100e18);
+        token.burn(1e18);
+        assertEq(token.balanceOf(address(this)), 99e18);
+    }
+
+    function testFailBurnWithNotEnoughAmount() public {
+        token.burn(1e18);
+    }
+
     function testTransfer() public {
         token.mint(100e18);
         assertEq(token.totalSupply(), 100e18);
@@ -55,8 +66,9 @@ contract ERC20Test is DSTest {
         assertEq(token.balanceOf(address(1)), 100e18);
     }
 
-    function testFailNoneApprovedTransferFrom() public {
+    function testNoneApprovedTransferFrom() public {
         token.mintTo(address(1), 100e18);
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         token.transferFrom(address(1), address(this), 100e18);
     }
 
@@ -70,21 +82,13 @@ contract ERC20Test is DSTest {
         assertEq(token.allowance(address(1), address(this)), 0);
     }
 
-    function testBurnTheToken() public {
-        token.mint(100e18);
-        assertEq(token.balanceOf(address(this)), 100e18);
-        token.burn(1e18);
-        assertEq(token.balanceOf(address(this)), 99e18);
-    }
-
-    function testFailBurnWithNotEnoughAmount() public {
-        token.burn(1e18);
-    }
-
-    function testFailTransferZeroBalance() public {
-        assertEq(token.totalSupply(), 0);
-        assertEq(token.balanceOf(address(this)), 0);
-        token.transfer(address(1), 1);
+    function testApprovedTransferFromOverBalance() public {
+        token.mintTo(address(1), 100e18);
+        cheats.prank(address(1));
+        token.approve(address(this), 100e18);
+        assertEq(token.allowance(address(1), address(this)), 100e18);
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        token.transferFrom(address(1), address(this), 101e18);
     }
 
     function testApproveForTokenAddr() public {
@@ -92,16 +96,18 @@ contract ERC20Test is DSTest {
         token.approve(address(token), 1);
     }
 
-    /**
-     * in this cases, to target has infinity amount, overflowed.
-     * but, this cases is rare.
-     */
-    // function testFailTransferToTokenAddr() public {
-    //     token.mint(2);
-    //     assertEq(token.totalSupply(), 2);
-    //     assertEq(token.balanceOf(address(this)), 2);
-    //     assertEq(token.balanceOf(address(token)), type(uint256).max);
-    //     token.transfer(address(token), 2);
-    //     assertEq(token.balanceOf(address(token)), 1);
-    // }
+    function testTransferOverBalance() public {
+        assertEq(token.totalSupply(), 0);
+        assertEq(token.balanceOf(address(this)), 0);
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        token.transfer(address(1), 1);
+    }
+
+    function testSupportInterface() public {
+        assertTrue(token.supportsInterface(type(IERC20).interfaceId));
+        assertTrue(token.supportsInterface(type(IERC165).interfaceId));
+        assertTrue(token.supportsInterface(type(IERC173).interfaceId));
+        assertTrue(token.supportsInterface(type(IERC2612).interfaceId));
+        assertTrue(!token.supportsInterface(0xDEADBEEF));
+    }
 }
