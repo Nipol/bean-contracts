@@ -4,3 +4,6 @@
 [submodule "foundry_seminar/lib/ds-test"]
 	path = foundry_seminar/lib/ds-test
 	url = https://github.com/dapphub/ds-test
+[submodule "foundry_seminar/lib/forge-std"]
+	path = foundry_seminar/lib/forge-std
+	url = https://github.com/brockelmore/forge-std
