@@ -5,7 +5,6 @@ src = 'contracts'
 out = 'artifacts'
 libs = ['node_modules']
 gas_reports = ["*"]
-solc_version = "0.8.11"
 
 [default.optimizer_details]
 constantOptimizer = true
