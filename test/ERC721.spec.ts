@@ -407,7 +407,7 @@ describe('ERC721', () => {
       const walletaddr = await wallet.getAddress();
       const addr = await Dummy.getAddress();
       await expect(ERC721Mock['safeTransferFrom(address,address,uint256)'](walletaddr, addr, '5')).revertedWith(
-        ERC721Errors.NOT_EXIST
+        ERC721Errors.NOT_EXIST,
       );
     });
 
@@ -491,6 +491,49 @@ describe('ERC721', () => {
       expect(await ERC721Mock.balanceOf(walletaddr)).to.equal('0');
       expect(await ERC721Mock.balanceOf(ERC721ReceiveMock.address)).to.equal('1');
       expect(await ERC721Mock.ownerOf('0')).to.equal(ERC721ReceiveMock.address);
+    });
+
+    it('should be success with implemented receive function with calldata', async () => {
+      const walletaddr = await wallet.getAddress();
+
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock', wallet)
+      ).deploy();
+
+      expect(
+        await ERC721Mock['safeTransferFrom(address,address,uint256,bytes)'](
+          walletaddr,
+          ERC721ReceiveMock.address,
+          '0',
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        ),
+      )
+        .to.emit(ERC721Mock, 'Transfer')
+        .withArgs(walletaddr, ERC721ReceiveMock.address, '0');
+
+      expect(await ERC721ReceiveMock.counter()).equal('1');
+    });
+
+    it('should be reverted with not owned nft, caller is not owner with calldata', async () => {
+      const walletaddr = await wallet.getAddress();
+      const addr = await Dummy.getAddress();
+
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock', wallet)
+      ).deploy();
+
+      await expect(
+        ERC721Mock.connect(Dummy2)['safeTransferFrom(address,address,uint256,bytes)'](
+          addr,
+          ERC721ReceiveMock.address,
+          '0',
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        ),
+      ).revertedWith(ERC721Errors.NOT_OWNER_OR_APPROVER);
+      expect(await ERC721Mock.balanceOf(walletaddr)).to.equal('1');
+      expect(await ERC721Mock.balanceOf(addr)).to.equal('1');
+      expect(await ERC721Mock.ownerOf('0')).to.equal(walletaddr);
+      expect(await ERC721ReceiveMock.counter()).equal('0');
     });
   });
 });

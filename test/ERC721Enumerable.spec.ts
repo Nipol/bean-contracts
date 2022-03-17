@@ -12,6 +12,7 @@ enum ERC721Errors {
   NOT_EXIST = 'ERC721_NotExist',
   ALREADY_EXIST = 'ERC721_AlreadyExist',
   OUT_OF_INDEX = 'ERC721Enumerable_OutOfIndex',
+  OUT_OF_BOUND = '0x32',
 }
 
 describe('ERC721Enumerable', () => {
@@ -140,9 +141,16 @@ describe('ERC721Enumerable', () => {
     });
 
     it('should be revert with none existed nft', async () => {
-      await expect(ERC721Mock.burn('3')).reverted;
+      await expect(ERC721Mock.burn('3')).revertedWith(ERC721Errors.OUT_OF_BOUND);
       expect(await ERC721Mock.ownerOf('3')).equal(constants.AddressZero);
       expect(await ERC721Mock.totalSupply()).to.equal('2');
+    });
+
+    it('should be revert with none exist nft', async () => {
+      await ERC721Mock.burn('0');
+      await expect(ERC721Mock.burn('0')).revertedWith(ERC721Errors.NOT_ALLOWED);
+      expect(await ERC721Mock.ownerOf('0')).equal(constants.AddressZero);
+      expect(await ERC721Mock.totalSupply()).to.equal('1');
     });
   });
 
@@ -572,6 +580,49 @@ describe('ERC721Enumerable', () => {
       expect(await ERC721Mock.balanceOf(walletaddr)).to.equal('0');
       expect(await ERC721Mock.balanceOf(ERC721ReceiveMock.address)).to.equal('1');
       expect(await ERC721Mock.ownerOf('0')).to.equal(ERC721ReceiveMock.address);
+    });
+
+    it('should be success with implemented receive function with calldata', async () => {
+      const walletaddr = await wallet.getAddress();
+
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock', wallet)
+      ).deploy();
+
+      expect(
+        await ERC721Mock['safeTransferFrom(address,address,uint256,bytes)'](
+          walletaddr,
+          ERC721ReceiveMock.address,
+          '0',
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        ),
+      )
+        .to.emit(ERC721Mock, 'Transfer')
+        .withArgs(walletaddr, ERC721ReceiveMock.address, '0');
+
+      expect(await ERC721ReceiveMock.counter()).equal('1');
+    });
+
+    it('should be reverted with not owned nft, caller is not owner with calldata', async () => {
+      const walletaddr = await wallet.getAddress();
+      const addr = await Dummy.getAddress();
+
+      const ERC721ReceiveMock = await (
+        await ethers.getContractFactory('contracts/mocks/ERC721ReceiveMock.sol:ERC721ReceiveMock', wallet)
+      ).deploy();
+
+      await expect(
+        ERC721Mock.connect(Dummy2)['safeTransferFrom(address,address,uint256,bytes)'](
+          addr,
+          ERC721ReceiveMock.address,
+          '0',
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        ),
+      ).revertedWith(ERC721Errors.NOT_OWNER_OR_APPROVER);
+      expect(await ERC721Mock.balanceOf(walletaddr)).to.equal('1');
+      expect(await ERC721Mock.balanceOf(addr)).to.equal('1');
+      expect(await ERC721Mock.ownerOf('0')).to.equal(walletaddr);
+      expect(await ERC721ReceiveMock.counter()).equal('0');
     });
   });
 });
