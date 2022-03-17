@@ -55,13 +55,8 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# PATH
-RUN su node -c "echo 'export PATH=\"$PATH:/home/node/.local/bin:/home/node/.foundry/bin\"' >> /home/node/.bashrc" \
-    && su node -c "echo 'export PATH=\"$PATH:/home/node/.local/bin:/home/node/.foundry/bin\"' >> /home/node/.zshrc" \
-    # install solc
-    && su node -c "pip3 install solc-select" \
-    # && su node -c "solc-select install ${SOLC_VERSION}" \
-    # && su node -c "solc-select use ${SOLC_VERSION}" \
+# install solc
+RUN su node -c "pip3 install solc-select" \
     # install Foundry
     && su node -c "curl -L https://foundry.paradigm.xyz | zsh"
 
