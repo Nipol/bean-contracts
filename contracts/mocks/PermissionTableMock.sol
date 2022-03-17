@@ -1,0 +1,17 @@
+/**
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
+
+pragma solidity ^0.8.0;
+
+import "../library/PermissionTable.sol";
+
+contract PermissionTableMock is PermissionTable {
+    function Grant(
+        address envoy,
+        bytes4 sig,
+        bytes3 permission
+    ) external {
+        grant(envoy, sig, permission);
+    }
+}
