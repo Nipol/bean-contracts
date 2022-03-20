@@ -63,12 +63,12 @@
     "url": "https://github.com/Nipol/bean-contracts"
   },
   "scripts": {
-    "build": "npx hardhat compile",
+    "build": "hardhat compile",
     "test": "npm run test:forge && npm run test:hardhat",
     "test:forge": "forge test",
-    "test:hardhat": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
+    "test:hardhat": "export TS_NODE_TRANSPILE_ONLY=1 && hardhat test",
     "snapshot": "forge snapshot",
-    "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
+    "coverage": "hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
     "coverage:server": "npm run coverage && http-server ./coverage -s -c-1",
     "docs": "scripts/docs.sh",
     "lint": "npm run lint:js && npm run lint:sol",
