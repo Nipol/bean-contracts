@@ -6,8 +6,6 @@ pragma solidity ^0.8.0;
 
 import "./Witchcraft.sol";
 
-
-
 // Call Type
 uint8 constant FLAG_CT_MASK = 0xc0;
 uint8 constant FLAG_CT_DELEGATECALL = 0x00;
@@ -30,17 +28,6 @@ uint256 constant SHORT_SPELL_FILL = 0x00000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
  */
 abstract contract Wizadry {
     using Witchcraft for bytes[];
-
-    address immutable self;
-
-    modifier ensureOnCall() {
-        require(address(this) == self);
-        _;
-    }
-
-    constructor() {
-        self = address(this);
-    }
 
     /**
      * @notice
@@ -105,16 +92,17 @@ abstract contract Wizadry {
      *       └──────┴───────────────────┘
      *       if 0xfe, use Entire ELEMENTS.
      */
-    function cast(bytes32[] calldata spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
+    function cast(bytes32[] calldata spells, bytes[] memory elements) internal returns (bytes[] memory) {
         bytes32 command;
-        uint8 flags;
         bytes32 indices;
+        uint256 length = spells.length;
+        uint8 flags;
         bytes1 outputPos;
 
         bool success;
         bytes memory outdata;
 
-        for (uint256 i; i != spells.length; ) {
+        for (uint256 i; i != length; ) {
             command = spells[i];
             flags = uint8(bytes1(command << 32));
 
@@ -145,16 +133,12 @@ abstract contract Wizadry {
                 (success, outdata) = address(uint160(uint256(command))).staticcall(
                     elements.toSpell(bytes4(command), indices)
                 );
-            } else {
-                revert("Invalid calltype");
             }
 
             if (!success) {
-                // pass along failure message from calls and revert.
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
-                    returndatacopy(0, 0, returndatasize())
-                    revert(0, returndatasize())
+                    revert(add(32, outdata), mload(outdata))
                 }
             }
 

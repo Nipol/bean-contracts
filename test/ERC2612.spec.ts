@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ethers, config } from 'hardhat';
+import hre, { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
 import {
   keccak256,
@@ -181,50 +181,66 @@ describe('StandardToken/ERC2612', () => {
       );
     });
 
-    // some times... just fail.
-    it('ethers.js sign', async () => {
-      //0x22310Bf73bC88ae2D2c9a29Bd87bC38FBAc9e6b0
-      // const privateKey = '0x7c299dda7c704f9d474b6ca5d7fee0b490c8decca493b5764541fe5ec6b65114';
-      // const wallet = new ethers.Wallet(privateKey, new ethers.providers.Web3Provider(Dummy.provider as any));
-      // const walletAddress = await wallet.getAddress();
-      // const walletToAddress = await walletTo.getAddress();
-      // const name = await ERC20Mock.name();
-      // const version = '1';
-      // const chainId = 31337; // hardhat testnet chainid.
-      // const tokenAddress = ERC20Mock.address;
-      // const value = constants.MaxUint256;
-      // const deadline = constants.MaxUint256;
-      // const nonce = await ERC20Mock.nonces(walletAddress);
-      // interface Domain {
-      //   name: string;
-      //   version: string;
-      //   chainId: number;
-      //   verifyingContract: string;
-      // }
-      // const domain: Domain = { name, version, chainId, verifyingContract: tokenAddress };
-      // const types = {
-      //   Permit: [
-      //     { name: 'owner', type: 'address' },
-      //     { name: 'spender', type: 'address' },
-      //     { name: 'value', type: 'uint256' },
-      //     { name: 'nonce', type: 'uint256' },
-      //     { name: 'deadline', type: 'uint256' },
-      //   ],
-      // };
-      // const message = {
-      //   owner: walletAddress,
-      //   spender: walletToAddress,
-      //   value,
-      //   nonce,
-      //   deadline,
-      // };
-      // // console.log(wallet);
-      // const rawSig = await wallet._signTypedData(domain, types, message);
-      // const { v, r, s } = splitSignature(rawSig);
-      // await expect(ERC20Mock.connect(walletTo).permit(walletAddress, walletToAddress, value, deadline, v, r, s))
-      //   .to.emit(ERC20Mock, 'Approval')
-      //   .withArgs(walletAddress, walletToAddress, value);
-      // expect(await ERC20Mock.connect(walletTo).allowance(walletAddress, walletToAddress)).to.be.equal(value);
+    it('should be success with eth_signTypedData_v4', async () => {
+      const walletAddress = await wallet.getAddress();
+      const walletToAddress = await walletTo.getAddress();
+
+      const name = await ERC20Mock.name();
+      const version = '1';
+      const chainId = await wallet.getChainId();
+      const tokenAddress = ERC20Mock.address;
+      const value = constants.MaxUint256;
+      const nonce = await ERC20Mock.nonces(walletAddress);
+      const deadline = constants.MaxUint256;
+
+      const types = {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Permit: [
+          { name: 'owner', type: 'address' },
+          { name: 'spender', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      };
+
+      const primaryType = 'Permit' as const;
+
+      const domain = {
+        name: name,
+        version: version,
+        chainId: chainId,
+        verifyingContract: tokenAddress,
+      };
+
+      const message = {
+        owner: walletAddress,
+        spender: walletToAddress,
+        value: value.toString(),
+        nonce: nonce.toString(),
+        deadline: deadline.toString(),
+      };
+
+      const typedMessage = {
+        domain,
+        types,
+        message,
+        primaryType,
+      };
+
+      const sig = await hre.network.provider.send('eth_signTypedData_v4', [walletAddress, typedMessage]);
+
+      const { v, r, s } = splitSignature(sig);
+
+      await expect(ERC20Mock.connect(walletTo).permit(walletAddress, walletToAddress, value, deadline, v, r, s))
+        .to.emit(ERC20Mock, 'Approval')
+        .withArgs(walletAddress, walletToAddress, value);
+      expect(await ERC20Mock.connect(walletTo).allowance(walletAddress, walletToAddress)).to.be.equal(value);
     });
   });
 });

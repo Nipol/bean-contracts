@@ -85,7 +85,7 @@ describe('Wizadry', () => {
   });
 
   describe('#cast()', () => {
-    it('should be successfully transfer token with call', async () => {
+    it('should be successfully transfer token before balance check using call', async () => {
       const ABI = ['function balanceOf(address target)', 'function transfer(address to,uint256 value)'];
       const interfaces = new Interface(ABI);
       const balanceOfsig = interfaces.getSighash('balanceOf');
@@ -98,8 +98,8 @@ describe('Wizadry', () => {
       const spells = [
         utils.concat([
           balanceOfsig, // function selector
-          '0x40', // flag return value not tuple
-          '0x00', // value position from elements array
+          '0x40', // flag 0x01000000 - call, no ext, no tuple
+          '0x00', // 00000000 static elements position 0
           '0xFF',
           '0xFF',
           '0xFF',
@@ -110,9 +110,9 @@ describe('Wizadry', () => {
         ]),
         utils.concat([
           transferSig, // function selector
-          '0x40', // flag
-          '0x01', // value position from elements array
-          '0x00',
+          '0x40', // flag 0x01000000 - call, no ext, no tuple
+          '0x01', // 00000000 static elements position 1
+          '0x00', // 00000000 static elements position 0
           '0xFF',
           '0xFF',
           '0xFF',
@@ -126,7 +126,7 @@ describe('Wizadry', () => {
       expect(await TokenMock.balanceOf(await Dummy.getAddress())).to.equal(initialToken);
     });
 
-    it('should be successfully transfer token with delegatecall', async () => {
+    it('should be successfully transfer token before balance check using delegatecall', async () => {
       const ABI = [
         'function balanceOf(address ERC20,address target)',
         'function safeTransfer(address ERC20,address to,uint256 value)',
@@ -143,9 +143,9 @@ describe('Wizadry', () => {
       const spells = [
         utils.concat([
           balanceOfsig, // function selector from address
-          '0x00', // flag return value not tuple
-          '0x00', // value position from elements array
-          '0x01',
+          '0x00', // flag 0x00000000 - delegatecall, no ext, no tuple
+          '0x00', // 00000000 static elements position 0
+          '0x01', // 00000000 static elements position 1
           '0xFF',
           '0xFF',
           '0xFF',
@@ -155,10 +155,10 @@ describe('Wizadry', () => {
         ]),
         utils.concat([
           transferSig, // function selector from address
-          '0x00', // flag
-          '0x00', // value position from elements array
-          '0x02',
-          '0x01',
+          '0x00', // flag 0x00000000 - delegatecall, no ext, no tuple
+          '0x00', // 00000000 static elements position 0
+          '0x02', // 00000010 static elements position 2
+          '0x01', // 00000001 static elements position 1
           '0xFF',
           '0xFF',
           '0xFF',
@@ -171,7 +171,7 @@ describe('Wizadry', () => {
       expect(await TokenMock.balanceOf(await Dummy.getAddress())).to.equal(initialToken);
     });
 
-    it('should be successfully function with value call', async () => {
+    it('should be successfully transfer with call value to Vault', async () => {
       await wallet.sendTransaction({
         to: WizadryMock.address,
         value: ethers.utils.parseEther('1.0'), // Sends exactly 1.0 ether
@@ -187,8 +187,8 @@ describe('Wizadry', () => {
       const spells = [
         utils.concat([
           saveSig, // function selector from address
-          '0x80', // flag return value not tuple
-          '0x00', // value position from elements array
+          '0x80', // flag 0x10000000 - call with value, no ext, no tuple
+          '0x00', // 00000000 static elements position 0
           '0xFF',
           '0xFF',
           '0xFF',
@@ -226,58 +226,103 @@ describe('Wizadry', () => {
       const spells = [
         utils.concat([
           splitSig, // function selector from Library address
-          '0x10', // flag delegatecall with tuple
-          '0x80', // value position from elements array. this value is over 32bytes
-          '0xFF', // value position from elements array. this value is over 32bytes
+          '0x10', // flag 0x00010000 - delegatecall, no ext, tuple
+          '0x80', // 10000000 encode elements position 0
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0x00', // returned data position on elements array. this value is over 32bytes
+          '0xFF',
+          '0x00', // 00000000 returned data position 0
           BytesLib.address, // address
         ]),
         utils.concat([
           mergeSig, // function selector from Library address
-          '0x00', // flag delegatecall
-          '0x40', // value position from elements array. this value is over 32bytes
+          '0x00', // flag 0x00000000 - delegatecall, no ext, no tuple
+          '0x40', // 010000000 pack elements position 0
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0x40', // returned data position
+          '0x40', // 01000000 pack elements returned data position 0
           BytesLib.address, // address
         ]),
         utils.concat([
           splitSig, // function selector from Library address
-          '0x10', // flag delegatecall with tuple
-          '0x80', // value position from elements array. this value is over 32bytes
-          '0xFF', // value position from elements array. this value is over 32bytes
+          '0x10', // flag 0x00010000 - delegatecall, no ext, tuple
+          '0x80', // 10000000 value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0x00', // returned data position on elements array. this value is over 32bytes
+          '0xFF',
+          '0x00', // 00000000 returned data position 0
+          BytesLib.address, // address
+        ]),
+        utils.concat([
+          mergeSig, // function selector from Library address
+          '0x00', // flag 0x00000000 - delegatecall, no ext, no tuple
+          '0x40', // 010000000 pack elements position 0
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x40', // 01000000 pack elements returned data position 0
+          BytesLib.address, // address
+        ]),
+        utils.concat([
+          splitSig, // function selector from Library address
+          '0x10', // flag 0x00010000 - delegatecall, no ext, tuple
+          '0x80', // 10000000 value position from elements array. this value is over 32bytes
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0xFF',
+          '0x00', // 00000000 returned data position 0
           BytesLib.address, // address
         ]),
         utils.concat([
           ecrecoverSig, // function selector from Library address
-          '0x00', // flag delegatecall with tuple
-          '0x01', // value position from elements array. this value is over 32bytes
-          '0x40', // value position from elements array. this value is over 32bytes
+          '0x00', // flag 0x00000000 - delegatecall, no ext, no tuple
+          '0x01', // 00000001 value position from elements array. this value is over 32bytes
+          '0x40', // 01000000 value position from elements array. this value is over 32bytes
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0x00', // returned data position on elements array. this value is over 32bytes
+          '0x00', // 00000000 returned data position 0
           CryptographyLib.address,
         ]),
       ];
 
+      // recovered address and digest
       expect(await WizadryMock.callStatic._cast(spells, elements)).to.deep.equal([
         '0x00000000000000000000000022310Bf73bC88ae2D2c9a29Bd87bC38FBAc9e6b0'.toLocaleLowerCase(),
         '0x00000000000000000000000000000000000000000000000000000000000001FA'.toLocaleLowerCase(),
       ]);
+    });
+
+    it('should be drop the tuple', async () => {
+      const hash = arrayify('0x00000000000000000000000000000000000000000000000000000000000001FA');
+
+      // for 0x22310Bf73bC88ae2D2c9a29Bd87bC38FBAc9e6b0
+      const sig = joinSignature(
+        new SigningKey('0x7c299dda7c704f9d474b6ca5d7fee0b490c8decca493b5764541fe5ec6b65114').signDigest(hash),
+      );
+
+      const ABI = [
+        'function splitSignature(bytes memory sig) external pure returns (uint8 v, bytes32 r, bytes32 s)',
+        'function mergeSignature(uint8 v, bytes32 r, bytes32 s) external pure returns (bytes memory signature)',
+        'function ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) external pure returns (address addr)',
+      ];
+      const interfaces = new Interface(ABI);
+      const splitSig = interfaces.getSighash('splitSignature');
+      const mergeSig = interfaces.getSighash('mergeSignature');
+      const ecrecoverSig = interfaces.getSighash('ecrecover');
+      const elements = [sig, hash];
     });
 
     it('should be successfully string concatening using lib with delegatecall', async () => {
@@ -293,20 +338,20 @@ describe('Wizadry', () => {
       const spells = [
         utils.concat([
           strcatSig, // function selector from Library address
-          '0x00', // flag delegatecall
-          '0xC0', // value position from elements array. this value is over 32bytes
-          '0xC1', // value position from elements array. this value is over 32bytes
+          '0x00', // flag 0x00000000 - delegatecall, no ext, no tuple
+          '0xC0', // 11000000 dynamic elements position 0
+          '0xC1', // 11000001 dynamic elements position 1
           '0xFF',
           '0xFF',
           '0xFF',
           '0xFF',
-          '0xC0', // returned data position on elements array. this value is over 32bytes
+          '0xC0', // 11000000 dynamic returned data position 0
           StringLib.address, // address
         ]),
         utils.concat([
           emitStrSig, // function selector from Library address
-          '0x00', // flag delegatecall
-          '0xC0', // value position from elements array. this value is over 32bytes
+          '0x00', // flag 0x00000000 - delegatecall, no ext, no tuple
+          '0xC0', // 11000000 dynamic elements position 0
           '0xFF',
           '0xFF',
           '0xFF',
