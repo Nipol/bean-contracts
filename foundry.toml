@@ -5,6 +5,7 @@ src = 'contracts'
 out = 'artifacts'
 libs = ['node_modules']
 gas_reports = ["*"]
+via_ir = false
 
 [default.optimizer_details]
 constantOptimizer = true
