@@ -24,7 +24,7 @@ error InvalidSignature(address recovered);
  *   withdrawal attacks
  */
 abstract contract ERC2612 is ERC20, IERC2612 {
-    bytes32 public immutable PERMIT_TYPEHASH =
+    bytes32 public constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     bytes32 public DOMAIN_SEPARATOR;
