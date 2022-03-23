@@ -120,9 +120,9 @@ library BeaconProxy {
         while (true) {
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                mstore(0x0, caller())
-                mstore(0x20, nonce)
-                seed := keccak256(0x00, 0x40)
+                mstore(0x80, caller())
+                mstore(0xa0, nonce)
+                seed := keccak256(0x80, 0xc0)
             }
 
             target = address(
