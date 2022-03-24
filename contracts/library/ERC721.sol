@@ -25,8 +25,10 @@ error ERC721_AlreadyExist(uint256 tokenId);
 
 /**
  * @author yoonsung.eth
- * @notice ERC721의 모든 명세를 만족하는 구현체로써, NFT를 구성하는 외적 정보는 해당 라이브러리를 사용하는 유저가 구현하여 사용할 수 있도록 합니다.
- * @dev NFT는 추가발행될 필요가 있으므로 internal mint 함수를 포함하고 있으며, 이를 이용하는 라이브러리가 Ownership을 적절하게
+ * @notice As an implementation that meets all the specifications of ERC721, 
+ * the external information constituting NFT is implemented and available to users using the library.
+ * @dev As some NFTs are continuously additionally issued, this library include an internal mint function,
+ * and the contract using it must properly tune Ownership.
  */
 abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
     string public name;
@@ -37,7 +39,7 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe {
     mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     /**
-     * @notice 해당 컨트랙트와 상호작용 하는 대상이 컨트랙트인 경우, NFT를 컨트롤 할 수 있는
+     * @notice 해당 NFT와 상호작용 하는 대상이 컨트랙트인 경우, NFT를 컨트롤 할 수 있는 인터페이스가 있는지 확인.
      */
     modifier checkERC721Receive(
         address from,

@@ -10,10 +10,10 @@ library EIP712 {
 
     /**
      * @dev Calculates a EIP712 domain separator.
-     * @param name The EIP712 domain name.
-     * @param version The EIP712 domain version.
-     * @param verifyingContract The EIP712 verifying contract.
-     * @return result EIP712 domain separator.
+     * @param name              EIP712 domain name.
+     * @param version           EIP712 domain version.
+     * @param verifyingContract EIP712 verifying contract.
+     * @return result           EIP712 domain separator.
      */
     function hashDomainSeperator(
         string memory name,
@@ -42,11 +42,11 @@ library EIP712 {
 
     /**
      * @dev Calculates a EIP712 domain separator.
-     * @param name The EIP712 domain name.
-     * @param version The EIP712 domain version.
-     * @param verifyingContract The EIP712 verifying contract.
-     * @param salt The EIP712 verifying contract.
-     * @return result EIP712 domain separator.
+     * @param name              EIP712 domain name.
+     * @param version           EIP712 domain version.
+     * @param verifyingContract EIP712 verifying contract.
+     * @param salt              EIP712 optional salt
+     * @return result           EIP712 domain separator.
      */
     function hashDomainSeperator(
         string memory name,
@@ -77,9 +77,9 @@ library EIP712 {
 
     /**
      * @dev Calculates EIP712 encoding for a hash struct with a given domain hash.
-     * @param domainHash Hash of the domain domain separator data, computed with getDomainHash().
-     * @param hashStruct The EIP712 hash struct.
-     * @return result EIP712 hash applied to the given EIP712 Domain.
+     * @param domainHash    Hash of the domain domain separator data, computed with getDomainHash().
+     * @param hashStruct    The EIP712 hash struct.
+     * @return result       EIP712 hash applied to the given EIP712 Domain.
      */
     function hashMessage(bytes32 domainHash, bytes32 hashStruct) internal pure returns (bytes32 result) {
         // solhint-disable-next-line no-inline-assembly

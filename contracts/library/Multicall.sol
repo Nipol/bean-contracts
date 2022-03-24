@@ -9,9 +9,15 @@ import "../interfaces/IMulticall.sol";
 /**
  * @title Multicall
  * @author yoonsung.eth
- * @notice 컨트랙트가 가지고 있는 트랜잭션을 순서대로 실행시킬 수 있음.
+ * @notice This library allows to execute functions specified in the contract in order.
  */
 abstract contract Multicall is IMulticall {
+    /**
+     * @notice Put the calldata to be called in order and execute it.
+     * @dev there is an operation that fails while running in order, all operations will be reverted.
+     * @param callData      bytes calldata to self.
+     * @return returnData   data returned from the called function.
+     */
     function multicall(bytes[] calldata callData) external returns (bytes[] memory returnData) {
         uint256 length = callData.length;
         returnData = new bytes[](length);

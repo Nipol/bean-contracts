@@ -17,11 +17,9 @@ error InvalidSignature(address recovered);
  * @notice An alternative to approveWithAuthorization, provided for
  * compatibility with the draft EIP2612 proposed by Uniswap.
  * @dev Differences:
- * - Uses sequential nonce, which restricts transaction submission to one at a
- *   time, or else it will revert
+ * - Uses sequential nonce, which restricts transaction submission to one at a time, or else it will revert
  * - Has deadline (= validBefore - 1) but does not have validAfter
- * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple
- *   withdrawal attacks
+ * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple withdrawal attacks
  */
 abstract contract ERC2612 is ERC20, IERC2612 {
     bytes32 public constant PERMIT_TYPEHASH =
@@ -31,6 +29,9 @@ abstract contract ERC2612 is ERC20, IERC2612 {
 
     string public version;
 
+    /**
+     * @notice get nonce per user.
+     */
     mapping(address => uint256) public nonces;
 
     /**
@@ -62,7 +63,7 @@ abstract contract ERC2612 is ERC20, IERC2612 {
         bytes32 r,
         bytes32 s
     ) external virtual {
-        if(deadline < block.timestamp) revert ExpiredTime();
+        if (deadline < block.timestamp) revert ExpiredTime();
 
         unchecked {
             uint256 nonce = nonces[owner]++;
@@ -72,7 +73,7 @@ abstract contract ERC2612 is ERC20, IERC2612 {
             );
 
             address recovered = ecrecover(digest, v, r, s);
-            if(recovered == address(0) || recovered != owner) revert InvalidSignature(recovered);
+            if (recovered == address(0) || recovered != owner) revert InvalidSignature(recovered);
         }
 
         _approve(owner, spender, value);
