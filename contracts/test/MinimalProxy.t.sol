@@ -76,7 +76,7 @@ contract MinimalProxyTest is DSTest {
             template,
             0x1000000000f00000000000000000000f00000000000000000f0000000000000f
         );
-        assertTrue(MinimalProxy.isMinimal(template, DummyProxy));
+        assertTrue(MinimalProxy.isMinimal(DummyProxy, template));
     }
 
     function testIncrementDeploy() public {
@@ -100,7 +100,7 @@ contract MinimalProxyTest is DSTest {
     function testFailReDeployDestructPoint() public {
         address template = address(new DestructTemplate());
         (bytes32 seed, ) = MinimalProxy.seedSearch(template);
-        
+
         address deployable = MinimalProxy.computeAddress(template, seed);
         address DestructProxy = MinimalProxy.deploy(template, seed);
         IDestruct(DestructProxy).destruct();

@@ -78,7 +78,7 @@ contract BeaconProxyTest is DSTest {
 
     function testIsBeaconWithTemplate() public {
         address DummyProxy = BeaconProxy.deploy(DummyBeacon, "");
-        assertTrue(BeaconProxy.isBeacon(DummyBeacon, DummyProxy));
+        assertTrue(BeaconProxy.isBeacon(DummyProxy, DummyBeacon));
     }
 
     function testIncrementDeploy() public {

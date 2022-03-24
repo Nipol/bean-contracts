@@ -44,7 +44,7 @@ contract BeaconProxyMock {
     }
 
     function isBeacon(address _template, address target) external view returns (bool result) {
-        result = BeaconProxy.isBeacon(_template, target);
+        result = BeaconProxy.isBeacon(target, _template);
     }
 
     function isBeacon(address target) external view returns (bool result) {

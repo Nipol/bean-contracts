@@ -142,7 +142,7 @@ contract EIP712Mock {
         if (recovered == address(0) || recovered != owner) revert InvalidSignature(recovered);
     }
 
-    function hashStruct(Receive calldata value) public view returns (bytes32) {
+    function hashStruct(Receive calldata value) public pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
