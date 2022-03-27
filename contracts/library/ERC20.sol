@@ -8,6 +8,11 @@ import "../interfaces/IERC20.sol";
 
 error ERC20_ApproveToSelf();
 
+/**
+ * @title ERC20
+ * @author yoonsung.eth
+ * @notice Standard ERC20 specification implementation
+ */
 abstract contract ERC20 is IERC20 {
     string public name;
     string public symbol;

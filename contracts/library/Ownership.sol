@@ -13,7 +13,7 @@ error ERC173_NotAllowedTo(address to);
 /**
  * @title Ownership
  * @author yoonsung.eth
- * @notice 단일 Ownership을 가질 수 있도록 도와주는 추상 컨트랙트
+ * @notice It is a single contract ownership and follows the ERC173 specification.
  * @dev constructor 기반 컨트랙트에서는 생성 시점에 owner가 msg.sender로 지정되며,
  *      Proxy로 작동되는 컨트랙트의 경우 `_transferOwnership(address)`를 명시적으로 호출하여 owner를 지정하여야 한다.
  */

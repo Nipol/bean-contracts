@@ -13,9 +13,8 @@ error ExpiredTime();
 error InvalidSignature(address recovered);
 
 /**
- * @title Permit
- * @notice An alternative to approveWithAuthorization, provided for
- * compatibility with the draft EIP2612 proposed by Uniswap.
+ * @title ERC2612
+ * @notice Provide EIP 2612 details aka permit and smooth the approach process by signing
  * @dev Differences:
  * - Uses sequential nonce, which restricts transaction submission to one at a time, or else it will revert
  * - Has deadline (= validBefore - 1) but does not have validAfter

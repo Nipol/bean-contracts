@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
 /**
  * @title MinimalProxy
  * @author yoonsung.eth
- * @notice Minimal Proxy를 배포하는 기능을 가지고 있습니다.
+ * @notice It helps to deploy the Minimal Proxy, which is the EIP 1167 specification.
  */
 library MinimalProxy {
     /**

@@ -17,7 +17,7 @@ error Scheduler_RemainingTime(bytes32 taskId);
 /**
  * @title Scheduler
  * @author yoonsung.eth
- * @notice 컨트랙트에 내부적으로 사용될 시간 지연 모듈
+ * @notice Manage task-level scheduling at the time specified by the user.
  */
 abstract contract Scheduler is IScheduler {
     uint32 public delay = type(uint32).max;

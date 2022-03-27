@@ -9,7 +9,7 @@ error Reentrant();
 /**
  * @title ReentrantSafe
  * @author yoonsung.eth
- * @notice 함수의 재진입을 방지하는 Modifier의 집합
+ * @notice Prevent the function from running again while it is running
  * @dev 다양한 Modifier가 포함된 재진입을
  * TODO: after shanghi switch to tload and tstore
  */
