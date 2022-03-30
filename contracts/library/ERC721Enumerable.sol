@@ -8,6 +8,7 @@ import "../interfaces/IERC721.sol";
 import "../interfaces/IERC721Enumerable.sol";
 import "../interfaces/IERC721Metadata.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
+import "./AbstractERC721.sol";
 import "./ReentrantSafe.sol";
 
 error ERC721_WrongERC721Receiver(address receiver);
@@ -28,12 +29,12 @@ error ERC721Enumerable_OutOfIndex(uint256 index);
 
 /**
  * @author yoonsung.eth
- * @notice As an implementation that meets all the specifications of ERC721Enumerable, 
+ * @notice As an implementation that meets all the specifications of ERC721Enumerable,
  * the external information constituting NFT is implemented and available to users using the library.
  * @dev As some NFTs are continuously additionally issued, this library include an internal mint function,
  * and the contract using it must properly tune Ownership.
  */
-abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, ReentrantSafe, IERC721 {
+abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerable, ReentrantSafe, AbstractERC721 {
     string public name;
     string public symbol;
     address[] private _owners;
@@ -126,8 +127,7 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         if (to == _owner) revert ERC721_NotAllowed(to, tokenId);
         if (msg.sender != _owner && !isApprovedForAll(_owner, msg.sender))
             revert ERC721_NotAllowed(msg.sender, tokenId);
-        _approves[tokenId] = to;
-        emit Approval(_owner, to, tokenId);
+        _approve(_owner, to, tokenId);
     }
 
     function setApprovalForAll(address operator, bool approved) public virtual {
@@ -213,6 +213,15 @@ abstract contract ERC721Enumerable is IERC721Metadata, IERC721Enumerable, Reentr
         bytes memory _data
     ) internal virtual reentrantSafer checkERC721Receive(from, to, tokenId, _data) {
         _transfer(from, to, tokenId);
+    }
+
+    function _approve(
+        address owner,
+        address to,
+        uint256 tokenId
+    ) internal override {
+        _approves[tokenId] = to;
+        emit Approval(owner, to, tokenId);
     }
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
