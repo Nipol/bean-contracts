@@ -34,10 +34,10 @@ abstract contract PermissionTable {
     function canCall(address envoy, bytes4 sig) public view returns (bool) {
         bytes32 pt = table[envoy][sig];
 
-        if (bytes1(pt) != 0) return true;
+        if (uint8(bytes1(pt)) != 0) return true;
         else if (envoy.code.length != 0) {
-            if (bytes1(pt << 8) != 0) return true;
-        } else if (bytes1(pt << 16) != 0) return true;
+            if (uint8(bytes1(pt << 8)) != 0) return true;
+        } else if (uint8(bytes1(pt << 16)) != 0) return true;
         return false;
     }
 

@@ -9,6 +9,8 @@ import "../library/PermissionTable.sol";
 
 interface CheatCodes {
     function etch(address who, bytes calldata code) external;
+
+    function label(address addr, string calldata label) external;
 }
 
 contract PermissionMock is PermissionTable {
@@ -28,10 +30,10 @@ contract PermissionTest is DSTest {
     function setUp() public {
         p = new PermissionMock();
 
-        cheats.etch(address(1), abi.encode(0x0001));
+        cheats.etch(address(1), abi.encode(0x6080604052348015610010));
         p.Grant(address(1), 0xDEADBEEF, 0x010000);
 
-        cheats.etch(address(2), abi.encode(0x0001));
+        cheats.etch(address(2), abi.encode(0x6080604052348015610010));
         p.Grant(address(2), 0xDEADBEEF, 0x000200);
 
         p.Grant(address(3), 0xDEADBEEF, 0x000003);
@@ -74,6 +76,7 @@ contract PermissionTest is DSTest {
     }
 
     function testCanCallWithPermissionedGroup() public {
+        emit log_named_uint("envoy code length", address(2).code.length);
         assertTrue(p.canCall(address(2), 0xDEADBEEF));
         assertTrue(!p.canCall(address(2), 0xDEADBEEF, 0x03));
         assertTrue(!p.canCall(address(2), 0xDEADBEEF, 0, 0x03, 0));
