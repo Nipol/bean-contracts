@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../../interfaces/IERC20.sol";
+import "../interfaces/IERC20.sol";
 
 contract ERC20Spell {
     function balanceOf(IERC20 ERC20, address target) external view returns (uint256 value) {

@@ -50,35 +50,35 @@ describe('Wizadry', () => {
     VaultMock = await (await ethers.getContractFactory('contracts/mocks/VaultMock.sol:VaultMock', wallet)).deploy();
 
     EventLib = await (
-      await ethers.getContractFactory('contracts/library/spell/EventSpell.sol:EventSpell', wallet)
+      await ethers.getContractFactory('contracts/mocks/EventSpell.sol:EventSpell', wallet)
     ).deploy();
 
     MathLib = await (
-      await ethers.getContractFactory('contracts/library/spell/MathSpell.sol:MathSpell', wallet)
+      await ethers.getContractFactory('contracts/mocks/MathSpell.sol:MathSpell', wallet)
     ).deploy();
 
     StringLib = await (
-      await ethers.getContractFactory('contracts/library/spell/StringSpell.sol:StringSpell', wallet)
+      await ethers.getContractFactory('contracts/mocks/StringSpell.sol:StringSpell', wallet)
     ).deploy();
 
     TokenLib = await (
-      await ethers.getContractFactory('contracts/library/spell/ERC20Spell.sol:ERC20Spell', wallet)
+      await ethers.getContractFactory('contracts/mocks/ERC20Spell.sol:ERC20Spell', wallet)
     ).deploy();
 
     EtherLib = await (
-      await ethers.getContractFactory('contracts/library/spell/EtherSpell.sol:EtherSpell', wallet)
+      await ethers.getContractFactory('contracts/mocks/EtherSpell.sol:EtherSpell', wallet)
     ).deploy();
 
     DeployLib = await (
-      await ethers.getContractFactory('contracts/library/spell/DeploySpell.sol:DeploySpell', wallet)
+      await ethers.getContractFactory('contracts/mocks/DeploySpell.sol:DeploySpell', wallet)
     ).deploy();
 
     BytesLib = await (
-      await ethers.getContractFactory('contracts/library/spell/BytesSpell.sol:BytesSpell', wallet)
+      await ethers.getContractFactory('contracts/mocks/BytesSpell.sol:BytesSpell', wallet)
     ).deploy();
 
     CryptographyLib = await (
-      await ethers.getContractFactory('contracts/library/spell/CryptographySpell.sol:CryptographySpell', wallet)
+      await ethers.getContractFactory('contracts/mocks/CryptographySpell.sol:CryptographySpell', wallet)
     ).deploy();
 
     await TokenMock.mintTo(WizadryMock.address, initialToken);
