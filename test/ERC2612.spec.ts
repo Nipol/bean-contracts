@@ -68,7 +68,7 @@ async function getApprovalDigest(
   );
 }
 
-describe('StandardToken/ERC2612', () => {
+describe('ERC20/ERC2612', () => {
   let ERC20Mock: Contract;
 
   let wallet: Signer;
