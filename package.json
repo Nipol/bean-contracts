@@ -64,9 +64,9 @@
   },
   "scripts": {
     "build": "hardhat compile",
-    "test": "npm run test:forge && npm run test:hardhat",
-    "test:forge": "forge test",
-    "test:hardhat": "export TS_NODE_TRANSPILE_ONLY=1 && hardhat test",
+    "test": "export TS_NODE_TRANSPILE_ONLY=1 && hardhat test",
+    "forge": "forge test",
+    "ci": "npm t && forge test",
     "snapshot": "forge snapshot",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
     "coverage:server": "npm run coverage && http-server ./coverage -s -c-1",
