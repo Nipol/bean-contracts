@@ -5,17 +5,14 @@ Helpful library for solidity.
 
 ## Installation
 
-```sh
+```shell
 npm install -d @beandao/contracts
 ```
 
 ## Usage
+Copy the code below, paste it into [Remix](https://remix.ethereum.org), deploy it, and test it. Remix automatically gets the @beandao library from npm.
 
 ```solidity
-/**
- * SPDX-License-Identifier: LGPL-3.0-or-later
- */
-
 pragma solidity ^0.8.0;
 
 import "@beandao/contracts/interfaces/IERC165.sol";
@@ -44,12 +41,14 @@ contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IERC165 {
         return
             // ERC20
             interfaceId == type(IERC20).interfaceId ||
+            // ERC173
+            interfaceId == type(IERC173).interfaceId ||
             // ERC2612
             interfaceId == type(IERC2612).interfaceId;
     }
 }
-
 ```
+
 
 ## included
 **Abstract Contract**
@@ -58,7 +57,8 @@ contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IERC165 {
 * ERC20 - Standard ERC20 specification implementation
 * ERC721 - Standard ERC721 and ERC721Metadata specification implementation
 * ERC721Enumerable - Standard ERC721Enumerable and ERC721Metadata specification implementation
-* ERC2612 - Provide EIP 2612 details aka permit and smooth the approach process by signing
+* ERC2612 - Provide EIP2612 details aka permit for ERC20 and smooth the approach process by signing
+* ERC4494 - Provide EIP4494 details aka permit for ERC721 and smooth the approach process by signing
 * Initializer - After the contract is deployed, you can configure a function that can only be called once
 * Ownership - It is a single contract ownership and follows the ERC173 specification
 * PermissionTable - Manage the contract address and its callable function signatures as an allow list. It can be managed with up to 256 Roles.
