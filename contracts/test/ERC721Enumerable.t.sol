@@ -63,7 +63,7 @@ contract ReentrantERC721Receiver is IERC721TokenReceiver {
         bytes memory
     ) external returns (bytes4) {
         // or
-        nft.safeTransferFrom(address(this), address(1), tokenId);
+        nft.safeTransferFrom(address(this), address(10), tokenId);
         return IERC721TokenReceiver.onERC721Received.selector;
     }
 }
@@ -284,12 +284,12 @@ contract ERC721EnumerableTest is DSTest {
 
     function testApprovalForAll() public {
         nft.mint();
-        nft.setApprovalForAll(address(1), true);
+        nft.setApprovalForAll(address(10), true);
 
-        cheats.prank(address(1));
+        cheats.prank(address(10));
         nft.transferFrom(address(this), address(2), 0);
         assertEq(nft.ownerOf(0), address(2));
-        assertTrue(nft.isApprovedForAll(address(this), address(1)));
+        assertTrue(nft.isApprovedForAll(address(this), address(10)));
     }
 
     function testApprovalForAllToSelf() public {
@@ -305,11 +305,11 @@ contract ERC721EnumerableTest is DSTest {
 
     function testNotExistTransfer() public {
         cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721_NotExist(uint256)")), 0));
-        nft.transferFrom(address(this), address(1), 0);
+        nft.transferFrom(address(this), address(10), 0);
     }
 
     function testNotApprovedTransfer() public {
-        nft.mintTo(address(1));
+        nft.mintTo(address(10));
         cheats.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721_NotOwnerOrApprover(address)")), address(this))
         );
@@ -326,11 +326,11 @@ contract ERC721EnumerableTest is DSTest {
 
     function testNotExistSafeTransfer() public {
         cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721_NotExist(uint256)")), 0));
-        nft.safeTransferFrom(address(this), address(1), 0, "");
+        nft.safeTransferFrom(address(this), address(10), 0, "");
     }
 
     function testNotApprovedSafeTransfer() public {
-        nft.mintTo(address(1));
+        nft.mintTo(address(10));
         cheats.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721_NotOwnerOrApprover(address)")), address(this))
         );

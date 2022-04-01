@@ -39,9 +39,9 @@ contract ERC20Test is DSTest {
     }
 
     function testMintAmountToAddr() public {
-        token.mintTo(address(1), 100e18);
+        token.mintTo(address(10), 100e18);
         assertEq(token.totalSupply(), 100e18);
-        assertEq(token.balanceOf(address(1)), 100e18);
+        assertEq(token.balanceOf(address(10)), 100e18);
     }
 
     function testBurnTheToken() public {
@@ -59,36 +59,36 @@ contract ERC20Test is DSTest {
         token.mint(100e18);
         assertEq(token.totalSupply(), 100e18);
         assertEq(token.balanceOf(address(this)), 100e18);
-        assertEq(token.balanceOf(address(1)), 0);
-        token.transfer(address(1), 100e18);
+        assertEq(token.balanceOf(address(10)), 0);
+        token.transfer(address(10), 100e18);
         assertEq(token.totalSupply(), 100e18);
         assertEq(token.balanceOf(address(this)), 0);
-        assertEq(token.balanceOf(address(1)), 100e18);
+        assertEq(token.balanceOf(address(10)), 100e18);
     }
 
     function testNoneApprovedTransferFrom() public {
-        token.mintTo(address(1), 100e18);
+        token.mintTo(address(10), 100e18);
         cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
-        token.transferFrom(address(1), address(this), 100e18);
+        token.transferFrom(address(10), address(this), 100e18);
     }
 
     function testApprovedTransferFrom() public {
-        token.mintTo(address(1), 100e18);
-        cheats.prank(address(1));
+        token.mintTo(address(10), 100e18);
+        cheats.prank(address(10));
         token.approve(address(this), 100e18);
-        assertEq(token.allowance(address(1), address(this)), 100e18);
-        token.transferFrom(address(1), address(this), 100e18);
+        assertEq(token.allowance(address(10), address(this)), 100e18);
+        token.transferFrom(address(10), address(this), 100e18);
         assertEq(token.balanceOf(address(this)), 100e18);
-        assertEq(token.allowance(address(1), address(this)), 0);
+        assertEq(token.allowance(address(10), address(this)), 0);
     }
 
     function testApprovedTransferFromOverBalance() public {
-        token.mintTo(address(1), 100e18);
-        cheats.prank(address(1));
+        token.mintTo(address(10), 100e18);
+        cheats.prank(address(10));
         token.approve(address(this), 100e18);
-        assertEq(token.allowance(address(1), address(this)), 100e18);
+        assertEq(token.allowance(address(10), address(this)), 100e18);
         cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
-        token.transferFrom(address(1), address(this), 101e18);
+        token.transferFrom(address(10), address(this), 101e18);
     }
 
     function testApproveForTokenAddr() public {
@@ -100,7 +100,7 @@ contract ERC20Test is DSTest {
         assertEq(token.totalSupply(), 0);
         assertEq(token.balanceOf(address(this)), 0);
         cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
-        token.transfer(address(1), 1);
+        token.transfer(address(10), 1);
     }
 
     function testSupportInterface() public {

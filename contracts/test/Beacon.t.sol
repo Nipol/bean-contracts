@@ -16,7 +16,7 @@ contract BeaconTest is DSTest {
     address deployed;
 
     function setUp() public {
-        deployed = BeaconDeployer.deploy(address(1));
+        deployed = BeaconDeployer.deploy(address(10));
     }
 
     function testUpgrade() public {
@@ -36,7 +36,7 @@ contract BeaconTest is DSTest {
         bool success;
         bytes memory data;
         bytes memory newAddr = abi.encode(address(5));
-        cheats.prank(address(1));
+        cheats.prank(address(10));
         (success, ) = deployed.call(newAddr);
 
         (success, data) = deployed.staticcall(data);

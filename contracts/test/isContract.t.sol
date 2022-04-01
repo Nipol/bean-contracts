@@ -15,7 +15,7 @@ contract IsContractTest is DSTest {
 
     function testSpecificAddress() public {
         bool result;
-        address target = address(1);
+        address target = address(10);
         // solhint-disable-next-line no-inline-assembly
         assembly {
             result := gt(extcodesize(target), 0)
