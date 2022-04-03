@@ -29,8 +29,7 @@ abstract contract ERC2612 is IERC2612, AbstractERC20 {
     string public version;
 
     constructor(string memory _name, string memory _version) {
-        version = _version;
-        DOMAIN_SEPARATOR = EIP712.hashDomainSeperator(_name, _version, address(this));
+        _initDomainSeparator(_name, _version);
     }
 
     /**
@@ -40,7 +39,7 @@ abstract contract ERC2612 is IERC2612, AbstractERC20 {
 
     /**
      * @notice Initialize EIP712 Domain Separator
-     * @param _name        name of contract TODO: name 자동으로 읽는 방법도...
+     * @param _name        name of contract
      * @param _version     version of contract
      */
     function _initDomainSeparator(string memory _name, string memory _version) internal {
