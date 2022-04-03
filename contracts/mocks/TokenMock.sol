@@ -7,22 +7,32 @@ pragma solidity ^0.8.0;
 import "../interfaces/IMint.sol";
 import "../interfaces/IBurn.sol";
 import "../interfaces/IERC165.sol";
+import "../library/Initializer.sol";
 import {ERC20, IERC20} from "../library/ERC20.sol";
 import {ERC2612, IERC2612} from "../library/ERC2612.sol";
 import {Ownership, IERC173} from "../library/Ownership.sol";
 import {Multicall, IMulticall} from "../library/Multicall.sol";
 
-contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IBurn, IMint, IERC165 {
+contract TokenMock is ERC20, ERC2612, Initializer, Ownership, Multicall, IBurn, IMint, IERC165 {
     constructor(
         string memory tokenName,
         string memory tokenSymbol,
         uint8 tokenDecimals,
         string memory tokenVersion
-    ) {
-        _initDomainSeparator(tokenName, tokenVersion);
+    ) ERC20(tokenName, tokenSymbol, tokenDecimals) ERC2612(tokenName, tokenVersion) {
+        balanceOf[address(this)] = type(uint256).max;
+    }
+
+    function initialize(
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint8 tokenDecimals,
+        string memory tokenVersion
+    ) external initializer {
         name = tokenName;
         symbol = tokenSymbol;
         decimals = tokenDecimals;
+        _initDomainSeparator(tokenName, tokenVersion);
         balanceOf[address(this)] = type(uint256).max;
     }
 

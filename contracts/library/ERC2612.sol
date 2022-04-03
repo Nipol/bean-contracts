@@ -5,8 +5,8 @@
 pragma solidity ^0.8.0;
 
 import "./EIP712.sol";
+import "./AbstractERC20.sol";
 import "../interfaces/IERC2612.sol";
-import {ERC20} from "./ERC20.sol";
 
 error ExpiredTime();
 
@@ -20,13 +20,18 @@ error InvalidSignature(address recovered);
  * - Has deadline (= validBefore - 1) but does not have validAfter
  * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple withdrawal attacks
  */
-abstract contract ERC2612 is ERC20, IERC2612 {
+abstract contract ERC2612 is IERC2612, AbstractERC20 {
     bytes32 public constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     bytes32 public DOMAIN_SEPARATOR;
 
     string public version;
+
+    constructor(string memory _name, string memory _version) {
+        version = _version;
+        DOMAIN_SEPARATOR = EIP712.hashDomainSeperator(_name, _version, address(this));
+    }
 
     /**
      * @notice get nonce per user.
@@ -35,7 +40,7 @@ abstract contract ERC2612 is ERC20, IERC2612 {
 
     /**
      * @notice Initialize EIP712 Domain Separator
-     * @param _name        name of contract
+     * @param _name        name of contract TODO: name 자동으로 읽는 방법도...
      * @param _version     version of contract
      */
     function _initDomainSeparator(string memory _name, string memory _version) internal {

@@ -14,6 +14,10 @@ error AlreadyInitialized();
 abstract contract Initializer {
     bool private _initialized;
 
+    constructor() {
+        _initialized = true;
+    }
+
     modifier initializer() {
         if (_initialized && (address(this).code.length != 0)) revert AlreadyInitialized();
         _initialized = true;
