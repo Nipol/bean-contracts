@@ -1,6 +1,6 @@
 # bean the DAO Contract library
 
-Helpful library for solidity.
+Helpful library for solidity. Basically, it is assumed that most libraries are used in proxies. Therefore, support for some constructors may be insufficient, but most of them are supported.
 
 
 ## Installation
@@ -52,8 +52,8 @@ contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IERC165 {
 
 ## included
 **Abstract Contract**
-* Aggregatecall - The contract using this library is set the caller to this contract and calls are execute in order.
-* Multicall - This library allows to execute functions specified in the contract in order.
+* Aggregatecall - The contract using this library is set the caller to this contract and calls are execute in order
+* Multicall - This library allows to execute functions specified in the contract in order
 * ERC20 - Standard ERC20 specification implementation
 * ERC721 - Standard ERC721 and ERC721Metadata specification implementation
 * ERC721Enumerable - Standard ERC721Enumerable and ERC721Metadata specification implementation
@@ -61,17 +61,20 @@ contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IERC165 {
 * ERC4494 - Provide EIP4494 details aka permit for ERC721 and smooth the approach process by signing
 * Initializer - After the contract is deployed, you can configure a function that can only be called once
 * Ownership - It is a single contract ownership and follows the ERC173 specification
-* PermissionTable - Manage the contract address and its callable function signatures as an allow list. It can be managed with up to 256 Roles.
+* PermissionTable - Manage the contract address and its callable function signatures as an allow list. It can be managed with up to 256 Roles
 * ReentrantSafe - Prevent the function from running again while it is running
 * Scheduler - Manage task-level scheduling at the time specified by the developer
-* Wizadry - Many Tx's can be compressed into one, and execution can be dynamically changed depending on the running state.
+* Wizadry - Many Tx's can be compressed into one, and execution can be dynamically changed depending on the running state
 
 **Library Contract**
-* BeaconDeployer - This is a wrapper that deploy beacon contracts created in yul.
-* BeaconProxy - A library that helps deploy Beacon proxy the minimum contract size referring to the implementation through Beacon.
+* BeaconDeployer - This is a wrapper that deploy beacon contracts created in yul
+* BeaconProxy - A library that helps deploy Beacon proxy the minimum contract size referring to the implementation through Beacon
 * MinimalProxy - It helps to deploy the Minimal Proxy, which is the EIP 1167 specification.
 * EIP712 - Easy set of functions to support EIP712, signTypedData specifications
 * Witchcraft - A library for magical dynamic ABIs
+
+**Support Contract**
+* WETH - Wrapped Ether Contract
 
 
 ## Acknowledgements
