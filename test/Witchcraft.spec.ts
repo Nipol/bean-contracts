@@ -223,6 +223,64 @@ describe('Witchcraft', () => {
       );
     });
   });
+
+  describe('#writeOutputs()', () => {
+    it('should be 32 bytes output data to elements', async () => {
+      let elements = [
+        '0x000000000000000000000000000000000000000000000000000000000000000a',
+        '0x1111111111111111111111111111111111111111111111111111111111111111',
+        '0x2222222222222222222222222222222222222222222222222222222222222222',
+      ];
+
+      let index = '0x00';
+
+      let output = '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+      const tx = await WitchcraftMock.writeOutputs(elements, index, output);
+
+      elements[0] = output;
+
+      expect(tx).deep.equal(elements);
+    });
+
+    it('should be multi bytes array output data to elements', async () => {
+      let elements = [
+        '0x000000000000000000000000000000000000000000000000000000000000000a',
+        '0x1111111111111111111111111111111111111111111111111111111111111111',
+        '0x2222222222222222222222222222222222222222222222222222222222222222',
+      ];
+
+      let index = '0xfe';
+
+      let precoded = ['0x11', '0x22', '0x33'];
+
+      let output = ethers.utils.defaultAbiCoder.encode(['bytes[]'], [precoded]);
+
+      const tx = await WitchcraftMock.writeOutputs(elements, index, output);
+
+      expect(tx).deep.equal(precoded);
+    });
+
+    it('should be encoded bytes output data to elements', async () => {
+      let elements = [
+        '0x000000000000000000000000000000000000000000000000000000000000000a',
+        '0x1111111111111111111111111111111111111111111111111111111111111111',
+        '0x2222222222222222222222222222222222222222222222222222222222222222',
+      ];
+
+      let index = '0x80';
+
+      let precoded = '0x11';
+
+      let output = ethers.utils.defaultAbiCoder.encode(['bytes'], [precoded]);
+
+      const tx = await WitchcraftMock.writeOutputs(elements, index, output);
+
+      elements[0] = precoded;
+
+      expect(tx).deep.equal(elements);
+    });
+  });
 });
 
 // [

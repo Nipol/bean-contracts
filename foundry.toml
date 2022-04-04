@@ -1,0 +1,14 @@
+[default]
+optimizer = true
+optimizer_runs = 42069
+src = 'contracts'
+out = 'artifacts'
+libs = ['node_modules']
+gas_reports = ["*"]
+via_ir = false
+
+[default.optimizer_details]
+constantOptimizer = true
+yul = true
+
+# See more config options https://github.com/gakonst/foundry/tree/master/config

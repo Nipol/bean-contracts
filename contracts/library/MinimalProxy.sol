@@ -7,14 +7,15 @@ pragma solidity ^0.8.0;
 /**
  * @title MinimalProxy
  * @author yoonsung.eth
- * @notice Minimal Proxy를 배포하는 기능을 가지고 있습니다.
+ * @notice It helps to deploy the Minimal Proxy, which is the EIP 1167 specification.
  */
 library MinimalProxy {
     /**
-     * @notice template를 기반으로 Minimal Proxy를 배포합니다.
-     * @dev seed 값이 0x0이라면 create로 배포되지만, 그 외의 값인 경우 seed를 이용하여 create2로 배포됩니다. 만약 같은 seed라면, 
-     * @param template 복사할 컨트랙트 주소
-     * @param seed 해당 값을 기반으로 create2로 배포됩니다.
+     * @notice Deploy BeaconProxy based on template contract address.
+     * @dev If the seed value is 0x0, it is deploy use "create",
+     * but if it is other values, it is deploy use "create2" using seed. If it is the same seed, it will fail.
+     * @param template  contract address for reference
+     * @param seed      This value is not 0x0, it is deploy as create2 based on the corresponding seed.
      */
     function deploy(address template, bytes32 seed) internal returns (address result) {
         (uint256 creationPtr, uint256 creationSize) = creationCode(template);
@@ -38,9 +39,9 @@ library MinimalProxy {
     }
 
     /**
-     * @notice Minimal Proxy를 배포할 creation code를 생성하여 포인터와 크기를 반환합니다.
-     * @param template Minimal Proxy로 배포할 컨트랙트 주소
-     * @return createPtr position of creation code in memory
+     * @notice Create a creation code to deploy the BeaconProxy and return the pointer and size.
+     * @param template      address of deployed contract
+     * @return createPtr    position of creation code in memory
      * @return creationSize size of creation code in memory
      */
     function creationCode(address template) internal pure returns (uint256 createPtr, uint256 creationSize) {
@@ -56,7 +57,13 @@ library MinimalProxy {
         }
     }
 
-    function isMinimal(address template, address target) internal view returns (bool result) {
+    /**
+     * @notice Verify that the contract deployed is a minimal proxy contract.
+     * @param target    deployed address to verify.
+     * @param template  for reference to specific contracts.
+     * @return result   minimal proxy contract or not.
+     */
+    function isMinimal(address target, address template) internal view returns (bool result) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             let clone := mload(0x40)
@@ -70,6 +77,34 @@ library MinimalProxy {
         }
     }
 
+    /**
+     * @notice Verify that the contract deployed is a minimal proxy contract.
+     * @param target    deployed address to verify.
+     * @return result   minimal proxy contract or not.
+     */
+    function isMinimal(address target) internal view returns (bool result) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let template := mload(0x40)
+            let clone := add(template, 0x40)
+            extcodecopy(target, template, 0xa, 0x15)
+
+            mstore(clone, 0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000)
+            mstore(add(clone, 0xa), mload(template))
+            mstore(add(clone, 0x1e), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+
+            let other := add(clone, 0x40)
+            extcodecopy(target, other, 0, 0x2d)
+            result := eq(mload(clone), mload(other))
+        }
+    }
+
+    /**
+     * @notice Before you deploy the minimal proxy to create2, you can identify the address.
+     * @param template  address for reference to deployed contracts.
+     * @param seed      bytes32 for create2 salt
+     * @return target   Specifed deployable address
+     */
     function computeAddress(address template, bytes32 seed) internal view returns (address target) {
         (uint256 creationPtr, uint256 creationSize) = creationCode(template);
         bytes32 creationHash;
@@ -83,6 +118,12 @@ library MinimalProxy {
         );
     }
 
+    /**
+     * @notice Use a specific contract to search for address and seed that can be deploy to create2.
+     * @param template  address for reference to deployed contracts.
+     * @return seed     deployable create2 salt
+     * @return target   Specifed deployable address
+     */
     function seedSearch(address template) internal view returns (bytes32 seed, address target) {
         (uint256 creationPtr, uint256 creationSize) = creationCode(template);
 
@@ -95,29 +136,28 @@ library MinimalProxy {
             creationHash := keccak256(creationPtr, creationSize)
         }
 
-        unchecked {
-            while (true) {
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    mstore(0x0, caller())
-                    mstore(0x20, nonce)
-                    seed := keccak256(0x00, 0x40)
-                }
+        while (true) {
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                mstore(0x80, caller())
+                mstore(0xa0, nonce)
+                seed := keccak256(0x80, 0xc0)
+            }
 
-                target = address(
-                    uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), seed, creationHash))))
-                );
+            target = address(
+                uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), seed, creationHash))))
+            );
 
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    exist := gt(extcodesize(target), 0)
-                }
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                exist := gt(extcodesize(target), 0)
+            }
 
-                if (!exist) {
-                    break;
-                }
-
-                nonce++;
+            if (!exist) {
+                break;
+            }
+            unchecked {
+                ++nonce;
             }
         }
     }

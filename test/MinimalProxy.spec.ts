@@ -122,7 +122,25 @@ describe('Minimal Proxy', () => {
     it('should be success check the deployed minimal', async () => {
       let deployaddr = await MinimalProxyMock['calculateIncrement()']();
       await MinimalProxyMock['deployIncrement()']();
-      expect(await MinimalProxyMock.isMinimal(deployaddr['addr'])).equal(true);
+      expect(await MinimalProxyMock['isMinimal(address)'](deployaddr['addr'])).equal(true);
+    });
+
+    it('should be success check the deployed minimal with template', async () => {
+      let deployaddr = await MinimalProxyMock['calculateIncrement()']();
+      await MinimalProxyMock['deployIncrement()']();
+      expect(await MinimalProxyMock['isMinimal(address,address)'](DummyTemplate.address, deployaddr['addr'])).equal(
+        true,
+      );
+    });
+
+    it('should be success with detect dummy contract', async () => {
+      expect(await MinimalProxyMock['isMinimal(address)'](DummyTemplate.address)).to.equal(false);
+    });
+
+    it('should be success with detect dummy contract with template', async () => {
+      expect(
+        await MinimalProxyMock['isMinimal(address,address)'](DummyTemplate.address, DummyTemplate.address),
+      ).to.equal(false);
     });
   });
 });

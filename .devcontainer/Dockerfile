@@ -50,16 +50,15 @@ RUN apt-get update \
     && locale-gen \
     # timezone
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
-    # install solc
-    && su node -c "pip3 install solc-select" \
-    # && su node -c "./home/node/.local/bin/solc-select install ${SOLC_VERSION}" \
-    # && su node -c "./home/node/.local/bin/solc-select use ${SOLC_VERSION}" \
-    # install graph-cli
-    && su node -c "npm install -g @graphprotocol/graph-cli" \
     # Clean up
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
+
+# install solc
+RUN su node -c "pip3 install solc-select" \
+    # install Foundry
+    && su node -c "curl -L https://foundry.paradigm.xyz | zsh"
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en

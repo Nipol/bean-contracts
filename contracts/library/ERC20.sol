@@ -4,9 +4,17 @@
 
 pragma solidity ^0.8.0;
 
+import "./AbstractERC20.sol";
 import "../interfaces/IERC20.sol";
 
-abstract contract ERC20 is IERC20 {
+error ERC20__ApproveToSelf();
+
+/**
+ * @title ERC20
+ * @author yoonsung.eth
+ * @notice Standard ERC20 specification implementation
+ */
+abstract contract ERC20 is IERC20, AbstractERC20 {
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -14,6 +22,16 @@ abstract contract ERC20 is IERC20 {
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
+
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        uint8 tokenDecimals
+    ) {
+        name = tokenName;
+        symbol = tokenSymbol;
+        decimals = tokenDecimals;
+    }
 
     function approve(address spender, uint256 value) external virtual returns (bool) {
         _approve(msg.sender, spender, value);
@@ -51,8 +69,8 @@ abstract contract ERC20 is IERC20 {
         address _owner,
         address spender,
         uint256 value
-    ) internal virtual {
-        require(spender != address(this), "ERC20/Impossible-Approve-to-Self");
+    ) internal virtual override {
+        if (spender == address(this)) revert ERC20__ApproveToSelf();
         allowance[_owner][spender] = value;
         emit Approval(_owner, spender, value);
     }

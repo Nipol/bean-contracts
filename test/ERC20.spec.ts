@@ -3,6 +3,13 @@ import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer } from 'ethers';
 import { Interface } from 'ethers/lib/utils';
 
+enum ERC20Errors {
+  ApproveToSelf = 'ERC20__ApproveToSelf',
+  ASSERT = '0x1',
+  ARITHMETIC_OVERFLOW_OR_UNDERFLOW = '0x11',
+  DIVISION_BY_ZERO = '0x12',
+}
+
 describe('ERC20', () => {
   let StandardToken: Contract;
 
@@ -100,9 +107,7 @@ describe('ERC20', () => {
       const value = constants.MaxUint256;
       const contractAddress = StandardToken.address;
 
-      await expect(StandardToken.approve(contractAddress, value)).to.be.revertedWith(
-        'ERC20/Impossible-Approve-to-Self',
-      );
+      await expect(StandardToken.approve(contractAddress, value)).to.be.revertedWith(ERC20Errors.ApproveToSelf);
     });
   });
 
@@ -110,12 +115,16 @@ describe('ERC20', () => {
     it('should be reverted, over Transfer Value', async () => {
       const value = initialToken.add('1');
       const walletAddress = await wallet.getAddress();
-      await expect(StandardToken.transfer(walletAddress, value)).to.be.revertedWith('');
+      await expect(StandardToken.transfer(walletAddress, value)).to.be.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
 
     it('should be reverted, to token contract transfer', async () => {
       const value = initialToken.add('1');
-      await expect(StandardToken.transfer(StandardToken.address, value)).to.be.revertedWith('');
+      await expect(StandardToken.transfer(StandardToken.address, value)).to.be.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
 
     it('should be successfully Transfer', async () => {
@@ -147,7 +156,9 @@ describe('ERC20', () => {
       await StandardToken.connect(walletTo);
 
       const newValue = value.add('1');
-      await expect(StandardToken.transferFrom(walletAddress, DummyAddress, newValue)).to.be.revertedWith('');
+      await expect(StandardToken.transferFrom(walletAddress, DummyAddress, newValue)).to.be.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
 
     it('should be reverted, over transfer value', async () => {
@@ -164,14 +175,15 @@ describe('ERC20', () => {
       StandardToken = await StandardToken.connect(walletTo);
 
       const newValue = initialToken.add('1');
-      await expect(StandardToken.transferFrom(walletAddress, DummyAddress, newValue)).to.be.revertedWith('');
+      await expect(StandardToken.transferFrom(walletAddress, DummyAddress, newValue)).to.be.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
 
     it('should be reverted, to token contract transfer', async () => {
       const value = BigNumber.from('5000000000000000000');
       const walletAddress = await wallet.getAddress();
       const walletToAddress = await walletTo.getAddress();
-      const DummyAddress = await Dummy.getAddress();
 
       await expect(StandardToken.approve(walletToAddress, value))
         .to.emit(StandardToken, 'Approval')
@@ -181,7 +193,9 @@ describe('ERC20', () => {
       await StandardToken.connect(walletTo);
 
       const newValue = value.add('1');
-      await expect(StandardToken.transferFrom(walletAddress, StandardToken.address, newValue)).to.be.revertedWith('');
+      await expect(StandardToken.transferFrom(walletAddress, StandardToken.address, newValue)).to.be.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
 
     it('should be success, over transfer value', async () => {
@@ -217,11 +231,9 @@ describe('ERC20', () => {
     });
 
     it('should be revert minting maximum amount uint256', async () => {
-      await expect(StandardToken.mint(constants.MaxUint256)).to.revertedWith('');
-    });
-
-    it('should be revert from not owner call', async () => {
-      await expect(StandardToken.connect(Dummy).mint(constants.MaxUint256)).to.revertedWith('Ownership/Not-Authorized');
+      await expect(StandardToken.mint(constants.MaxUint256)).to.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
   });
 
@@ -237,18 +249,15 @@ describe('ERC20', () => {
 
     it('should be revert minting token for self', async () => {
       const TokenAddress = StandardToken.address;
-      await expect(StandardToken.mintTo(TokenAddress, initialToken)).to.revertedWith('');
+      await expect(StandardToken.mintTo(TokenAddress, initialToken)).to.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
 
     it('should be revert minting maximum amount uint256', async () => {
       const DummyAddress = await Dummy.getAddress();
-      await expect(StandardToken.mintTo(DummyAddress, constants.MaxUint256)).to.revertedWith('');
-    });
-
-    it('should be revert from not owner call', async () => {
-      const DummyAddress = await Dummy.getAddress();
-      await expect(StandardToken.connect(Dummy).mintTo(DummyAddress, constants.MaxUint256)).to.revertedWith(
-        'Ownership/Not-Authorized',
+      await expect(StandardToken.mintTo(DummyAddress, constants.MaxUint256)).to.revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
       );
     });
   });
@@ -268,11 +277,7 @@ describe('ERC20', () => {
       expect(await StandardToken.burn(initialToken))
         .to.emit(StandardToken, 'Transfer')
         .withArgs(walletAddress, constants.AddressZero, initialToken);
-      await expect(StandardToken.burn(initialToken)).to.revertedWith('');
-    });
-
-    it('shoule be revert from not owner call', async () => {
-      await expect(StandardToken.connect(Dummy).burn(initialToken)).revertedWith('Ownership/Not-Authorized');
+      await expect(StandardToken.burn(initialToken)).to.revertedWith(ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW);
     });
   });
 
@@ -300,19 +305,16 @@ describe('ERC20', () => {
 
       await StandardToken.connect(Dummy).approve(walletAddress, constants.MaxUint256);
 
-      await expect(StandardToken.burnFrom(DummyAddress, initialToken)).revertedWith('');
+      await expect(StandardToken.burnFrom(DummyAddress, initialToken)).revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
+      );
     });
 
     it('should be revert at not approved', async () => {
       const DummyAddress = await Dummy.getAddress();
       await StandardToken.transfer(DummyAddress, initialToken);
-      await expect(StandardToken.burnFrom(DummyAddress, initialToken)).revertedWith('');
-    });
-
-    it('shoule be revert from not owner call', async () => {
-      const DummyAddress = await Dummy.getAddress();
-      await expect(StandardToken.connect(Dummy).burnFrom(DummyAddress, initialToken)).revertedWith(
-        'Ownership/Not-Authorized',
+      await expect(StandardToken.burnFrom(DummyAddress, initialToken)).revertedWith(
+        ERC20Errors.ARITHMETIC_OVERFLOW_OR_UNDERFLOW,
       );
     });
   });

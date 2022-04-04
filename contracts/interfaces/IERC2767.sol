@@ -4,11 +4,9 @@
 
 pragma solidity ^0.8.0;
 
-import {IERC165} from "./IERC165.sol";
-
 /// @title ERC-2767 Governance
 /// @dev ERC-165 InterfaceID: 0xd8b04e0e
-interface IERC2767 is IERC165 {
+interface IERC2767 {
     /// @notice Gets number votes required for achieving consensus
     /// @dev Should cost less than 30000 gas
     /// @return Required number of votes for achieving consensus

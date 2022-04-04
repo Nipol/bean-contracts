@@ -7,9 +7,14 @@ pragma solidity ^0.8.0;
 /**
  * @title BeaconDeployer
  * @author yoonsung.eth
- * @notice library that deploy Beacon contract.
+ * @notice This is a wrapper that deploy beacon contracts created in yul.
  */
 library BeaconDeployer {
+    /**
+     * @notice Deploy beacon contracts that refer to the contract addresses being deployed.
+     * @param implementation    deployed contract address
+     * @return result           deployed beacon address
+     */
     function deploy(address implementation) internal returns (address result) {
         bytes memory code = abi.encodePacked(
             hex"606161002960003933600081816002015260310152602080380360803960805160005560616000f3fe337f00000000000000000000000000000000000000000000000000000000000000001415602e57600035600055005b337f00000000000000000000000000000000000000000000000000000000000000001460605760005460005260206000f35b",

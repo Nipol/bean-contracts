@@ -9,25 +9,34 @@ import "../interfaces/IAggregatecall.sol";
 /**
  * @title Aggregatecall
  * @author yoonsung.eth
- * @notice 컨트랙트가 가지고 있는 트랜잭션을 순서대로 실행시킬 수 있음.
+ * @notice The contract using this library is set the caller to this contract and calls are execute in order.
  */
 abstract contract Aggregatecall is IAggregatecall {
-    function aggregate(Call[] calldata calls) external override returns (bytes[] memory returnData) {
-        returnData = new bytes[](calls.length);
-        for (uint256 i = 0; i < calls.length; i++) {
-            (bool success, bytes memory result) = calls[i].target.call(calls[i].data);
-            // Next 5 lines from https://ethereum.stackexchange.com/a/83577
+    /**
+     * @notice Put the target address and the data to be called in order and execute it.
+     * @dev there is an operation that fails while running in order, all operations will be reverted.
+     * @param calls         object with the address and data.
+     * @return returnData   data returned from the called function.
+     */
+    function aggregate(Call[] calldata calls) public returns (bytes[] memory returnData) {
+        uint256 length = calls.length;
+        returnData = new bytes[](length);
+        Call calldata calli;
+        for (uint256 i; i != length; ) {
+            calli = calls[i];
+            (bool success, bytes memory result) = calli.target.call(calli.data);
             if (!success) {
-                // revert called without a message
-                if (result.length < 68) revert();
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
-                    result := add(result, 0x04)
+                    revert(add(32, result), mload(result))
                 }
-                revert(abi.decode(result, (string)));
             }
 
             returnData[i] = result;
+
+            unchecked {
+                ++i;
+            }
         }
     }
 }

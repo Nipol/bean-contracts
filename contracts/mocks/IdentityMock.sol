@@ -9,7 +9,7 @@ import "../interfaces/IERC1271.sol";
 contract IdentityMock is IERC1271 {
     mapping(address => bool) public owners;
 
-    bytes4 internal constant MAGICVALUE = bytes4(keccak256("isValidSignature(bytes,bytes)"));
+    bytes4 internal constant MAGICVALUE = bytes4(keccak256("isValidSignature(bytes32,bytes)"));
     bytes4 internal constant NOT_MAGICVALUE = 0xffffffff;
 
     constructor() {

@@ -4,15 +4,22 @@
 
 pragma solidity ^0.8.0;
 
-import "./Address.sol";
+error Initializer__AlreadyInitialized();
 
+/**
+ * @title Initializer
+ * @author yoonsung.eth
+ * @notice After the contract is deployed, you can configure a function that can only be called once.
+ */
 abstract contract Initializer {
-    using Address for address;
-
     bool private _initialized;
 
+    constructor() {
+        _initialized = true;
+    }
+
     modifier initializer() {
-        require(!_initialized || !address(this).isContract(), "Initializer/Already Initialized");
+        if (_initialized && (address(this).code.length != 0)) revert Initializer__AlreadyInitialized();
         _initialized = true;
         _;
     }

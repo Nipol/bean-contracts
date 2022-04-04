@@ -5,7 +5,7 @@
 pragma solidity ^0.8.0;
 
 import "../library/Ownership.sol";
-import "../library/ERC721.sol";
+import {IERC721, ERC721} from "../library/ERC721.sol";
 
 contract ERC721Mock is ERC721, Ownership {
     constructor(string memory nftName, string memory nftSymbol) {
@@ -35,5 +35,9 @@ contract ERC721Mock is ERC721, Ownership {
 
     function burn(uint256 tokenId) external {
         _burn(tokenId);
+    }
+
+    function tokenURI(uint256) external pure returns (string memory) {
+        return "";
     }
 }

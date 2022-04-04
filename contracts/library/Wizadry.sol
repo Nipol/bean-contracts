@@ -29,17 +29,6 @@ uint256 constant SHORT_SPELL_FILL = 0x00000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFF
 abstract contract Wizadry {
     using Witchcraft for bytes[];
 
-    address immutable self;
-
-    modifier ensureOnCall() {
-        require(address(this) == self);
-        _;
-    }
-
-    constructor() {
-        self = address(this);
-    }
-
     /**
      * @notice
      * @dev Specification
@@ -103,22 +92,25 @@ abstract contract Wizadry {
      *       └──────┴───────────────────┘
      *       if 0xfe, use Entire ELEMENTS.
      */
-    function cast(bytes32[] memory spells, bytes[] memory elements) internal ensureOnCall returns (bytes[] memory) {
+    function cast(bytes32[] calldata spells, bytes[] memory elements) internal returns (bytes[] memory) {
         bytes32 command;
-        uint8 flags;
         bytes32 indices;
+        uint256 length = spells.length;
+        uint8 flags;
         bytes1 outputPos;
 
         bool success;
         bytes memory outdata;
 
-        for (uint256 i = 0; i < spells.length; i++) {
+        for (uint256 i; i != length; ) {
             command = spells[i];
             flags = uint8(bytes1(command << 32));
 
             if (flags & FLAG_EXTENSION != 0) {
-                indices = spells[++i];
-                outputPos = bytes1(indices << 248);
+                unchecked {
+                    indices = spells[++i];
+                    outputPos = bytes1(indices << 248);
+                }
             } else {
                 indices = bytes32(uint256(command << 40) | SHORT_SPELL_FILL);
                 outputPos = bytes1(command << 88);
@@ -141,16 +133,12 @@ abstract contract Wizadry {
                 (success, outdata) = address(uint160(uint256(command))).staticcall(
                     elements.toSpell(bytes4(command), indices)
                 );
-            } else {
-                revert("Invalid calltype");
             }
 
             if (!success) {
-                // pass along failure message from calls and revert.
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
-                    returndatacopy(0, 0, returndatasize())
-                    revert(0, returndatasize())
+                    revert(add(32, outdata), mload(outdata))
                 }
             }
 
@@ -158,6 +146,10 @@ abstract contract Wizadry {
                 elements.writeTuple(outputPos, outdata);
             } else {
                 elements = elements.writeOutputs(outputPos, outdata);
+            }
+
+            unchecked {
+                ++i;
             }
         }
         return elements;

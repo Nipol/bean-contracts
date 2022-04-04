@@ -2,14 +2,16 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer, ContractFactory } from 'ethers';
 
-describe('Initializer', () => {
-  let AddressMock: Contract;
+enum InitializerErrors {
+  ALREADY_INITIALIZED = 'Initializer__AlreadyInitialized',
+}
 
+describe('Initializer', () => {
   let wallet: Signer;
   let Dummy: Signer;
 
   let ConstrucDeploy: ContractFactory;
-  let InitFuncDeploy: ContractFactory;
+  let Init: Contract;
 
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
@@ -19,21 +21,36 @@ describe('Initializer', () => {
       'contracts/mocks/InitConstructorMock.sol:InitConstructorMock',
       wallet,
     );
-    InitFuncDeploy = await ethers.getContractFactory('contracts/mocks/InitMock.sol:InitMock', wallet);
+    Init = await (await ethers.getContractFactory('contracts/mocks/InitMock.sol:InitMock', wallet)).deploy();
   });
 
-  describe('#Constructor Init()', () => {
-    it('should be auto initialized', async () => {
-      const addr = await ConstrucDeploy.deploy();
-      await expect(addr.initialize()).revertedWith('Initializer/Already Initialized');
+  describe('construct auto initializer', () => {
+    it('should be success with construct with auto initialize', async () => {
+      await expect(Init.initialize()).revertedWith(InitializerErrors.ALREADY_INITIALIZED);
+    });
+
+    it('should be not initialize contract using initialized contract', async () => {
+      const proxyDeployer = await (
+        await ethers.getContractFactory('contracts/mocks/MinimalProxyMock.sol:MinimalProxyMock', wallet)
+      ).deploy(Init.address);
+
+      const deployable = (await proxyDeployer.calculateIncrement())['addr'];
+
+      await proxyDeployer.deployIncrement();
+
+      const deployed = (await ethers.getContractFactory('contracts/mocks/InitMock.sol:InitMock', wallet)).attach(
+        deployable,
+      );
+
+      await deployed.initialize();
+      await expect(deployed.initialize()).revertedWith(InitializerErrors.ALREADY_INITIALIZED);
     });
   });
 
-  describe('#Function Init()', () => {
+  describe('#modifier initializer()', () => {
     it('should be auto initialized', async () => {
-      const addr = await InitFuncDeploy.deploy();
-      await addr.initialize();
-      await expect(addr.initialize()).revertedWith('Initializer/Already Initialized');
+      const addr = await ConstrucDeploy.deploy();
+      await expect(addr.initialize()).revertedWith(InitializerErrors.ALREADY_INITIALIZED);
     });
   });
 });

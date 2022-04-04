@@ -4,6 +4,10 @@ import { Contract, BigNumber, constants, Signer } from 'ethers';
 import { computeCreateAddress } from './utils';
 import { Interface } from 'ethers/lib/utils';
 
+enum ReentrantSafeErrors {
+  REENTRANT = 'RentrantSafe__Reentrant',
+}
+
 describe('ReentrantSafe', () => {
   let CorrectTarget: Contract;
   let IncorrectTarget: Contract;
@@ -32,7 +36,7 @@ describe('ReentrantSafe', () => {
 
     it('should be order of each modifier is correct', async () => {
       expect(await CorrectTarget.encounter()).to.equal('100');
-      await expect(ReentrantCaller.increase()).reverted;
+      await expect(ReentrantCaller.increase()).revertedWith(ReentrantSafeErrors.REENTRANT);
       expect(await CorrectTarget.encounter()).to.equal('100');
     });
   });
@@ -46,7 +50,7 @@ describe('ReentrantSafe', () => {
 
     it('should be order of each modifier is incorrect', async () => {
       expect(await IncorrectTarget.encounter()).to.equal('100');
-      await expect(ReentrantCaller.increase()).reverted;
+      await expect(ReentrantCaller.increase()).revertedWith(ReentrantSafeErrors.REENTRANT);
       expect(await IncorrectTarget.encounter()).to.equal('100');
     });
   });

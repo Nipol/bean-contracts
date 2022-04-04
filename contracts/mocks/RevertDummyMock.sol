@@ -10,6 +10,5 @@ contract RevertDummyMock {
     function initialize(string memory _name) external returns (bool) {
         name = _name;
         revert("Intentional REVERT");
-        return true;
     }
 }

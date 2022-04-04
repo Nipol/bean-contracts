@@ -9,15 +9,15 @@ import "../interfaces/IERC173.sol";
 contract InterfaceMock is IERC165, IERC173 {
     event Dummy();
 
-    function owner() external view override returns (address) {
+    function owner() external pure returns (address) {
         return address(0);
     }
 
-    function transferOwnership(address newOwner) external override {
+    function transferOwnership(address) external {
         emit Dummy();
     }
 
-    function supportsInterface(bytes4 interfaceID) external view override returns (bool) {
+    function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
         return interfaceID == type(IERC173).interfaceId || interfaceID == type(IERC165).interfaceId;
     }
 }

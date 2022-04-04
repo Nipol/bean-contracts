@@ -5,28 +5,36 @@
 pragma solidity ^0.8.0;
 
 import "./EIP712.sol";
+import "./AbstractERC20.sol";
 import "../interfaces/IERC2612.sol";
-import {ERC20} from "./ERC20.sol";
+
+error ERC2612__ExpiredTime();
+
+error ERC2612__InvalidSignature(address recovered);
 
 /**
- * @title Permit
- * @notice An alternative to approveWithAuthorization, provided for
- * compatibility with the draft EIP2612 proposed by Uniswap.
+ * @title ERC2612
+ * @notice Provide EIP 2612 details aka permit and smooth the approach process by signing
  * @dev Differences:
- * - Uses sequential nonce, which restricts transaction submission to one at a
- *   time, or else it will revert
+ * - Uses sequential nonce, which restricts transaction submission to one at a time, or else it will revert
  * - Has deadline (= validBefore - 1) but does not have validAfter
- * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple
- *   withdrawal attacks
+ * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple withdrawal attacks
  */
-abstract contract ERC2612 is ERC20, IERC2612 {
-    bytes32 public immutable PERMIT_TYPEHASH =
+abstract contract ERC2612 is IERC2612, AbstractERC20 {
+    bytes32 public constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     bytes32 public DOMAIN_SEPARATOR;
 
     string public version;
 
+    constructor(string memory _name, string memory _version) {
+        _initDomainSeparator(_name, _version);
+    }
+
+    /**
+     * @notice get nonce per user.
+     */
     mapping(address => uint256) public nonces;
 
     /**
@@ -58,17 +66,17 @@ abstract contract ERC2612 is ERC20, IERC2612 {
         bytes32 r,
         bytes32 s
     ) external virtual {
-        require(owner != address(0), "ERC2612/Invalid-address-0");
-        require(deadline >= block.timestamp, "ERC2612/Expired-time");
+        if (deadline < block.timestamp) revert ERC2612__ExpiredTime();
 
         unchecked {
+            uint256 nonce = nonces[owner]++;
             bytes32 digest = EIP712.hashMessage(
                 DOMAIN_SEPARATOR,
-                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline))
             );
 
             address recovered = ecrecover(digest, v, r, s);
-            require(recovered != address(0) && recovered == owner, "ERC2612/Invalid-Signature");
+            if (recovered == address(0) || recovered != owner) revert ERC2612__InvalidSignature(recovered);
         }
 
         _approve(owner, spender, value);

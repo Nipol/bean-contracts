@@ -23,4 +23,14 @@ contract WitchcraftMock {
         bytes32 indices = bytes32((spell << 40) | SHORT_COMMAND_FILL);
         ret = elements.toSpell(selector, indices);
     }
+
+    function writeOutputs(
+        bytes[] memory elements,
+        bytes1 index,
+        bytes memory output
+    ) external pure returns (bytes[] memory) {
+        elements = elements.writeOutputs(index, output);
+
+        return elements;
+    }
 }

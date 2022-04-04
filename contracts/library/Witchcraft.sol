@@ -45,7 +45,7 @@ library Witchcraft {
         bytes memory paramData; // option, 호출이 필요로 하는 경우 현재 상태 인코딩에 사용
         uint8 idx;
 
-        for (uint256 i = 0; i < 32; i++) {
+        for (uint256 i; i != 32; ) {
             idx = uint8(indices[i]);
             if (idx == IO_END_OF_ARGS) break;
 
@@ -55,42 +55,58 @@ library Witchcraft {
                 if (paramData.length == 0) {
                     paramData = abi.encode(elements);
                 }
-                count += paramData.length;
-                free += 32;
+                unchecked {
+                    count += paramData.length;
+                    free += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_DYNAMIC) {
                 // 0xC0, 특정 element를 하나의 인자로 사용한다.
                 // 총 길이가 32bytes가 되지 않더라도, free pointer가 이후에 작성되기 때문에 32byte로 떨어짐
                 uint256 arglen = elements[idx & ELEMENT_POS_MASK].length;
                 assert(arglen % 32 == 0);
-                count += arglen + 32; // 데이터 포지션 기록때문에 32 padding
-                free += 32;
+                unchecked {
+                    count += arglen + 32; // 데이터 포지션 기록때문에 32 padding
+                    free += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_ENCODE) {
                 // 0x80, 현재 인덱스의 인자에 대해 32bytes mod zero-padding, 길이 삽입, 데이터 위치 지정 을 수행한다.
                 // 마스킹 되어서 배열로 들어온 포지션
                 paramData = abi.encode(elements[idx & ELEMENT_POS_MASK]);
-                count += paramData.length;
-                free += 32;
+                unchecked {
+                    count += paramData.length;
+                    free += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_PACK) {
                 // 0x40, 현재의 인자를 패킹만 함.
                 paramData = abi.encodePacked(elements[idx & ELEMENT_POS_MASK]);
-                count += paramData.length - 32;
-                free += 32;
+                unchecked {
+                    count += paramData.length - 32;
+                    free += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_STATIC) {
                 // 0x00,
                 assert(elements[idx & ELEMENT_POS_MASK].length == 32);
-                count += 32;
-                free += 32;
+                unchecked {
+                    count += 32;
+                    free += 32;
+                }
+            }
+
+            unchecked {
+                ++i;
             }
         }
 
-        ret = new bytes(count + 4);
+        unchecked {
+            ret = new bytes(count + 4);
+        }
         // solhint-disable-next-line no-inline-assembly
         assembly {
             mstore(add(ret, 32), selector)
         }
         count = 0;
 
-        for (uint256 i = 0; i < 32; i++) {
+        for (uint256 i; i != 32; ) {
             idx = uint8(indices[i]);
             if (idx == IO_END_OF_ARGS) break;
 
@@ -99,41 +115,55 @@ library Witchcraft {
                 assembly {
                     mstore(add(add(ret, 36), count), free)
                 }
-                memcpy(paramData, 32, ret, free + 4, paramData.length - 32);
-                free += paramData.length - 32;
-                count += 32;
+                unchecked {
+                    memcpy(paramData, 32, ret, free + 4, paramData.length - 32);
+                    free += paramData.length - 32;
+                    count += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_DYNAMIC) {
                 uint256 arglen = elements[idx & ELEMENT_POS_MASK].length;
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
                     mstore(add(add(ret, 36), count), free)
                 }
-                memcpy(elements[idx & ELEMENT_POS_MASK], 0, ret, free + 4, arglen);
-                free += arglen;
-                count += 32;
+                unchecked {
+                    memcpy(elements[idx & ELEMENT_POS_MASK], 0, ret, free + 4, arglen);
+                    free += arglen;
+                    count += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_ENCODE) {
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
                     mstore(add(add(ret, 36), count), free)
                 }
-                memcpy(paramData, 32, ret, free + 4, paramData.length);
-                free += paramData.length - 32;
-                count += 32;
+                unchecked {
+                    memcpy(paramData, 32, ret, free + 4, paramData.length);
+                    free += paramData.length - 32;
+                    count += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_PACK) {
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
                     mstore(add(add(ret, 36), count), count)
                 }
-                memcpy(paramData, 32, ret, count + 4, paramData.length);
-                count += paramData.length - 32;
-                free += 32;
+                unchecked {
+                    memcpy(paramData, 32, ret, count + 4, paramData.length);
+                    count += paramData.length - 32;
+                    free += 32;
+                }
             } else if (idx & IO_USE_MASK == IO_USE_STATIC) {
                 bytes memory element = elements[idx & ELEMENT_POS_MASK];
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
                     mstore(add(add(ret, 36), count), mload(add(element, 32)))
                 }
-                count += 32;
+                unchecked {
+                    count += 32;
+                }
+            }
+
+            unchecked {
+                ++i;
             }
         }
     }
@@ -143,7 +173,7 @@ library Witchcraft {
         bytes[] memory elements,
         bytes1 index,
         bytes memory output
-    ) internal view returns (bytes[] memory newEle) {
+    ) internal pure returns (bytes[] memory newEle) {
         uint256 idx = uint8(index);
         if (idx == IO_END_OF_ARGS) return elements;
 
@@ -190,12 +220,14 @@ library Witchcraft {
         uint8 idx = uint8(index);
         if (idx == IO_END_OF_ARGS) return;
 
-        bytes memory entry = elements[idx] = new bytes(output.length + 32);
-        memcpy(output, 0, entry, 32, output.length);
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let l := mload(output)
-            mstore(add(entry, 32), l)
+        unchecked {
+            bytes memory entry = elements[idx] = new bytes(output.length + 32);
+            memcpy(output, 0, entry, 32, output.length);
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                let l := mload(output)
+                mstore(add(entry, 32), l)
+            }
         }
     }
 

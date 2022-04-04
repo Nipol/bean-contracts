@@ -12,13 +12,18 @@ pragma solidity ^0.8.0;
 interface IScheduler {
     enum STATE {
         UNKNOWN,
-        APPROVED,
+        QUEUED,
         RESOLVED,
         STALED
     }
 
+    struct Task {
+        uint32 endTime;
+        STATE state;
+    }
+
     event Delayed(uint32 delay);
-    event Approved(bytes32 indexed id, uint32 delay);
-    event Resolved(bytes32 indexed id);
-    event Staled(bytes32 indexed id);
+    event Queued(bytes32 indexed taskId, uint32 delay);
+    event Resolved(bytes32 indexed taskId);
+    event Staled(bytes32 indexed taskId);
 }

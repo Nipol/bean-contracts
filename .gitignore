@@ -1,6 +1,7 @@
 node_modules
 coverage
 cache
+hh-cache
 artifacts
 build
 coverage.json

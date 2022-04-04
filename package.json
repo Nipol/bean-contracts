@@ -26,7 +26,7 @@
     "eth-gas-reporter": "^0.2.23",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.5.2",
-    "hardhat": "^2.8.0",
+    "hardhat": "^2.9.0",
     "hardhat-gas-reporter": "^1.0.6",
     "http-server": "^0.12.3",
     "keccak256": "^1.0.6",
@@ -44,7 +44,8 @@
   "files": [
     "contracts/**/*.sol",
     "/build/contracts/*.json",
-    "!/contracts/mocks/**/*"
+    "!/contracts/mocks/**/*",
+    "!/contracts/test/**/*"
   ],
   "homepage": "https://github.com/Nipol/bean-contracts#readme",
   "keywords": [
@@ -62,21 +63,25 @@
     "url": "https://github.com/Nipol/bean-contracts"
   },
   "scripts": {
-    "build": "npx hardhat compile",
-    "test": "export TS_NODE_TRANSPILE_ONLY=1 && npx hardhat test",
-    "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
+    "build": "hardhat compile",
+    "test": "export TS_NODE_TRANSPILE_ONLY=1 && hardhat test",
+    "forge": "forge test",
+    "ci": "npm t && forge test",
+    "snapshot": "forge snapshot",
+    "coverage": "hardhat coverage --solcoverjs ./.solcover.js --network hardhat",
     "coverage:server": "npm run coverage && http-server ./coverage -s -c-1",
     "docs": "scripts/docs.sh",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:js": "eslint '*/**/*.{js,ts}' --quiet --fix",
     "lint:sol": "solhint 'contracts/**/*.sol' && prettier -c 'contracts/**/*.sol'",
     "lint:sol:fix": "prettier --config .prettierrc --write '**/*.{js,sol,ts}'",
-    "prepublish": "rimraf build contracts/build artifacts cache contracts/*.md",
+    "prepublish": "rimraf build contracts/build artifacts cache hh-cache contracts/*.md",
     "prepare": "env COMPILE_MODE=production npm run build",
     "prepack": "scripts/prepack.sh",
     "release": "scripts/release.sh",
     "vertigo": "scripts/vertigo.sh",
     "analyze": "slither ./contracts",
-    "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js"
+    "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.js",
+    "clean": "rm package-lock.json && rm -rf node_modules/* node_modules/.*"
   }
 }
