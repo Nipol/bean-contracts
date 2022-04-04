@@ -48,12 +48,12 @@ abstract contract ERC4494 is IERC4494, AbstractERC721 {
     /// @param spender the address to approve
     /// @param tokenId the index of the NFT to approve the spender on
     /// @param deadline a timestamp expiry for the permit
-    /// @param sig a traditional or EIP-2098 signature
+    /// @param signature a traditional or EIP-2098 signature
     function permit(
         address spender,
         uint256 tokenId,
         uint256 deadline,
-        bytes memory sig
+        bytes memory signature
     ) external virtual {
         if (deadline < block.timestamp) revert ExpiredTime();
 
@@ -61,27 +61,24 @@ abstract contract ERC4494 is IERC4494, AbstractERC721 {
         bytes32 r;
         bytes32 s;
 
-        if (sig.length == 65) {
+        if (signature.length == 65) {
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                // first 32 bytes, after the length prefix.
-                r := mload(add(sig, 32))
-                // second 32 bytes.
-                s := mload(add(sig, 64))
-                // final byte (first byte of the next 32 bytes).
-                v := byte(0, mload(add(sig, 96)))
+                r := mload(add(signature, 32))
+                s := mload(add(signature, 64))
+                v := byte(0, mload(add(signature, 96)))
             }
-        } else if (sig.length == 64) {
+        } else if (signature.length == 64) {
             bytes32 vs;
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                // first 32 bytes, after the length prefix.
-                r := mload(add(sig, 32))
-                // second 32 bytes.
-                vs := mload(add(sig, 64))
+                r := mload(add(signature, 32))
+                vs := mload(add(signature, 64))
+                s := and(vs, 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
             }
-            s = vs & 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-            v = 27 + uint8(uint256(vs) >> 255);
+            unchecked {
+                v = 27 + uint8(uint256(vs) >> 255);
+            }
         } else {
             revert InvalidSignature(address(0));
         }
