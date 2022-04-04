@@ -10,4 +10,6 @@ abstract contract AbstractERC721 {
         address to,
         uint256 tokenId
     ) internal virtual;
+
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success);
 }

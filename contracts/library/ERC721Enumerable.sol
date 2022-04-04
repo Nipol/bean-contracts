@@ -224,7 +224,7 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
         emit Approval(owner, to, tokenId);
     }
 
-    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view override returns (bool success) {
         if (!_exists(tokenId)) revert ERC721__NotExist(tokenId);
         address _owner = _owners[tokenId];
         success = (spender == _owner) || (_approves[tokenId] == spender) || isApprovedForAll(_owner, spender);

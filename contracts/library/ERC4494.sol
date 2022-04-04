@@ -9,6 +9,8 @@ import "./AbstractERC721.sol";
 import "../interfaces/IERC721.sol";
 import "../interfaces/IERC4494.sol";
 
+import "hardhat/console.sol";
+
 error ERC4494__ExpiredTime();
 
 error ERC4494__InvalidSignature(address recovered);
@@ -30,7 +32,7 @@ abstract contract ERC4494 is IERC4494, AbstractERC721 {
     string public version;
 
     /**
-     * @notice get nonce per user.
+     * @notice get nonce per tokenId.
      */
     mapping(uint256 => uint256) public nonces;
 
@@ -93,9 +95,60 @@ abstract contract ERC4494 is IERC4494, AbstractERC721 {
             );
 
             address recovered = ecrecover(digest, v, r, s);
-            if (recovered == address(0) || recovered != owner) revert ERC4494__InvalidSignature(recovered);
+
+            bool invalid = recovered == address(0) || !_isApprovedOrOwner(recovered, tokenId);
+
+            if (spender.code.length != 0) {
+                if (!verify(spender, digest, v, r, s) || invalid) revert ERC4494__InvalidSignature(recovered);
+            } else if (invalid) {
+                revert ERC4494__InvalidSignature(recovered);
+            }
         }
 
         _approve(owner, spender, tokenId);
+    }
+
+    function verify(
+        address spender,
+        bytes32 digest,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal view returns (bool success) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let reuse := mload(0x40)
+            // Write the abi-encoded calldata to memory piece by piece:
+            // EIP 1271 sig
+            mstore(reuse, 0x1626ba7e00000000000000000000000000000000000000000000000000000000)
+            mstore(add(reuse, 4), digest) // "digest" argument. No mask as it's a full 32 byte value.
+            mstore(add(reuse, 36), 0x0000000000000000000000000000000000000000000000000000000000000040)
+            mstore(add(reuse, 68), 0x0000000000000000000000000000000000000000000000000000000000000041)
+            mstore(add(reuse, 133), and(v, 0xff)) // Finally append the "v" argument. with mask uint8
+            mstore(add(reuse, 100), r) // "r" argument. No mask as it's a full 32 byte value.
+            mstore(add(reuse, 132), s) // "s" argument. No mask as it's a full 32 byte value.
+            // use 101 because the calldata length is 4 + 32 * 5 + 1.
+            let callStatus := staticcall(gas(), spender, reuse, 165, 0, 32)
+            let returnDataSize := returndatasize()
+            if iszero(callStatus) {
+                // Copy the revert message into memory.
+                returndatacopy(0, 0, returnDataSize)
+
+                // Revert with the same message.
+                revert(0, returnDataSize)
+            }
+            // returndata copy
+            returndatacopy(reuse, 0, returnDataSize)
+            switch mload(reuse)
+            case 0x1626ba7e00000000000000000000000000000000000000000000000000000000 {
+                success := 1
+            }
+            case 0xffffffff00000000000000000000000000000000000000000000000000000000 {
+                success := 0
+            }
+            default {
+                success := 0
+            }
+        }
     }
 }

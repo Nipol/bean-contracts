@@ -160,7 +160,7 @@ abstract contract ERC721 is IERC721, IERC721Metadata, ReentrantSafe, AbstractERC
         emit Approval(owner, to, tokenId);
     }
 
-    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view override returns (bool success) {
         if (!_exists(tokenId)) revert ERC721__NotExist(tokenId);
         address _owner = ownerOf[tokenId];
         success = (spender == _owner) || isApprovedForAll(_owner, spender) || (_approves[tokenId] == spender);

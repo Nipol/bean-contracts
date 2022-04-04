@@ -70,11 +70,11 @@ describe('ERC721/ERC4494', () => {
 
   let wallet: Signer;
   let walletTo: Signer;
-  let Dummy: Signer;
+  let approver: Signer;
 
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
-    [wallet, walletTo, Dummy] = accounts;
+    [wallet, walletTo, approver] = accounts;
 
     NFTPermit = await (
       await ethers.getContractFactory('contracts/mocks/NFTPermitMock.sol:NFTPermitMock', wallet)
@@ -85,8 +85,6 @@ describe('ERC721/ERC4494', () => {
 
   describe('#permit()', () => {
     it('should be success with eth_signTypedData_v4', async () => {
-      expect(await NFTPermit.getApproved('0')).equal(constants.AddressZero);
-
       const walletAddress = await wallet.getAddress();
       const walletToAddress = await walletTo.getAddress();
       const name = await NFTPermit.name();
@@ -94,7 +92,7 @@ describe('ERC721/ERC4494', () => {
       const chainId = await wallet.getChainId();
       const tokenAddress = NFTPermit.address;
       const tokenId = '0';
-      const nonce = await NFTPermit.nonces(walletAddress);
+      const nonce = await NFTPermit.nonces(tokenId);
       const deadline = constants.MaxUint256;
 
       const types = {
@@ -135,12 +133,223 @@ describe('ERC721/ERC4494', () => {
         primaryType,
       };
 
+      expect(await NFTPermit.getApproved('0')).equal(constants.AddressZero);
+
       const sig = await hre.network.provider.send('eth_signTypedData_v4', [walletAddress, typedMessage]);
 
       await expect(NFTPermit.connect(walletTo).permit(walletToAddress, tokenId, deadline, sig))
         .to.emit(NFTPermit, 'Approval')
         .withArgs(walletAddress, walletToAddress, tokenId);
       expect(await NFTPermit.getApproved('0')).equal(walletToAddress);
+    });
+
+    it('should be success with approved and approvedForAll', async () => {
+      expect(await NFTPermit.getApproved('0')).equal(constants.AddressZero);
+
+      const walletAddress = await wallet.getAddress();
+      const walletToAddress = await walletTo.getAddress();
+      const approverAddress = await approver.getAddress();
+      const name = await NFTPermit.name();
+      const version = '1';
+      const chainId = await wallet.getChainId();
+      const tokenAddress = NFTPermit.address;
+      const tokenId = '0';
+      const nonce = await NFTPermit.nonces(approverAddress);
+      const deadline = constants.MaxUint256;
+
+      const types = {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Permit: [
+          { name: 'spender', type: 'address' },
+          { name: 'tokenId', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      };
+
+      const primaryType = 'Permit' as const;
+
+      const domain = {
+        name: name,
+        version: version,
+        chainId: chainId,
+        verifyingContract: tokenAddress,
+      };
+
+      const message = {
+        spender: walletToAddress,
+        tokenId: tokenId,
+        nonce: nonce.toString(),
+        deadline: deadline.toString(),
+      };
+
+      const typedMessage = {
+        domain,
+        types,
+        message,
+        primaryType,
+      };
+
+      const sig = await hre.network.provider.send('eth_signTypedData_v4', [approverAddress, typedMessage]);
+
+      await expect(NFTPermit.connect(walletTo).permit(walletToAddress, tokenId, deadline, sig)).to.be.revertedWith(
+        ERC4494Errors.INVALID_SIGNATURE,
+      );
+
+      await NFTPermit.approve(approverAddress, tokenId);
+
+      await expect(NFTPermit.connect(walletTo).permit(walletToAddress, tokenId, deadline, sig))
+        .to.emit(NFTPermit, 'Approval')
+        .withArgs(walletAddress, walletToAddress, tokenId);
+
+      expect(await NFTPermit.getApproved('0')).equal(walletToAddress);
+    });
+
+    it('should be success with approved and approvedForAll for Verifiable Contract', async () => {
+      const walletAddress = await wallet.getAddress();
+      const walletToAddress = await walletTo.getAddress();
+      const approverAddress = await approver.getAddress();
+      const name = await NFTPermit.name();
+      const version = '1';
+      const chainId = await wallet.getChainId();
+      const tokenAddress = NFTPermit.address;
+      const tokenId = '0';
+      const nonce = await NFTPermit.nonces(approverAddress);
+      const deadline = constants.MaxUint256;
+
+      const Identity = await (await ethers.getContractFactory('contracts/mocks/IdentityMock.sol:IdentityMock', wallet))
+        .connect(approver)
+        .deploy();
+
+      const types = {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Permit: [
+          { name: 'spender', type: 'address' },
+          { name: 'tokenId', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      };
+
+      const primaryType = 'Permit' as const;
+
+      const domain = {
+        name: name,
+        version: version,
+        chainId: chainId,
+        verifyingContract: tokenAddress,
+      };
+
+      const message = {
+        spender: Identity.address,
+        tokenId: tokenId,
+        nonce: nonce.toString(),
+        deadline: deadline.toString(),
+      };
+
+      const typedMessage = {
+        domain,
+        types,
+        message,
+        primaryType,
+      };
+
+      const sig = await hre.network.provider.send('eth_signTypedData_v4', [approverAddress, typedMessage]);
+
+      expect(await NFTPermit.getApproved('0')).equal(constants.AddressZero);
+
+      await expect(NFTPermit.connect(walletTo).permit(Identity.address, tokenId, deadline, sig)).to.be.revertedWith(
+        ERC4494Errors.INVALID_SIGNATURE,
+      );
+
+      // await NFTPermit.approve(approverAddress, tokenId);
+
+      // await expect(NFTPermit.connect(walletTo).permit(Identity.address, tokenId, deadline, sig))
+      //   .to.emit(NFTPermit, 'Approval')
+      //   .withArgs(walletAddress, Identity.address, tokenId);
+
+      // expect(await NFTPermit.getApproved('0')).equal(Identity.address);
+    });
+
+    it('should be success with approved and approvedForAll for Not Verifiable Contract', async () => {
+      const walletAddress = await wallet.getAddress();
+      const walletToAddress = await walletTo.getAddress();
+      const approverAddress = await approver.getAddress();
+      const name = await NFTPermit.name();
+      const version = '1';
+      const chainId = await wallet.getChainId();
+      const tokenAddress = NFTPermit.address;
+      const tokenId = '0';
+      const nonce = await NFTPermit.nonces(approverAddress);
+      const deadline = constants.MaxUint256;
+
+      const Identity = await (await ethers.getContractFactory('contracts/mocks/IdentityMock.sol:IdentityMock', wallet))
+        .connect(walletTo)
+        .deploy();
+
+      const types = {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Permit: [
+          { name: 'spender', type: 'address' },
+          { name: 'tokenId', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      };
+
+      const primaryType = 'Permit' as const;
+
+      const domain = {
+        name: name,
+        version: version,
+        chainId: chainId,
+        verifyingContract: tokenAddress,
+      };
+
+      const message = {
+        spender: Identity.address,
+        tokenId: tokenId,
+        nonce: nonce.toString(),
+        deadline: deadline.toString(),
+      };
+
+      const typedMessage = {
+        domain,
+        types,
+        message,
+        primaryType,
+      };
+
+      const sig = await hre.network.provider.send('eth_signTypedData_v4', [approverAddress, typedMessage]);
+
+      expect(await NFTPermit.getApproved('0')).equal(constants.AddressZero);
+
+      await expect(NFTPermit.connect(walletTo).permit(Identity.address, tokenId, deadline, sig)).to.be.revertedWith(
+        ERC4494Errors.INVALID_SIGNATURE,
+      );
+
+      await NFTPermit.approve(approverAddress, tokenId);
+
+      await expect(NFTPermit.connect(walletTo).permit(Identity.address, tokenId, deadline, sig)).to.be.revertedWith(
+        ERC4494Errors.INVALID_SIGNATURE,
+      );
+
+      expect(await NFTPermit.getApproved('0')).equal(approverAddress);
     });
 
     it('should be success with compact signature', async () => {
@@ -153,7 +362,7 @@ describe('ERC721/ERC4494', () => {
       const chainId = await wallet.getChainId();
       const tokenAddress = NFTPermit.address;
       const tokenId = '0';
-      const nonce = await NFTPermit.nonces(walletAddress);
+      const nonce = await NFTPermit.nonces(tokenId);
       const deadline = constants.MaxUint256;
 
       const types = {
@@ -214,7 +423,7 @@ describe('ERC721/ERC4494', () => {
       const chainId = await wallet.getChainId();
       const tokenAddress = NFTPermit.address;
       const tokenId = '0';
-      const nonce = await NFTPermit.nonces(walletAddress);
+      const nonce = await NFTPermit.nonces(tokenId);
       const deadline = constants.MaxUint256;
 
       const types = {
@@ -272,7 +481,7 @@ describe('ERC721/ERC4494', () => {
       const tokenId = '0';
       const chainId = await wallet.getChainId();
       const deadline = constants.MaxUint256;
-      const nonce = await NFTPermit.nonces(walletAddress);
+      const nonce = await NFTPermit.nonces(tokenId);
 
       const digest = await getApprovalDigest(
         chainId,
@@ -306,7 +515,7 @@ describe('ERC721/ERC4494', () => {
       const chainId = await wallet.getChainId();
       const tokenAddress = NFTPermit.address;
       const tokenId = '0';
-      const nonce = await NFTPermit.nonces(walletAddress);
+      const nonce = await NFTPermit.nonces(tokenId);
       const deadline = BigNumber.from('1');
 
       const types = {
@@ -365,7 +574,7 @@ describe('ERC721/ERC4494', () => {
       const chainId = await wallet.getChainId();
       const tokenAddress = NFTPermit.address;
       const tokenId = '0';
-      const nonce = await NFTPermit.nonces(walletAddress);
+      const nonce = await NFTPermit.nonces(tokenId);
       const deadline = constants.MaxUint256;
 
       const types = {
