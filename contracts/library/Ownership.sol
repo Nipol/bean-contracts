@@ -6,9 +6,9 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IERC173.sol";
 
-error ERC173_NotAuthorized(address caller);
+error ERC173__NotAuthorized(address caller);
 
-error ERC173_NotAllowedTo(address to);
+error ERC173__NotAllowedTo(address to);
 
 /**
  * @title Ownership
@@ -21,7 +21,7 @@ abstract contract Ownership is IERC173 {
     address public owner;
 
     modifier onlyOwner() {
-        if (owner != msg.sender) revert ERC173_NotAuthorized(msg.sender);
+        if (owner != msg.sender) revert ERC173__NotAuthorized(msg.sender);
         _;
     }
 
@@ -31,7 +31,7 @@ abstract contract Ownership is IERC173 {
     }
 
     function transferOwnership(address newOwner) external virtual onlyOwner {
-        if (newOwner == address(0)) revert ERC173_NotAllowedTo(newOwner);
+        if (newOwner == address(0)) revert ERC173__NotAllowedTo(newOwner);
         _transferOwnership(newOwner);
     }
 

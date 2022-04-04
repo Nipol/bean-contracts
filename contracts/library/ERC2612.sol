@@ -8,9 +8,9 @@ import "./EIP712.sol";
 import "./AbstractERC20.sol";
 import "../interfaces/IERC2612.sol";
 
-error ExpiredTime();
+error ERC2612__ExpiredTime();
 
-error InvalidSignature(address recovered);
+error ERC2612__InvalidSignature(address recovered);
 
 /**
  * @title ERC2612
@@ -66,7 +66,7 @@ abstract contract ERC2612 is IERC2612, AbstractERC20 {
         bytes32 r,
         bytes32 s
     ) external virtual {
-        if (deadline < block.timestamp) revert ExpiredTime();
+        if (deadline < block.timestamp) revert ERC2612__ExpiredTime();
 
         unchecked {
             uint256 nonce = nonces[owner]++;
@@ -76,7 +76,7 @@ abstract contract ERC2612 is IERC2612, AbstractERC20 {
             );
 
             address recovered = ecrecover(digest, v, r, s);
-            if (recovered == address(0) || recovered != owner) revert InvalidSignature(recovered);
+            if (recovered == address(0) || recovered != owner) revert ERC2612__InvalidSignature(recovered);
         }
 
         _approve(owner, spender, value);

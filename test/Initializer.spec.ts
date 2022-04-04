@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer, ContractFactory } from 'ethers';
 
 enum InitializerErrors {
-  ALREADY_INITIALIZED = 'AlreadyInitialized',
+  ALREADY_INITIALIZED = 'Initializer__AlreadyInitialized',
 }
 
 describe('Initializer', () => {

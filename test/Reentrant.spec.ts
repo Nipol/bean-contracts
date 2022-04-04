@@ -5,7 +5,7 @@ import { computeCreateAddress } from './utils';
 import { Interface } from 'ethers/lib/utils';
 
 enum ReentrantSafeErrors {
-  REENTRANT = 'Reentrant',
+  REENTRANT = 'RentrantSafe__Reentrant',
 }
 
 describe('ReentrantSafe', () => {

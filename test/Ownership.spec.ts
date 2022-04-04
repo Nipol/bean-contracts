@@ -3,8 +3,8 @@ import { ethers } from 'hardhat';
 import { Contract, BigNumber, constants, Signer, ContractFactory } from 'ethers';
 
 enum ERC173Errors {
-  NOT_AUTHORIZED = 'ERC173_NotAuthorized',
-  NOT_ALLOWED = 'ERC173_NotAllowedTo',
+  NOT_AUTHORIZED = 'ERC173__NotAuthorized',
+  NOT_ALLOWED = 'ERC173__NotAllowedTo',
   ASSERT = '0x1',
   ARITHMETIC_OVERFLOW_OR_UNDERFLOW = '0x11',
   DIVISION_BY_ZERO = '0x12',

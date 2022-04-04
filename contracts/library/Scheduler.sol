@@ -6,13 +6,13 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IScheduler.sol";
 
-error Scheduler_DelayIsNotRange();
+error Scheduler__DelayIsNotRange();
 
-error Scheduler_AlreadyQueued(bytes32 taskId);
+error Scheduler__AlreadyQueued(bytes32 taskId);
 
-error Scheduler_NotQueued(bytes32 taskId);
+error Scheduler__NotQueued(bytes32 taskId);
 
-error Scheduler_RemainingTime(bytes32 taskId);
+error Scheduler__RemainingTime(bytes32 taskId);
 
 /**
  * @title Scheduler
@@ -29,7 +29,7 @@ abstract contract Scheduler is IScheduler {
         uint32 maximumDelay
     ) internal {
         if (delayValue < minimumDelay || delayValue > maximumDelay || minimumDelay > maximumDelay)
-            revert Scheduler_DelayIsNotRange();
+            revert Scheduler__DelayIsNotRange();
         delay = delayValue;
         emit Delayed(delayValue);
     }
@@ -39,7 +39,7 @@ abstract contract Scheduler is IScheduler {
     }
 
     function queue(bytes32 taskid, uint32 from) internal {
-        if (taskOf[taskid].state != STATE.UNKNOWN) revert Scheduler_AlreadyQueued(taskid);
+        if (taskOf[taskid].state != STATE.UNKNOWN) revert Scheduler__AlreadyQueued(taskid);
         assert(from >= uint32(block.timestamp));
         uint32 total = from + delay;
         (taskOf[taskid].endTime, taskOf[taskid].state) = (total, STATE.QUEUED);
@@ -48,8 +48,8 @@ abstract contract Scheduler is IScheduler {
 
     function resolve(bytes32 taskid, uint32 gracePeriod) internal {
         Task memory t = taskOf[taskid];
-        if (t.state != STATE.QUEUED) revert Scheduler_NotQueued(taskid);
-        if (t.endTime > uint32(block.timestamp)) revert Scheduler_RemainingTime(taskid);
+        if (t.state != STATE.QUEUED) revert Scheduler__NotQueued(taskid);
+        if (t.endTime > uint32(block.timestamp)) revert Scheduler__RemainingTime(taskid);
 
         if (uint32(block.timestamp) >= t.endTime + gracePeriod) {
             (taskOf[taskid].endTime, taskOf[taskid].state) = (0, STATE.STALED);

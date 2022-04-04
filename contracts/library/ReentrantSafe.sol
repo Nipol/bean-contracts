@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-error Reentrant();
+error RentrantSafe__Reentrant();
 
 /**
  * @title ReentrantSafe
@@ -22,7 +22,7 @@ abstract contract ReentrantSafe {
      * @dev 이것이 다양한 modifier와 함께 사용될 때 가장 왼쪽에 위치하는 것이 일반적인 사용입니다.
      */
     modifier reentrantSafer() {
-        if (ent != 0) revert Reentrant();
+        if (ent != 0) revert RentrantSafe__Reentrant();
 
         ent = 1;
 
@@ -38,7 +38,7 @@ abstract contract ReentrantSafe {
      * 가장 오른쪽에 `reentrantEnd`가 같이 사용되어 다른 modifier를 감싸는 형태가 되어야 합니다.
      */
     modifier reentrantStart() {
-        if (ent != 0) revert Reentrant();
+        if (ent != 0) revert RentrantSafe__Reentrant();
 
         ent = 1;
 

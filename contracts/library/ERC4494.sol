@@ -9,9 +9,9 @@ import "./AbstractERC721.sol";
 import "../interfaces/IERC721.sol";
 import "../interfaces/IERC4494.sol";
 
-error ExpiredTime();
+error ERC4494__ExpiredTime();
 
-error InvalidSignature(address recovered);
+error ERC4494__InvalidSignature(address recovered);
 
 /**
  * @title ERC4494
@@ -55,7 +55,7 @@ abstract contract ERC4494 is IERC4494, AbstractERC721 {
         uint256 deadline,
         bytes memory signature
     ) external virtual {
-        if (deadline < block.timestamp) revert ExpiredTime();
+        if (deadline < block.timestamp) revert ERC4494__ExpiredTime();
 
         uint8 v;
         bytes32 r;
@@ -80,7 +80,7 @@ abstract contract ERC4494 is IERC4494, AbstractERC721 {
                 v = 27 + uint8(uint256(vs) >> 255);
             }
         } else {
-            revert InvalidSignature(address(0));
+            revert ERC4494__InvalidSignature(address(0));
         }
 
         address owner = IERC721(address(this)).ownerOf(tokenId);
@@ -93,7 +93,7 @@ abstract contract ERC4494 is IERC4494, AbstractERC721 {
             );
 
             address recovered = ecrecover(digest, v, r, s);
-            if (recovered == address(0) || recovered != owner) revert InvalidSignature(recovered);
+            if (recovered == address(0) || recovered != owner) revert ERC4494__InvalidSignature(recovered);
         }
 
         _approve(owner, spender, tokenId);

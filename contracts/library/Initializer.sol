@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.0;
 
-error AlreadyInitialized();
+error Initializer__AlreadyInitialized();
 
 /**
  * @title Initializer
@@ -19,7 +19,7 @@ abstract contract Initializer {
     }
 
     modifier initializer() {
-        if (_initialized && (address(this).code.length != 0)) revert AlreadyInitialized();
+        if (_initialized && (address(this).code.length != 0)) revert Initializer__AlreadyInitialized();
         _initialized = true;
         _;
     }

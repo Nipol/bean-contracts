@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
 import "./AbstractERC20.sol";
 import "../interfaces/IERC20.sol";
 
-error ERC20_ApproveToSelf();
+error ERC20__ApproveToSelf();
 
 /**
  * @title ERC20
@@ -70,7 +70,7 @@ abstract contract ERC20 is IERC20, AbstractERC20 {
         address spender,
         uint256 value
     ) internal virtual override {
-        if (spender == address(this)) revert ERC20_ApproveToSelf();
+        if (spender == address(this)) revert ERC20__ApproveToSelf();
         allowance[_owner][spender] = value;
         emit Approval(_owner, spender, value);
     }

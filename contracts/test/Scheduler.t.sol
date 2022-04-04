@@ -53,9 +53,9 @@ contract SchedulerTest is Scheduler, DSTest {
     }
 
     function testDelaySetWithWrongRange() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler_DelayIsNotRange()"))));
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler__DelayIsNotRange()"))));
         sch.set(2 days, MAXIMUM_DELAY, MINIMUM_DELAY);
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler_DelayIsNotRange()"))));
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler__DelayIsNotRange()"))));
         sch.set(32 days, MINIMUM_DELAY, MAXIMUM_DELAY);
     }
 
@@ -78,7 +78,7 @@ contract SchedulerTest is Scheduler, DSTest {
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
         cheats.expectRevert(
             abi.encodeWithSelector(
-                bytes4(keccak256("Scheduler_AlreadyQueued(bytes32)")),
+                bytes4(keccak256("Scheduler__AlreadyQueued(bytes32)")),
                 0x0000000000000000000000000000000000000000000000000000000000000001
             )
         );
@@ -94,7 +94,7 @@ contract SchedulerTest is Scheduler, DSTest {
     function testNotQueuedTaskResolve() public {
         cheats.expectRevert(
             abi.encodeWithSelector(
-                bytes4(keccak256("Scheduler_NotQueued(bytes32)")),
+                bytes4(keccak256("Scheduler__NotQueued(bytes32)")),
                 0x0000000000000000000000000000000000000000000000000000000000000001
             )
         );
@@ -107,7 +107,7 @@ contract SchedulerTest is Scheduler, DSTest {
 
         cheats.expectRevert(
             abi.encodeWithSelector(
-                bytes4(keccak256("Scheduler_RemainingTime(bytes32)")),
+                bytes4(keccak256("Scheduler__RemainingTime(bytes32)")),
                 0x0000000000000000000000000000000000000000000000000000000000000001
             )
         );

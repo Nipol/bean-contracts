@@ -4,10 +4,10 @@ import { Contract, BigNumber, Signer } from 'ethers';
 import { keccak256 } from 'ethers/lib/utils';
 
 enum SchedulerErrors {
-  DELAY_IS_NOT_RANGED = 'Scheduler_DelayIsNotRange',
-  ALREADY_QUEUED = 'Scheduler_AlreadyQueued',
-  NOT_QUEUED = 'Scheduler_NotQueued',
-  REMAINING_TIME = 'Scheduler_RemainingTime',
+  DELAY_IS_NOT_RANGED = 'Scheduler__DelayIsNotRange',
+  ALREADY_QUEUED = 'Scheduler__AlreadyQueued',
+  NOT_QUEUED = 'Scheduler__NotQueued',
+  REMAINING_TIME = 'Scheduler__RemainingTime',
   ASSERT = '0x1',
 }
 

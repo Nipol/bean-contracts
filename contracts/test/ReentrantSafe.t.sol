@@ -37,17 +37,17 @@ contract ReentrantSafeTest is DSTest {
     }
 
     function testReentrantSaferWithReentrant() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Reentrant()"))));
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
         r.selfRecall();
     }
 
     function testReentrantSaferWithRange() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Reentrant()"))));
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
         r.selfRecallWithRange();
     }
 
     function testReentrantSaferWithWrong() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Reentrant()"))));
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
         r.selfRecallWithWrong();
     }
 

@@ -4,7 +4,7 @@ import { Contract, BigNumber, constants, Signer } from 'ethers';
 import { Interface } from 'ethers/lib/utils';
 
 enum ERC20Errors {
-  ApproveToSelf = 'ERC20_ApproveToSelf',
+  ApproveToSelf = 'ERC20__ApproveToSelf',
   ASSERT = '0x1',
   ARITHMETIC_OVERFLOW_OR_UNDERFLOW = '0x11',
   DIVISION_BY_ZERO = '0x12',

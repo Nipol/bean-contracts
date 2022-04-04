@@ -92,7 +92,7 @@ contract ERC20Test is DSTest {
     }
 
     function testApproveForTokenAddr() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC20_ApproveToSelf()"))));
+        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC20__ApproveToSelf()"))));
         token.approve(address(token), 1);
     }
 

@@ -14,8 +14,8 @@ import {
 } from 'ethers/lib/utils';
 
 enum ERC2612Errors {
-  EXPIRED_TIME = 'ExpiredTime',
-  INVALID_SIGNATURE = 'InvalidSignature',
+  EXPIRED_TIME = 'ERC2612__ExpiredTime',
+  INVALID_SIGNATURE = 'ERC2612__InvalidSignature',
 }
 
 const EIP712DOMAIN_TYPEHASH = keccak256(

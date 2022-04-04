@@ -11,21 +11,21 @@ import "../interfaces/IERC721TokenReceiver.sol";
 import "./AbstractERC721.sol";
 import "./ReentrantSafe.sol";
 
-error ERC721_WrongERC721Receiver(address receiver);
+error ERC721__WrongERC721Receiver(address receiver);
 
-error ERC721_NoneERC721Receiver(address receiver);
+error ERC721__NoneERC721Receiver(address receiver);
 
-error ERC721_NotOwnerOrApprover(address caller);
+error ERC721__NotOwnerOrApprover(address caller);
 
-error ERC721_NotAllowed(address caller, uint256 tokenId);
+error ERC721__NotAllowed(address caller, uint256 tokenId);
 
-error ERC721_NotApproved(address operator, address caller);
+error ERC721__NotApproved(address operator, address caller);
 
-error ERC721_NotExist(uint256 tokenId);
+error ERC721__NotExist(uint256 tokenId);
 
-error ERC721_AlreadyExist(uint256 tokenId);
+error ERC721__AlreadyExist(uint256 tokenId);
 
-error ERC721Enumerable_OutOfIndex(uint256 index);
+error ERC721Enumerable__OutOfIndex(uint256 index);
 
 /**
  * @author yoonsung.eth
@@ -54,10 +54,10 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
         if (to.code.length != 0) {
             try IERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
                 if (retval == IERC721TokenReceiver.onERC721Received.selector) return;
-                else revert ERC721_WrongERC721Receiver(to);
+                else revert ERC721__WrongERC721Receiver(to);
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
-                    revert ERC721_NoneERC721Receiver(to);
+                    revert ERC721__NoneERC721Receiver(to);
                 } else {
                     // solhint-disable-next-line no-inline-assembly
                     assembly {
@@ -100,7 +100,7 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
         uint256 tokenId,
         bytes memory data
     ) public payable virtual {
-        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721_NotOwnerOrApprover(msg.sender);
+        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721__NotOwnerOrApprover(msg.sender);
         _safeTransfer(from, to, tokenId, data);
     }
 
@@ -109,7 +109,7 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
         address to,
         uint256 tokenId
     ) public payable virtual {
-        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721_NotOwnerOrApprover(msg.sender);
+        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721__NotOwnerOrApprover(msg.sender);
         _safeTransfer(from, to, tokenId, "");
     }
 
@@ -118,20 +118,20 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
         address to,
         uint256 tokenId
     ) public payable virtual {
-        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721_NotOwnerOrApprover(msg.sender);
+        if (!_isApprovedOrOwner(msg.sender, tokenId)) revert ERC721__NotOwnerOrApprover(msg.sender);
         _transfer(from, to, tokenId);
     }
 
     function approve(address to, uint256 tokenId) public payable virtual {
         address _owner = _owners[tokenId];
-        if (to == _owner) revert ERC721_NotAllowed(to, tokenId);
+        if (to == _owner) revert ERC721__NotAllowed(to, tokenId);
         if (msg.sender != _owner && !isApprovedForAll(_owner, msg.sender))
-            revert ERC721_NotAllowed(msg.sender, tokenId);
+            revert ERC721__NotAllowed(msg.sender, tokenId);
         _approve(_owner, to, tokenId);
     }
 
     function setApprovalForAll(address operator, bool approved) public virtual {
-        if (operator == msg.sender) revert ERC721_NotApproved(operator, msg.sender);
+        if (operator == msg.sender) revert ERC721__NotApproved(operator, msg.sender);
         _operatorApprovals[msg.sender][operator] = approved;
         emit ApprovalForAll(msg.sender, operator, approved);
     }
@@ -163,12 +163,12 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
     }
 
     function tokenByIndex(uint256 index) public view virtual returns (uint256) {
-        if (index >= _owners.length) revert ERC721_NotExist(index);
+        if (index >= _owners.length) revert ERC721__NotExist(index);
         return index;
     }
 
     function tokenOfOwnerByIndex(address target, uint256 index) public view virtual returns (uint256 tokenId) {
-        if (index >= balanceOf(target)) revert ERC721Enumerable_OutOfIndex(index);
+        if (index >= balanceOf(target)) revert ERC721Enumerable__OutOfIndex(index);
         uint256 count;
         address[] memory owners = _owners;
         uint256 length = owners.length;
@@ -199,8 +199,8 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
         address to,
         uint256 tokenId
     ) internal virtual {
-        if (_owners[tokenId] != from) revert ERC721_NotAllowed(from, tokenId);
-        if (to == address(0)) revert ERC721_NotAllowed(to, tokenId);
+        if (_owners[tokenId] != from) revert ERC721__NotAllowed(from, tokenId);
+        if (to == address(0)) revert ERC721__NotAllowed(to, tokenId);
         _approves[tokenId] = address(0);
         _owners[tokenId] = to;
         emit Transfer(from, to, tokenId);
@@ -225,7 +225,7 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
     }
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool success) {
-        if (!_exists(tokenId)) revert ERC721_NotExist(tokenId);
+        if (!_exists(tokenId)) revert ERC721__NotExist(tokenId);
         address _owner = _owners[tokenId];
         success = (spender == _owner) || (_approves[tokenId] == spender) || isApprovedForAll(_owner, spender);
     }
@@ -235,8 +235,8 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
     }
 
     function _mint(address to, uint256 tokenId) internal virtual {
-        if (to == address(0)) revert ERC721_NotAllowed(to, tokenId);
-        if (_exists(tokenId)) revert ERC721_AlreadyExist(tokenId);
+        if (to == address(0)) revert ERC721__NotAllowed(to, tokenId);
+        if (_exists(tokenId)) revert ERC721__AlreadyExist(tokenId);
 
         _owners.push(to);
 
@@ -253,7 +253,7 @@ abstract contract ERC721Enumerable is IERC721, IERC721Metadata, IERC721Enumerabl
 
     function _burn(uint256 tokenId) internal virtual {
         address _owner = _owners[tokenId];
-        if (_owner == address(0)) revert ERC721_NotAllowed(_owner, tokenId);
+        if (_owner == address(0)) revert ERC721__NotAllowed(_owner, tokenId);
         _approves[tokenId] = address(0);
         delete _owners[tokenId];
 

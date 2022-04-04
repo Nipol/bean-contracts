@@ -4,14 +4,14 @@ import { Contract, constants, Signer } from 'ethers';
 import { parseEther } from 'ethers/lib/utils';
 
 enum ERC721Errors {
-  WRONG_RECEIVER = 'ERC721_WrongERC721Receiver',
-  NONE_RECEIVER = 'ERC721_NoneERC721Receiver',
-  NOT_OWNER_OR_APPROVER = 'ERC721_NotOwnerOrApprover',
-  NOT_ALLOWED = 'ERC721_NotAllowed',
-  NOT_APPROVED = 'ERC721_NotApproved',
-  NOT_EXIST = 'ERC721_NotExist',
-  ALREADY_EXIST = 'ERC721_AlreadyExist',
-  OUT_OF_INDEX = 'ERC721Enumerable_OutOfIndex',
+  WRONG_RECEIVER = 'ERC721__WrongERC721Receiver',
+  NONE_RECEIVER = 'ERC721__NoneERC721Receiver',
+  NOT_OWNER_OR_APPROVER = 'ERC721__NotOwnerOrApprover',
+  NOT_ALLOWED = 'ERC721__NotAllowed',
+  NOT_APPROVED = 'ERC721__NotApproved',
+  NOT_EXIST = 'ERC721__NotExist',
+  ALREADY_EXIST = 'ERC721__AlreadyExist',
+  OUT_OF_INDEX = 'ERC721Enumerable__OutOfIndex',
   OUT_OF_BOUND = '0x32',
 }
 
