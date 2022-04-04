@@ -21,20 +21,16 @@ import {ERC2612, IERC2612} from "@beandao/contracts/library/ERC2612.sol";
 import {Ownership, IERC173} from "@beandao/contracts/library/Ownership.sol";
 import {Multicall, IMulticall} from "@beandao/contracts/library/Multicall.sol";
 
-contract TokenMock is ERC20, ERC2612, Ownership, Multicall, IERC165 {
+contract StandardToken is ERC20, ERC2612, Ownership, Multicall, IERC165 {
     constructor(
         string memory tokenName,
         string memory tokenSymbol,
         uint8 tokenDecimals,
         string memory tokenVersion,
-        uint256 balance
-    ) {
-        _initDomainSeparator(tokenName, '1');
-        name = tokenName;
-        symbol = tokenSymbol;
-        decimals = tokenDecimals;
-        balanceOf[msg.sender] = balance;
-        totalSupply = balance;
+        uint256 amount
+    ) ERC20(tokenName, tokenSymbol, tokenDecimals) ERC2612(tokenName, tokenVersion) {
+        totalSupply = amount;
+        balanceOf[msg.sender] = amount;
     }
 
     function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
