@@ -3,7 +3,7 @@ optimizer = true
 optimizer_runs = 42069
 src = 'contracts'
 out = 'artifacts'
-libs = ['node_modules']
+libs = ["node_modules", "lib"]
 gas_reports = ["*"]
 via_ir = false
 
