@@ -4,30 +4,21 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import {WETH, IERC20, IERC165, IERC2612} from "../library/WETH.sol";
 
-interface CheatCodes {
-    function prank(address) external;
-
-    function expectRevert(bytes calldata) external;
-
-    function deal(address who, uint256 newBalance) external;
-}
-
-contract WETHTest is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract WETHTest is Test {
     WETH weth;
 
     receive() external payable {}
 
     function setUp() public {
         weth = new WETH();
-        cheats.deal(address(this), 1 ether);
+        vm.deal(address(this), 1 ether);
     }
 
     function testFailDepositWithTransfer() public {
-        // cheats.expectRevert(
+        // vm.expectRevert(
         //     abi.encodeWithSelector(
         //         bytes4(keccak256("Error(string)")),
         //         bytes("Call reverted as expected, but without data")
@@ -71,7 +62,7 @@ contract WETHTest is DSTest {
     }
 
     function testWithdrawWithNotEnoughBalance() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         weth.withdraw(1 ether);
     }
 }

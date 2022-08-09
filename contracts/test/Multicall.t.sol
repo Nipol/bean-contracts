@@ -4,17 +4,10 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import {IMulticall, Multicall} from "../library/Multicall.sol";
 
-interface CheatCodes {
-    function prank(address) external;
-
-    function expectRevert(bytes calldata) external;
-}
-
-contract MulticallTest is Multicall, DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract MulticallTest is Multicall, Test {
     uint256 public counter;
 
     function setUp() public {
@@ -63,7 +56,7 @@ contract MulticallTest is Multicall, DSTest {
         bytes[] memory cds = new bytes[](1);
         (cds[0]) = (cd);
 
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         IMulticall(address(this)).multicall(cds);
     }
 
@@ -73,7 +66,7 @@ contract MulticallTest is Multicall, DSTest {
 
         (cds[0]) = (cd);
 
-        cheats.expectRevert(bytes("Message From Revert"));
+        vm.expectRevert(bytes("Message From Revert"));
         IMulticall(address(this)).multicall(cds);
     }
 
@@ -83,7 +76,7 @@ contract MulticallTest is Multicall, DSTest {
 
         (cds[0]) = (cd);
 
-        cheats.expectRevert(bytes(""));
+        vm.expectRevert(bytes(""));
         IMulticall(address(this)).multicall(cds);
     }
 }

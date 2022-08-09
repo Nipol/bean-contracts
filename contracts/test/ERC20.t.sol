@@ -4,17 +4,10 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import {TokenMock, IERC20, IERC165, IERC173, IERC2612} from "../mocks/TokenMock.sol";
 
-interface CheatCodes {
-    function prank(address) external;
-
-    function expectRevert(bytes calldata) external;
-}
-
-contract ERC20Test is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract ERC20Test is Test {
     TokenMock token;
     string private name = "Test Token";
     string private symbol = "TT";
@@ -68,13 +61,13 @@ contract ERC20Test is DSTest {
 
     function testNoneApprovedTransferFrom() public {
         token.mintTo(address(10), 100e18);
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         token.transferFrom(address(10), address(this), 100e18);
     }
 
     function testApprovedTransferFrom() public {
         token.mintTo(address(10), 100e18);
-        cheats.prank(address(10));
+        vm.prank(address(10));
         token.approve(address(this), 100e18);
         assertEq(token.allowance(address(10), address(this)), 100e18);
         token.transferFrom(address(10), address(this), 100e18);
@@ -84,22 +77,22 @@ contract ERC20Test is DSTest {
 
     function testApprovedTransferFromOverBalance() public {
         token.mintTo(address(10), 100e18);
-        cheats.prank(address(10));
+        vm.prank(address(10));
         token.approve(address(this), 100e18);
         assertEq(token.allowance(address(10), address(this)), 100e18);
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         token.transferFrom(address(10), address(this), 101e18);
     }
 
     function testApproveForTokenAddr() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC20__ApproveToSelf()"))));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC20__ApproveToSelf()"))));
         token.approve(address(token), 1);
     }
 
     function testTransferOverBalance() public {
         assertEq(token.totalSupply(), 0);
         assertEq(token.balanceOf(address(this)), 0);
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         token.transfer(address(10), 1);
     }
 

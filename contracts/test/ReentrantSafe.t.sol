@@ -3,12 +3,9 @@
  */
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "../library/ReentrantSafe.sol";
 
-interface CheatCodes {
-    function expectRevert(bytes calldata) external;
-}
 
 contract ReentrantMock is ReentrantSafe {
     function justcall() public reentrantSafer {}
@@ -28,8 +25,7 @@ contract ReentrantMock is ReentrantSafe {
     }
 }
 
-contract ReentrantSafeTest is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract ReentrantSafeTest is Test {
     ReentrantMock r;
 
     function setUp() public {
@@ -37,17 +33,17 @@ contract ReentrantSafeTest is DSTest {
     }
 
     function testReentrantSaferWithReentrant() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
         r.selfRecall();
     }
 
     function testReentrantSaferWithRange() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
         r.selfRecallWithRange();
     }
 
     function testReentrantSaferWithWrong() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("RentrantSafe__Reentrant()"))));
         r.selfRecallWithWrong();
     }
 

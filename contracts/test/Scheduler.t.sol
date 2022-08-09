@@ -3,14 +3,8 @@
  */
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import {IScheduler, Scheduler} from "../library/Scheduler.sol";
-
-interface CheatCodes {
-    function expectRevert(bytes calldata) external;
-
-    function warp(uint256) external;
-}
 
 contract SchedulerMock is Scheduler {
     function set(
@@ -34,13 +28,12 @@ contract SchedulerMock is Scheduler {
     }
 }
 
-contract SchedulerTest is Scheduler, DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract SchedulerTest is Scheduler, Test {
     SchedulerMock sch;
 
     function setUp() public {
         sch = new SchedulerMock();
-        cheats.warp(1);
+        vm.warp(1);
     }
 
     uint32 internal constant GRACE_PERIOD = 1 days;
@@ -53,9 +46,9 @@ contract SchedulerTest is Scheduler, DSTest {
     }
 
     function testDelaySetWithWrongRange() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler__DelayIsNotRange()"))));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler__DelayIsNotRange()"))));
         sch.set(2 days, MAXIMUM_DELAY, MINIMUM_DELAY);
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler__DelayIsNotRange()"))));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Scheduler__DelayIsNotRange()"))));
         sch.set(32 days, MINIMUM_DELAY, MAXIMUM_DELAY);
     }
 
@@ -76,7 +69,7 @@ contract SchedulerTest is Scheduler, DSTest {
     function testAlreadyQueued() public {
         sch.set(2 days, MINIMUM_DELAY, MAXIMUM_DELAY);
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(
                 bytes4(keccak256("Scheduler__AlreadyQueued(bytes32)")),
                 0x0000000000000000000000000000000000000000000000000000000000000001
@@ -92,7 +85,7 @@ contract SchedulerTest is Scheduler, DSTest {
     }
 
     function testNotQueuedTaskResolve() public {
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(
                 bytes4(keccak256("Scheduler__NotQueued(bytes32)")),
                 0x0000000000000000000000000000000000000000000000000000000000000001
@@ -105,7 +98,7 @@ contract SchedulerTest is Scheduler, DSTest {
         sch.set(2 days, MINIMUM_DELAY, MAXIMUM_DELAY);
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
 
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(
                 bytes4(keccak256("Scheduler__RemainingTime(bytes32)")),
                 0x0000000000000000000000000000000000000000000000000000000000000001
@@ -118,7 +111,7 @@ contract SchedulerTest is Scheduler, DSTest {
         sch.set(2 days, MINIMUM_DELAY, MAXIMUM_DELAY);
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
 
-        cheats.warp(1 + 60 * 60 * 24 * 2);
+        vm.warp(1 + 60 * 60 * 24 * 2);
         sch.setResolve(0x0000000000000000000000000000000000000000000000000000000000000001, GRACE_PERIOD);
 
         (uint32 et, IScheduler.STATE state) = sch.taskOf(
@@ -132,7 +125,7 @@ contract SchedulerTest is Scheduler, DSTest {
         sch.set(2 days, MINIMUM_DELAY, MAXIMUM_DELAY);
         sch.setQueue(0x0000000000000000000000000000000000000000000000000000000000000001);
 
-        cheats.warp(1 + 60 * 60 * 24 * 4);
+        vm.warp(1 + 60 * 60 * 24 * 4);
         sch.setResolve(0x0000000000000000000000000000000000000000000000000000000000000001, GRACE_PERIOD);
 
         (uint32 et, IScheduler.STATE state) = sch.taskOf(

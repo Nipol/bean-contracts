@@ -4,9 +4,9 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 
-contract LoopTest is DSTest {
+contract LoopTest is Test {
     function testLoop1() public {
         uint256[] memory arr = new uint256[](256);
         for (uint256 i = 0; i < arr.length; i++) {

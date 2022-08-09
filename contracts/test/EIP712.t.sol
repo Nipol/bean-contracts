@@ -4,10 +4,10 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "../library/EIP712.sol";
 
-contract EIP712Test is DSTest {
+contract EIP712Test is Test {
     bytes32 public constant VERIFY_PLAIN_TYPEHASH = keccak256("Verify(address owner,uint256 value)");
     bytes32 public constant VERIFY_ARRAY_TYPEHASH = keccak256("Verify(address owner,uint256[] value)");
     bytes32 public constant VERIFY_COMPLEX_TYPEHASH =

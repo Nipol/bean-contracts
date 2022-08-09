@@ -4,12 +4,8 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "../library/MinimalProxy.sol";
-
-interface CheatCodes {
-    function expectRevert(bytes calldata) external;
-}
 
 interface IDummy {
     function name() external returns (string memory);
@@ -45,9 +41,7 @@ contract RevertDummyMock is IDummy {
     }
 }
 
-contract MinimalProxyTest is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
-
+contract MinimalProxyTest is Test {
     function testComputeCreate2Check() public {
         address template = address(new DummyTemplate());
         address deployable = MinimalProxy.computeAddress(
@@ -126,7 +120,7 @@ contract MinimalProxyTest is DSTest {
     function testCallCodeToRevert() public {
         address RevertProxy = MinimalProxy.deploy(address(new RevertDummyMock()), "");
         bytes memory initCode = abi.encodeWithSelector(bytes4(keccak256("initialize(string)")), "Hello World");
-        cheats.expectRevert("Intentional REVERT");
+        vm.expectRevert("Intentional REVERT");
         (bool success, ) = RevertProxy.call(initCode);
         assertTrue(success);
         assertEq(IDummy(RevertProxy).name(), "");
