@@ -20,7 +20,7 @@
   "remoteUser": "node",
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:/home/node/.local/bin:/home/node/.foundry/bin",
-    "SOLC_VERSION": "0.8.13"
+    "SOLC_VERSION": "0.8.16"
   },
 
   // Set *default* container specific settings.json values on container create.

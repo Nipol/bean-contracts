@@ -4,19 +4,12 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "../library/Ownership.sol";
-
-interface CheatCodes {
-    function prank(address) external;
-
-    function expectRevert(bytes calldata) external;
-}
 
 contract OwnershipT is Ownership {}
 
-contract OwnershipTest is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract OwnershipTest is Test {
     OwnershipT o;
 
     function setUp() public {
@@ -35,7 +28,7 @@ contract OwnershipTest is DSTest {
 
     function testTransferOwnershipToZero() public {
         assertEq(o.owner(), 0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC173__NotAllowedTo(address)")), address(0)));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC173__NotAllowedTo(address)")), address(0)));
         o.transferOwnership(address(0));
     }
 
@@ -52,8 +45,8 @@ contract OwnershipTest is DSTest {
     }
 
     function testCallTransferOwnershipFromZeroAddress() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC173__NotAuthorized(address)")), address(0)));
-        cheats.prank(address(0));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC173__NotAuthorized(address)")), address(0)));
+        vm.prank(address(0));
         o.transferOwnership(address(10));
     }
 

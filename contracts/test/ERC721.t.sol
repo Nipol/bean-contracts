@@ -4,17 +4,11 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
 import {IERC721, ERC721Mock} from "../mocks/ERC721Mock.sol";
 import {ExploitERC721Mint} from "../mocks/ExploitERC721Mint.sol";
 import {ExploitMinter} from "../mocks/ExploitMinter.sol";
-
-interface CheatCodes {
-    function prank(address) external;
-
-    function expectRevert(bytes calldata) external;
-}
 
 contract ERC721Receiver is IERC721TokenReceiver {
     function onERC721Received(
@@ -70,8 +64,7 @@ contract ReentrantERC721Receiver is IERC721TokenReceiver {
 
 contract NoneERC721Receiver {}
 
-contract ERC721Test is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract ERC721Test is Test {
     ERC721Mock nft;
 
     function setUp() public {
@@ -153,7 +146,7 @@ contract ERC721Test is DSTest {
     function testApproveAndTransferFrom() public {
         nft.mintTo(address(0xDEADBEEF), 0);
 
-        cheats.prank(address(0xDEADBEEF));
+        vm.prank(address(0xDEADBEEF));
         nft.approve(address(this), 0);
 
         nft.transferFrom(address(0xDEADBEEF), address(this), 0);
@@ -177,7 +170,7 @@ contract ERC721Test is DSTest {
         WrongERC721Receiver r = new WrongERC721Receiver();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__WrongERC721Receiver(address)")), address(r))
         );
         nft.safeMint(address(r), 0);
@@ -189,7 +182,7 @@ contract ERC721Test is DSTest {
         RevertERC721Receiver r = new RevertERC721Receiver();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("Peek A Boo"));
+        vm.expectRevert(bytes("Peek A Boo"));
         nft.safeMint(address(r), 0);
 
         assertEq(nft.balanceOf(address(r)), 0);
@@ -199,7 +192,7 @@ contract ERC721Test is DSTest {
         NoneERC721Receiver r = new NoneERC721Receiver();
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__NoneERC721Receiver(address)")), address(r))
         );
         nft.safeMint(address(r), 0);
@@ -233,7 +226,7 @@ contract ERC721Test is DSTest {
         nft.mint(0);
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__WrongERC721Receiver(address)")), address(r))
         );
         nft.safeTransferFrom(address(this), address(r), 0);
@@ -246,7 +239,7 @@ contract ERC721Test is DSTest {
         nft.mint(0);
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(bytes("Peek A Boo"));
+        vm.expectRevert(bytes("Peek A Boo"));
         nft.safeTransferFrom(address(this), address(r), 0);
 
         assertEq(nft.balanceOf(address(r)), 0);
@@ -257,7 +250,7 @@ contract ERC721Test is DSTest {
         nft.mint(0);
         assertEq(nft.balanceOf(address(r)), 0);
 
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__NoneERC721Receiver(address)")), address(r))
         );
         nft.safeTransferFrom(address(this), address(r), 0);
@@ -269,14 +262,14 @@ contract ERC721Test is DSTest {
         nft.mint(0);
         nft.setApprovalForAll(address(10), true);
 
-        cheats.prank(address(10));
+        vm.prank(address(10));
         nft.transferFrom(address(this), address(2), 0);
         assertEq(nft.ownerOf(0), address(2));
         assertTrue(nft.isApprovedForAll(address(this), address(10)));
     }
 
     function testApprovalForAllToSelf() public {
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(
                 bytes4(keccak256("ERC721__NotApproved(address,address)")),
                 address(this),
@@ -287,13 +280,13 @@ contract ERC721Test is DSTest {
     }
 
     function testNotExistTransfer() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721__NotExist(uint256)")), 0));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721__NotExist(uint256)")), 0));
         nft.transferFrom(address(this), address(10), 0);
     }
 
     function testNotApprovedTransfer() public {
         nft.mintTo(address(10), 0);
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__NotOwnerOrApprover(address)")), address(this))
         );
         nft.transferFrom(address(this), address(2), 0);
@@ -301,20 +294,20 @@ contract ERC721Test is DSTest {
 
     function testTransferToZero() public {
         nft.mint(0);
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__NotAllowed(address,uint256)")), address(0), 0)
         );
         nft.transferFrom(address(this), address(0), 0);
     }
 
     function testNotExistSafeTransfer() public {
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721__NotExist(uint256)")), 0));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("ERC721__NotExist(uint256)")), 0));
         nft.safeTransferFrom(address(this), address(10), 0, "");
     }
 
     function testNotApprovedSafeTransfer() public {
         nft.mintTo(address(10), 0);
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__NotOwnerOrApprover(address)")), address(this))
         );
         nft.safeTransferFrom(address(this), address(2), 0, "");
@@ -322,7 +315,7 @@ contract ERC721Test is DSTest {
 
     function testSafeTransferToZero() public {
         nft.mint(0);
-        cheats.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(bytes4(keccak256("ERC721__NotAllowed(address,uint256)")), address(0), 0)
         );
         nft.safeTransferFrom(address(this), address(0), 0, "");

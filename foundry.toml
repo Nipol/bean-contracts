@@ -1,14 +1,18 @@
-[default]
+[profile.default]
 optimizer = true
 optimizer_runs = 42069
 src = 'contracts'
 out = 'artifacts'
-libs = ['node_modules']
+libs = ["node_modules", "lib"]
 gas_reports = ["*"]
 via_ir = false
 
-[default.optimizer_details]
+[profile.default.optimizer_details]
 constantOptimizer = true
 yul = true
+
+[profile.default.optimizer_details.yulDetails]
+stackAllocation = true
+optimizerSteps = 'dhfoDgvulfnTUtnIf'
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config

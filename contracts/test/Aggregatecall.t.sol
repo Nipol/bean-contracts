@@ -4,14 +4,8 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import {IAggregatecall, Aggregatecall} from "../library/Aggregatecall.sol";
-
-interface CheatCodes {
-    function prank(address) external;
-
-    function expectRevert(bytes calldata) external;
-}
 
 contract Encounter {
     uint256 public counter;
@@ -35,8 +29,7 @@ contract Encounter {
 
 contract AggregateCaller is Aggregatecall {}
 
-contract AggregatecallTest is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract AggregatecallTest is Test {
     Encounter c;
     IAggregatecall ac;
 
@@ -79,7 +72,7 @@ contract AggregatecallTest is DSTest {
             data: abi.encodeWithSelector(bytes4(keccak256("decrease()")))
         });
 
-        cheats.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("Panic(uint256)")), 0x11));
         IAggregatecall.Call[] memory cds = new IAggregatecall.Call[](1);
         (cds[0]) = (cd);
 
@@ -95,7 +88,7 @@ contract AggregatecallTest is DSTest {
         IAggregatecall.Call[] memory cds = new IAggregatecall.Call[](1);
         (cds[0]) = (cd);
 
-        cheats.expectRevert(bytes("Message From Revert"));
+        vm.expectRevert(bytes("Message From Revert"));
         ac.aggregate(cds);
     }
 
@@ -108,7 +101,7 @@ contract AggregatecallTest is DSTest {
         IAggregatecall.Call[] memory cds = new IAggregatecall.Call[](1);
         (cds[0]) = (cd);
 
-        cheats.expectRevert(bytes(""));
+        vm.expectRevert(bytes(""));
         ac.aggregate(cds);
     }
 }

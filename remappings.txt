@@ -1,1 +1,6 @@
-ds-test/=lib/ds-test/src/
+@ensdomains/=node_modules/@ensdomains/
+@nomiclabs/=node_modules/@nomiclabs/
+@solidity-parser/=node_modules/@solidity-parser/
+eth-gas-reporter/=node_modules/eth-gas-reporter/
+forge-std/=lib/forge-std/src/
+hardhat/=node_modules/hardhat/

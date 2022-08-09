@@ -4,14 +4,8 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "../library/PermissionTable.sol";
-
-interface CheatCodes {
-    function etch(address who, bytes calldata code) external;
-
-    function label(address addr, string calldata label) external;
-}
 
 contract PermissionMock is PermissionTable {
     function Grant(
@@ -23,17 +17,16 @@ contract PermissionMock is PermissionTable {
     }
 }
 
-contract PermissionTest is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract PermissionTest is Test {
     PermissionMock p;
 
     function setUp() public {
         p = new PermissionMock();
 
-        cheats.etch(address(11), abi.encode(0x6080604052348015610010));
+        vm.etch(address(11), abi.encode(0x6080604052348015610010));
         p.Grant(address(11), 0xDEADBEEF, 0x010000);
 
-        cheats.etch(address(12), abi.encode(0x6080604052348015610010));
+        vm.etch(address(12), abi.encode(0x6080604052348015610010));
         p.Grant(address(12), 0xDEADBEEF, 0x000200);
 
         p.Grant(address(13), 0xDEADBEEF, 0x000003);

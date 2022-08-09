@@ -4,15 +4,10 @@
 
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
+import "forge-std/Test.sol";
 import "../library/BeaconDeployer.sol";
 
-interface CheatCodes {
-    function prank(address) external;
-}
-
-contract BeaconTest is DSTest {
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+contract BeaconTest is Test {
     address deployed;
 
     function setUp() public {
@@ -26,7 +21,7 @@ contract BeaconTest is DSTest {
         (success, ) = deployed.call(newAddr);
         assertTrue(success);
 
-        cheats.prank(address(3));
+        vm.prank(address(3));
         (success, data) = deployed.staticcall(data);
         assertTrue(success);
         assertEq(bytes32(data), 0x0000000000000000000000000000000000000000000000000000000000000009);
@@ -36,7 +31,7 @@ contract BeaconTest is DSTest {
         bool success;
         bytes memory data;
         bytes memory newAddr = abi.encode(address(5));
-        cheats.prank(address(10));
+        vm.prank(address(10));
         (success, ) = deployed.call(newAddr);
 
         (success, data) = deployed.staticcall(data);
